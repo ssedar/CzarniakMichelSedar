@@ -1,0 +1,48 @@
+----
+title: "EDE Group Project"
+author: "Gaby Czarniak, Mara Michel, Sam Sedar"
+date: "2023-11-14"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+library(here); here()
+library(rvest)
+library(cowplot)
+library(agricolae)
+library(dplyr)
+library(tidyverse)
+library(lubridate)
+library(trend)
+library(zoo) 
+library(Kendall)
+library(tseries)
+
+```
+
+
+
+```{r cars}
+
+#Loading Data
+
+plant <- read.csv(here('PLNT21.csv'), stringsAsFactors = TRUE, skip = 1)
+gen <- read.csv(here('GEN21.csv'), stringsAsFactors = TRUE, skip = 1)
+poverty <- read.csv(here('PovertyEstimates.csv'), stringsAsFactors = TRUE, skip = 3)
+unemployment <- read.csv(here('Unemployment.csv'), stringsAsFactors = TRUE, skip = 3)
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
