@@ -1,0 +1,56 @@
+----
+title: "EDE Group Project"
+author: "Gaby Czarniak, Mara Michel, Sam Sedar"
+date: "2023-11-14"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+library(here); here()
+library(rvest)
+library(cowplot)
+library(agricolae)
+library(dplyr)
+library(tidyverse)
+library(lubridate)
+library(trend)
+library(zoo) 
+library(Kendall)
+library(tseries)
+
+getwd()
+
+```
+
+
+
+```{r Load unemployment data}
+
+#Loading Unemployment Data
+unemployment_NC_2021 <- read.csv(here('Unemployment.csv'), 
+                                stringsAsFactors = TRUE, skip = 4) %>%
+                        select(FIPS_Code, State, Area_Name, 
+                         Rural_Urban_Continuum_Code_2013, 
+                         Urban_Influence_Code_2013, Metro_2013,
+                         Employed_2021, Unemployed_2021, Unemployment_rate_2021,
+                         Median_Household_Income_2021, 
+                         Med_HH_Income_Percent_of_State_Total_2021)
+
+glimpse(unemployment_NC_2021)
+
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r Median Household Income Mapping for 2021, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
