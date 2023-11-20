@@ -20,29 +20,35 @@ library(trend)
 library(zoo) 
 library(Kendall)
 library(tseries)
-
+library(sf)
+library(leaflet)
+library(mapview); mapviewOptions(fgb = FALSE)
 ```
 
 
 
-```{r cars}
+```{r Data Load}
 
 #Loading Data
 
 plant <- read.csv(here('PLNT21.csv'), stringsAsFactors = TRUE, skip = 1)
 gen <- read.csv(here('GEN21.csv'), stringsAsFactors = TRUE, skip = 1)
-poverty <- read.csv(here('PovertyEstimates.csv'), stringsAsFactors = TRUE, skip = 3)
-unemployment <- read.csv(here('Unemployment.csv'), stringsAsFactors = TRUE, skip = 3)
-
+poverty <- read.csv(here('PovertyEstimates.csv'), stringsAsFactors = TRUE, skip = 4)
+unemployment <- read.csv(here('Unemployment.csv'), stringsAsFactors = TRUE, skip = 4)
+counties_sf<- st_read(here('cb_2018_us_county_20m.shp')) %>% 
+  filter(STATEFP == 37) #Filter for just NC Counties
 
 ```
 
-## Including Plots
+## Data Wrangling
 
-You can also embed plots, for example:
+```{r Data Wrangling}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+#Filter by North Carolina
+Plant_NC <- plant %>% filter(PSTATABB=='NC')
+gen_NC <-gen %>% filter(PSTATABB=='NC')
+
+#Create Joined Plot
+PowerPlants_DF <-merge(x=gen_NC,y=Plant_NC, by='ORISPL',all.x=TRUE)
 ```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```
