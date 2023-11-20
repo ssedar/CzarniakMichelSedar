@@ -29,11 +29,14 @@ library(tseries)
 
 #Loading Data
 
-plant <- read.csv(here('PLNT21.csv'), stringsAsFactors = TRUE, skip = 1)
-gen <- read.csv(here('GEN21.csv'), stringsAsFactors = TRUE, skip = 1)
-poverty <- read.csv(here('PovertyEstimates.csv'), stringsAsFactors = TRUE, skip = 3)
-unemployment <- read.csv(here('Unemployment.csv'), stringsAsFactors = TRUE, skip = 3)
-
+plant <- read.csv(here('PLNT21.csv'), 
+                  stringsAsFactors = TRUE, skip = 1)
+gen <- read.csv(here('GEN21.csv'), 
+                  stringsAsFactors = TRUE, skip = 1)
+poverty <- read.csv(here('PovertyEstimates.csv'), 
+                  stringsAsFactors = TRUE, skip = 3)
+unemployment <- read.csv(here('Unemployment.csv'), 
+                  stringsAsFactors = TRUE, skip = 3)
 
 ```
 
