@@ -27,19 +27,72 @@ library(tseries)
 
 ```{r cars}
 
-#Loading Data
+#Loading Data into Raw Data folder
 
-plant <- read.csv(here('PLNT21.csv'), 
-                  stringsAsFactors = TRUE, skip = 1)
-gen <- read.csv(here('GEN21.csv'), 
-                  stringsAsFactors = TRUE, skip = 1)
-poverty <- read.csv(here('PovertyEstimates.csv'), 
-                  stringsAsFactors = TRUE, skip = 3)
-unemployment <- read.csv(here('Unemployment.csv'), 
-                  stringsAsFactors = TRUE, skip = 3)
+plant <- read.csv(here('Data/Raw/PLNT21.csv'),
+                  stringsAsFactors = FALSE, skip = 1, 
+                  colClasses = c('FIPSST' = 'character', 
+                                 'FIPSCNTY' = 'character',
+                                 'ORISPL' = 'character'))
+
+gen <- read.csv(here('Data/Raw/GEN21.csv'), 
+                stringsAsFactors = FALSE, skip = 1, 
+                  colClasses = c('ORISPL' = 'character'))
+
+income <- read.csv(here('Data/Raw/PovertyEstimates.csv'), 
+                  stringsAsFactors = TRUE, skip = 4)
+
+unemployment <- read.csv(here('Data/Raw/Unemployment.csv'), 
+                  stringsAsFactors = TRUE, skip = 4)
 
 ```
 
+
+```{r}
+#####  DATA WRANGLING  #####
+
+#eGRID Data
+
+#Selecting columns of interest from plant data
+plant_select <- plant %>%
+  select(PSTATABB, ORISPL, FIPSST, FIPSCNTY, PLFUELCT, NAMEPCAP,
+         PLNGENAN,PLSO2RTA, PLCO2RTA, PLCH4RTA, PLN2ORTA, CNTYNAME, LAT,
+         LON, COALFLAG) %>%
+  filter(PSTATABB == "NC") %>%
+  unite(FIPS_Code, FIPSST, FIPSCNTY, sep = "")
+
+
+#Combining Generator and Plant df based on ORISPL
+plant_gen <- gen %>%
+  inner_join(plant_select, by = 'ORISPL', 
+             suffix = c("_gen", "_palnt"))
+
+#Removing duplicate state abbreviation column
+plant_gen_data <- plant_gen[, -which(names(plant_gen) == "PSTATABB_palnt")]
+
+
+#Unemployment
+
+#Selecting columns of interest: unemployment rates: 2002-2022
+
+ue <- unemployment %>%
+  select(FIPS_Code,	Unemployment_rate_2000,	Unemployment_rate_2001,	Unemployment_rate_2002,	Unemployment_rate_2003,	Unemployment_rate_2004,	Unemployment_rate_2005,	Unemployment_rate_2006,	Unemployment_rate_2007,	Unemployment_rate_2008,	Unemployment_rate_2009,	Unemployment_rate_2010,	Unemployment_rate_2011,	Unemployment_rate_2012,	Unemployment_rate_2013,	Unemployment_rate_2014,	Unemployment_rate_2015,	Unemployment_rate_2016,	Unemployment_rate_2017,	Unemployment_rate_2018,	Unemployment_rate_2019,	Unemployment_rate_2020,	Unemployment_rate_2021,	Unemployment_rate_2022)
+
+#Merging with eGrid
+ue_egrid <- merge(plant_gen_data, ue, by = "FIPS_Code")
+
+
+#Income
+
+#Selecting columns of interest: 
+inc <- income %>%
+  select(FIPS_Code, PCTPOVALL_2021, MEDHHINC_2021)
+
+#Merging
+processed_data <- merge(ue_egrid, inc, by = "FIPS_Code")
+
+
+```
 ## Including Plots
 
 You can also embed plots, for example:
