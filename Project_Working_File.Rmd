@@ -1,9 +1,9 @@
-----
-title: "EDE Group Project"
-author: "Gaby Czarniak, Mara Michel, Sam Sedar"
-date: "2023-11-14"
-output: pdf_document
----
+|                                                 |
+|-------------------------------------------------|
+| title: "EDE Group Project"                      |
+| author: "Gaby Czarniak, Mara Michel, Sam Sedar" |
+| date: "2023-11-14"                              |
+| output: pdf_document                            |
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -24,8 +24,6 @@ library(sf)
 library(leaflet)
 library(mapview); mapviewOptions(fgb = FALSE)
 ```
-
-
 
 ```{r Data Load}
 
@@ -48,7 +46,6 @@ unemployment <- read.csv(here('Data/Raw/Unemployment.csv'),
                   stringsAsFactors = TRUE, skip = 4)
 
 ```
-
 
 ```{r}
 #####  DATA WRANGLING  #####
@@ -104,30 +101,24 @@ for (col in columns_to_convert) {
   processed_data[[col]] <- as.numeric(processed_data[[col]])}
 
 ```
+
 ```{r}
 #EXPLORATION
 summary(processed_data)
 
 ```
 
-
-
-## Including Plots
-=======
-
-
-
-```
-
-## Data Wrangling
->>>>>>> 2e6e64c83a5364fc662dfd37c84123b17da3d1b7
-
 ```{r}
 #Load in counties data
-counties_sf<- st_read(here('Data/cb_2018_us_county_20m.shp')) %>% 
+counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>% 
   filter(STATEFP==37)
-  
-#Convert tabular data to spatial data
-plant_gen_spatial <-st_as_sf(coords = c('SITE_LONGITUDE','SITE_LATITUDE'), crs=4269)
-```
 
+#Convert eGrid tabular data to spatial data
+plant_gen_sf <-plant_gen_data %>% st_as_sf(coords = c('LON','LAT'), crs=4269)
+
+#Create maps of power plants
+gens_counties_map <-ggplot()+geom_sf(data=counties_sf)+geom_sf(data=plant_gen_sf) + 
+  scale_fill_gradient(low="yellow", high="darkgreen")
+
+gen_locations<-mapview(plant_gen_sf)+mapview(counties_sf)
+```
