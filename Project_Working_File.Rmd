@@ -1,9 +1,9 @@
-|                                                 |
-|-------------------------------------------------|
-| title: "EDE Group Project"                      |
-| author: "Gaby Czarniak, Mara Michel, Sam Sedar" |
-| date: "2023-11-14"                              |
-| output: pdf_document                            |
+----
+title: "EDE Group Project"
+author: "Gaby Czarniak, Mara Michel, Sam Sedar"
+date: "2023-11-14"
+output: pdf_document
+---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -24,6 +24,8 @@ library(sf)
 library(leaflet)
 library(mapview); mapviewOptions(fgb = FALSE)
 ```
+
+
 
 ```{r Data Load}
 
@@ -47,6 +49,7 @@ unemployment <- read.csv(here('Data/Raw/Unemployment.csv'),
 
 ```
 
+
 ```{r}
 #####  DATA WRANGLING  #####
 
@@ -60,17 +63,28 @@ plant_select <- plant %>%
   filter(PSTATABB == "NC") %>%
   unite(FIPS_Code, FIPSST, FIPSCNTY, sep = "")
 
+plant_select$PLNGENAN <- as.numeric(plant_select$PLNGENAN)
+plant_select$PLCO2RTA <- as.numeric(plant_select$PLCO2RTA)
+plant_select$NAMEPCAP <- as.numeric(plant_select$NAMEPCAP)
+
+
 
 #Combining Generator and Plant df based on ORISPL
 plant_gen <- gen %>%
   inner_join(plant_select, by = 'ORISPL', 
              suffix = c("_gen", "_palnt"))
 
+plant_gen$CFACT <- as.numeric(plant_gen$CFACT)
+plant_gen$GENNTOZ <- as.numeric(plant_gen$GENNTOZ)
+plant_gen$NAMEPCAP_gen <- as.numeric(plant_gen$NAMEPCAP_gen)
+plant_gen$GENNTAN <- as.numeric(plant_gen$GENNTAN)
+
+
 #Removing duplicate state abbreviation column
 plant_gen_data <- plant_gen[, -which(names(plant_gen) == "PSTATABB_palnt")]
 
 
-#Unemployment
+#UNEMPLOYMENT
 
 #Selecting columns of interest: unemployment rates: 2002-2022
 
@@ -81,7 +95,7 @@ ue <- unemployment %>%
 ue_egrid <- merge(plant_gen_data, ue, by = "FIPS_Code")
 
 
-#Income
+#INCOME
 
 #Selecting columns of interest: 
 inc <- income %>%
@@ -93,32 +107,76 @@ processed_data <- merge(ue_egrid, inc, by = "FIPS_Code")
 colnames(processed_data)
 
 
-# Convert columns to numeric
-
-columns_to_convert <- c("CFACT", "PLNGENAN", "PLCO2RTA", "PLCO2RTA","GENNTOZ","NAMEPCAP_palnt")
-
-for (col in columns_to_convert) {
-  processed_data[[col]] <- as.numeric(processed_data[[col]])}
-
 ```
-
 ```{r}
 #EXPLORATION
 summary(processed_data)
+
 
 ```
 
 ```{r}
 #Load in counties data
+counties_sf<- st_read(here('Data/cb_2018_us_county_20m.shp')) %>% 
 counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>% 
   filter(STATEFP==37)
+  
+#Convert tabular data to spatial data
+plant_gen_spatial <-st_as_sf(coords = c('SITE_LONGITUDE','SITE_LATITUDE'), crs=4269)
 
 #Convert eGrid tabular data to spatial data
 plant_gen_sf <-plant_gen_data %>% st_as_sf(coords = c('LON','LAT'), crs=4269)
-
 #Create maps of power plants
 gens_counties_map <-ggplot()+geom_sf(data=counties_sf)+geom_sf(data=plant_gen_sf) + 
   scale_fill_gradient(low="yellow", high="darkgreen")
-
 gen_locations<-mapview(plant_gen_sf)+mapview(counties_sf)
+
+```
+
+
+
+```{r Data Wrangling}
+
+#Filter by North Carolina
+Plant_NC <- plant %>% filter(PSTATABB=='NC')
+gen_NC <-gen %>% filter(PSTATABB=='NC')
+
+#Create Joined Plot
+PowerPlants_DF <-merge(x=gen_NC,y=Plant_NC, by='ORISPL',all.x=TRUE)
+```
+
+
+
+
+```{r Income and Fuel Category}
+
+#NC Breakdown of Fuel by Category
+fuel_summarized <- processed_data %>%
+  group_by(PLFUELCT) %>%
+  summarise(total_generation = sum(PLNGENAN, na.rm = TRUE))
+print(fuel_summarized)
+
+#In percentages
+fuel_summarized$percentage <- fuel_summarized$total_generation / sum(fuel_summarized$total_generation) * 100
+
+#Pie chart with percent makeup of fuel in  NC
+pie_chart_percentage <- ggplot(fuel_summarized, aes(x = factor(1), fill = PLFUELCT, y = percentage)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  labs(title = "North Carolina Primary Fuel (% of Total Annual Generation)",
+       fill = "Primary Fuel Type",
+       y = "Percentage of Total Generation (%)", x = NULL)
+print(pie_chart_percentage)
+
+
+processed_data$MEDHHINC_2021 <- as.numeric(processed_data$MEDHHINC_2021)
+
+scatter_income_generation <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
+  geom_point() +
+  labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
+       x = "Median Household Income",
+       y = "Annual Generation",
+       color = "Fuel Type")
+# Display the scatter plot
+print(scatter_income_generation)
 ```
