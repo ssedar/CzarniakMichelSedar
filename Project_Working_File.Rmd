@@ -31,7 +31,6 @@ library(mapview); mapviewOptions(fgb = FALSE)
 
 #Loading Data into Raw Data folder
 
-<<<<<<< HEAD
 plant <- read.csv(here('Data/Raw/PLNT21.csv'),
                   stringsAsFactors = FALSE, skip = 1, 
                   colClasses = c('FIPSST' = 'character', 
@@ -94,8 +93,26 @@ inc <- income %>%
 #Merging
 processed_data <- merge(ue_egrid, inc, by = "FIPS_Code")
 
+colnames(processed_data)
+
+
+# Convert columns to numeric
+
+columns_to_convert <- c("CFACT", "PLNGENAN", "PLCO2RTA", "PLCO2RTA","GENNTOZ","NAMEPCAP_palnt")
+
+for (col in columns_to_convert) {
+  processed_data[[col]] <- as.numeric(processed_data[[col]])}
 
 ```
+```{r}
+#EXPLORATION
+summary(processed_data)
+
+
+```
+
+
+
 ## Including Plots
 =======
 plant <- read.csv(here('PLNT21.csv'), stringsAsFactors = TRUE, skip = 1)
