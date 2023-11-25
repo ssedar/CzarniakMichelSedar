@@ -108,32 +108,26 @@ for (col in columns_to_convert) {
 #EXPLORATION
 summary(processed_data)
 
-
 ```
 
 
 
 ## Including Plots
 =======
-plant <- read.csv(here('PLNT21.csv'), stringsAsFactors = TRUE, skip = 1)
-gen <- read.csv(here('GEN21.csv'), stringsAsFactors = TRUE, skip = 1)
-poverty <- read.csv(here('PovertyEstimates.csv'), stringsAsFactors = TRUE, skip = 4)
-unemployment <- read.csv(here('Unemployment.csv'), stringsAsFactors = TRUE, skip = 4)
-counties_sf<- st_read(here('cb_2018_us_county_20m.shp')) %>% 
-  filter(STATEFP == 37) #Filter for just NC Counties
+
+
 
 ```
 
 ## Data Wrangling
 >>>>>>> 2e6e64c83a5364fc662dfd37c84123b17da3d1b7
 
-```{r Data Wrangling}
-
-#Filter by North Carolina
-Plant_NC <- plant %>% filter(PSTATABB=='NC')
-gen_NC <-gen %>% filter(PSTATABB=='NC')
-
-#Create Joined Plot
-PowerPlants_DF <-merge(x=gen_NC,y=Plant_NC, by='ORISPL',all.x=TRUE)
+```{r}
+#Load in counties data
+counties_sf<- st_read(here('Data/cb_2018_us_county_20m.shp')) %>% 
+  filter(STATEFP==37)
+  
+#Convert tabular data to spatial data
+plant_gen_spatial <-st_as_sf(coords = c('SITE_LONGITUDE','SITE_LATITUDE'), crs=4269)
 ```
-```
+
