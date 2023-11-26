@@ -160,7 +160,24 @@ gen_NC <-gen %>% filter(PSTATABB=='NC')
 PowerPlants_DF <-merge(x=gen_NC,y=Plant_NC, by='ORISPL',all.x=TRUE)
 ```
 
+```{r Creating income groupings}
 
+summary(processed_data$MEDHHINC_2021)
+
+low_threshold <- 44477
+medium_threshold <- 52463
+
+# Create subsets based on income thresholds
+low_income_subset <- processed_data[processed_data$MEDHHINC_2021 < low_threshold, ]
+
+medium_income_subset <- processed_data[processed_data$MEDHHINC_2021 >= low_threshold & processed_data$MEDHHINC_2021 < medium_threshold, ]
+
+high_income_subset <- processed_data[processed_data$MEDHHINC_2021 >= medium_threshold, ]
+
+ts_low_income <- ts(low_income_subset$Unemployment_rate_2000:low_income_subset$Unemployment_rate_2022, start = min(low_income_subset$YEAR), end = max(low_income_subset$YEAR))
+
+
+```
 
 
 ```{r Income and Fuel Category}
