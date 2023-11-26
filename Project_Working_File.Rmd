@@ -23,6 +23,8 @@ library(tseries)
 library(sf)
 library(leaflet)
 library(mapview); mapviewOptions(fgb = FALSE)
+
+getwd()
 ```
 
 
@@ -161,6 +163,20 @@ PowerPlants_DF <-merge(x=gen_NC,y=Plant_NC, by='ORISPL',all.x=TRUE)
 ```
 
 ```{r Creating income groupings}
+
+# GENYRRET = Generator planned or actual retirement year (four-digit)
+# GENYRONL - year the generator came online (four-digit)
+
+# change years to date formats
+is.Date(processed_data$GENYRONL) # not a date
+processed_data$GENYRONL <- as.Date(processed_data$GENYRONL,
+                                   format = "%Y")
+is.Date(processed_data$GENYRONL) # changed to date
+
+is.Date(processed_data$GENYRRET ) # not a date
+processed_data$GENYRRET <- as.Date(processed_data$GENYRRET,
+                                   format = "%Y")
+is.Date(processed_data$GENYRRET) # changed to date
 
 summary(processed_data$MEDHHINC_2021)
 
