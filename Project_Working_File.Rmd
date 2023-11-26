@@ -122,17 +122,29 @@ counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>%
 #Convert eGrid tabular data to spatial data
 plant_gen_sf <-plant_gen_data %>% st_as_sf(coords = c('LON','LAT'), crs=4269)
 
-#Create maps of power plants
+#Create initial map of power plants
 gens_counties_map <-ggplot()+
   geom_sf(data=counties_sf)+
-  geom_sf(data=plant_gen_sf,
-          aes(group=CNTYNAME, fill=NAMEPCAP_plant,color='black'))
+  geom_sf(data=plant_gen_sf,size=0.8)+
+  labs(title = "Locations of NC Power Plants")
 
 gens_counties_map
 
-gen_locations<-mapview(plant_gen_sf)+mapview(counties_sf)
+#Compute sum of nameplate capacity by county
+nameplate_capacity <-plant_gen_data %>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_NAMEPCAP = sum(NAMEPCAP_plant))
 
-gen_locations
+#Join the eGrid attributes to the county spatial features
+counties_sf_join <-  merge(x = counties_sf,
+                           y = plant_gen_data, 
+                           by.x = 'NAME', 
+                           by.y = 'CNTYNAME' )
+
+#Map total generator capacity by county
+gen_cap_map <-ggplot(data=counties_sf_join)+
+  geom_sf(aes(fill=NAMEPCAP_plant))
+gen_cap_map
 
 ```
 
