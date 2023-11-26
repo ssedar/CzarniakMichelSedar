@@ -72,7 +72,7 @@ plant_select$NAMEPCAP <- as.numeric(plant_select$NAMEPCAP)
 #Combining Generator and Plant df based on ORISPL
 plant_gen <- gen %>%
   inner_join(plant_select, by = 'ORISPL', 
-             suffix = c("_gen", "_palnt"))
+             suffix = c("_gen", "_plant"))
 
 plant_gen$CFACT <- as.numeric(plant_gen$CFACT)
 plant_gen$GENNTOZ <- as.numeric(plant_gen$GENNTOZ)
@@ -80,7 +80,7 @@ plant_gen$NAMEPCAP_gen <- as.numeric(plant_gen$NAMEPCAP_gen)
 plant_gen$GENNTAN <- as.numeric(plant_gen$GENNTAN)
 
 #Removing duplicate state abbreviation column
-plant_gen_data <- plant_gen[, -which(names(plant_gen) == "PSTATABB_palnt")]
+plant_gen_data <- plant_gen[, -which(names(plant_gen) == "PSTATABB_plant")]
 
 
 #UNEMPLOYMENT
@@ -116,19 +116,23 @@ summary(processed_data)
 
 ```{r}
 #Load in counties data
-counties_sf<- st_read(here('Data/cb_2018_us_county_20m.shp')) %>% 
 counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>% 
   filter(STATEFP==37)
-  
-#Convert tabular data to spatial data
-plant_gen_spatial <-st_as_sf(coords = c('SITE_LONGITUDE','SITE_LATITUDE'), crs=4269)
 
 #Convert eGrid tabular data to spatial data
 plant_gen_sf <-plant_gen_data %>% st_as_sf(coords = c('LON','LAT'), crs=4269)
+
 #Create maps of power plants
-gens_counties_map <-ggplot()+geom_sf(data=counties_sf)+geom_sf(data=plant_gen_sf) + 
-  scale_fill_gradient(low="yellow", high="darkgreen")
+gens_counties_map <-ggplot()+
+  geom_sf(data=counties_sf)+
+  geom_sf(data=plant_gen_sf,
+          aes(group=CNTYNAME, fill=NAMEPCAP_plant,color='black'))
+
+gens_counties_map
+
 gen_locations<-mapview(plant_gen_sf)+mapview(counties_sf)
+
+gen_locations
 
 ```
 
