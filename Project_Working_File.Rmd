@@ -109,6 +109,7 @@ colnames(processed_data)
 
 
 ```
+
 ```{r}
 #EXPLORATION
 summary(processed_data)
@@ -167,17 +168,86 @@ PowerPlants_DF <-merge(x=gen_NC,y=Plant_NC, by='ORISPL',all.x=TRUE)
 # GENYRRET = Generator planned or actual retirement year (four-digit)
 # GENYRONL - year the generator came online (four-digit)
 
+summary(processed_data$GENYRRET) # 1161 NA's
+retired_year <- processed_data$GENYRRET %>%
+  na.omit()
+# earliest year of plant retirement was 2021
+# can't run time series analysis with this data, 
+# but could run regression analysis to understand relationship between
+# planned retirement and 2021 avg household income or
+# 2021 retirement and 2021 unemployment
+summary(retired_year)
+
+summary(processed_data$GENYRONL) # no NA's
+online_plants <- processed_data %>%
+  # drop observations with NAs in GENYRONL
+  # which means we don't know what year they came online
+  # new number of observations should be 1175 (dropping 15 NAs)
+  drop_na(GENYRONL) %>%
+  select(FIPS_Code, CNTYNAME, SEQGEN, YEAR, PNAME, 
+         GENID, GENSTAT, GENYRONL, MEDHHINC_2021,	
+         Unemployment_rate_2000,	Unemployment_rate_2001,	
+         Unemployment_rate_2002,	Unemployment_rate_2003,	
+         Unemployment_rate_2004,	Unemployment_rate_2005,	
+         Unemployment_rate_2006,	Unemployment_rate_2007,	
+         Unemployment_rate_2008,	Unemployment_rate_2009,	
+         Unemployment_rate_2010,	Unemployment_rate_2011,	
+         Unemployment_rate_2012,	Unemployment_rate_2013,	
+         Unemployment_rate_2014,	Unemployment_rate_2015,	
+         Unemployment_rate_2016,	Unemployment_rate_2017,	
+         Unemployment_rate_2018,	Unemployment_rate_2019,	
+         Unemployment_rate_2020,	Unemployment_rate_2021,	
+         Unemployment_rate_2022)
+summary(online_plants)
+
+online_year <- online_plants$GENYRONL
+summary(online_year)
+
+online_month_day_ <- rep(c("01-01-"), length(online_year))
+
+# repeating month_day_ to fill in month and day
+# for as many year entries as are found in 
+# dropping NAs but may need to keep them in; decide as group
+Date_Online <- paste0(online_month_day_,online_year)
+summary(Date_Online)
+head(Date_Online)
+# 1175 observations in Date_Online
+
 # change years to date formats
-is.Date(processed_data$GENYRONL) # not a date
-processed_data$GENYRONL <- as.Date(processed_data$GENYRONL,
-                                   format = "%Y")
-is.Date(processed_data$GENYRONL) # changed to date
+is.Date(Date_Online) # not a date
+Date_Online <- as.Date(Date_Online, format = "%m-%d-%Y")
+is.Date(Date_Online) # true
 
-is.Date(processed_data$GENYRRET ) # not a date
-processed_data$GENYRRET <- as.Date(processed_data$GENYRRET,
-                                   format = "%Y")
-is.Date(processed_data$GENYRRET) # changed to date
+# ensure date column is in date format
+online_plants <- online_plants %>%
+  mutate(GENYRONL = Date_Online)
+is.Date(online_plants$GENYRONL) # true
 
+# identifying the county with the most power plants
+county_freq_table <- table(online_plants$CNTYNAME)
+view(county_freq_table)
+max(county_freq_table) # 48, Robeson County
+county_freq_table <- sort(county_freq_table, decreasing = TRUE)
+view(county_freq_table)
+robeson_online_plants <- online_plants %>%
+  filter(CNTYNAME == "Robeson")
+unique(robeson_online_plants$PNAME) # 44 unique power plant names
+unique(robeson_online_plants$GENID) # 32 unique GENIDs
+
+# multiple regression for just one county, Robeson 
+# the one with highest total number of existing plants in 2021
+# to understand relationship between year online for each power plant and unemployment 
+# need to make table by year
+# with 5 columns: Year, FIPS code, number of plants in existence that year, unemployment rate
+robeson_year <- year(robeson_online_plants$GENYRONL)
+robeson_FIPS_code <- robeson_online_plants$FIPS_Code
+## MARKING WHERE GC LEFT OFF
+robeson_plant_count <- tally(robeson_online_plants$PNAME, wt = NULL, sort = FALSE, name = NULL)
+is.Date(robeson_online_plants$GENYRONL)
+
+## WILL LIKELY NOT NEED 
+## INCOME THRESHOLDS FOR TIME SERIES ANALYSIS
+# Median Household Income for 2021
 summary(processed_data$MEDHHINC_2021)
 
 low_threshold <- 44477
