@@ -126,6 +126,10 @@ counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>%
 plant_gen_sf <-plant_gen_data %>% st_as_sf(coords = c('LON','LAT'), crs=4269)
 
 #Create initial map of power plants
+```
+
+
+```{r}
 gens_counties_map <-ggplot()+
   geom_sf(data=counties_sf)+
   geom_sf(data=plant_gen_sf,size=0.8)+
@@ -323,3 +327,23 @@ stacked_barplot_total_generation <- ggplot(processed_data, aes(x = CNTYNAME, y =
 print(stacked_barplot_total_generation)
 
 ```
+
+
+```{r Heat Maps}
+#Create data frame of NC income data
+income_NC <-income %>% 
+  filter(Stabr=='NC')
+
+#Join the income attributes to the county spatial features
+income_NC_sf_join <-  merge(x = counties_sf,
+                           y = income_NC, 
+                           by.x = 'GEOID', 
+                           by.y = 'FIPS_Code')
+
+#Map total generator capacity by county
+income_heat_map <-ggplot(data=income_NC_sf_join)+
+  geom_sf(aes(fill=PCTPOV017_2021))
+income_heat_map
+
+```
+
