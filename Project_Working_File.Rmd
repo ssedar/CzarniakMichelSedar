@@ -49,6 +49,12 @@ income <- read.csv(here('Data/Raw/PovertyEstimates.csv'),
 unemployment <- read.csv(here('Data/Raw/Unemployment.csv'), 
                   stringsAsFactors = TRUE, skip = 4)
 
+
+gen20 <- read.csv(here('Data/Raw/GEN20.csv'), 
+                stringsAsFactors = FALSE, skip = 1, 
+                  colClasses = c('ORISPL' = 'character'))
+
+
 ```
 
 
@@ -308,12 +314,6 @@ scatter_income_generation <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = P
        color = "Fuel Type")
 print(scatter_income_generation)
 
-#relationship between power plant retirements, income, and unemployment
-model <- lm(GENYRRET ~ MEDHHINC_2021 + Unemployment_rate_2000 + Unemployment_rate_2001 + Unemployment_rate_2002 + Unemployment_rate_2003 + Unemployment_rate_2004 + Unemployment_rate_2005 + Unemployment_rate_2006 + Unemployment_rate_2007 + Unemployment_rate_2008 + Unemployment_rate_2009 + Unemployment_rate_2010 + Unemployment_rate_2011 + Unemployment_rate_2012 + Unemployment_rate_2013 + Unemployment_rate_2014 + Unemployment_rate_2015 + Unemployment_rate_2016 + Unemployment_rate_2017 + Unemployment_rate_2018 + Unemployment_rate_2019 + Unemployment_rate_2020 + Unemployment_rate_2021 + Unemployment_rate_2022, data = processed_data)
-
-anova(model)
-plot(model)
-summary(model)
 
 
 ####IN PROGRESS###
@@ -336,6 +336,9 @@ stacked_barplot_total_generation <- ggplot(processed_data, aes(x = CNTYNAME, y =
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(stacked_barplot_total_generation)
 
+
+
+###########SIMPLE REGRESSIONS ON INC AND GEN/CAP/NUM PLANTS ######
 
 #Income and the number of plants
 
