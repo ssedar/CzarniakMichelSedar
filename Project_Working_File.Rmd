@@ -191,7 +191,8 @@ online_plants <- processed_data %>%
   # new number of observations should be 1175 (dropping 15 NAs)
   drop_na(GENYRONL) %>%
   select(FIPS_Code, CNTYNAME, SEQGEN, YEAR, PNAME, 
-         GENID, GENSTAT, GENYRONL, MEDHHINC_2021,	
+         GENID, GENSTAT, GENYRONL, NAMEPCAP_plant, 
+         PLNGENAN, PLCO2AN, COALFLAG, MEDHHINC_2021,	
          Unemployment_rate_2000,	Unemployment_rate_2001,	
          Unemployment_rate_2002,	Unemployment_rate_2003,	
          Unemployment_rate_2004,	Unemployment_rate_2005,	
@@ -307,6 +308,13 @@ scatter_income_generation <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = P
        color = "Fuel Type")
 print(scatter_income_generation)
 
+#relationship between power plant retirements, income, and unemployment
+model <- lm(GENYRRET ~ MEDHHINC_2021 + Unemployment_rate_2000 + Unemployment_rate_2001 + Unemployment_rate_2002 + Unemployment_rate_2003 + Unemployment_rate_2004 + Unemployment_rate_2005 + Unemployment_rate_2006 + Unemployment_rate_2007 + Unemployment_rate_2008 + Unemployment_rate_2009 + Unemployment_rate_2010 + Unemployment_rate_2011 + Unemployment_rate_2012 + Unemployment_rate_2013 + Unemployment_rate_2014 + Unemployment_rate_2015 + Unemployment_rate_2016 + Unemployment_rate_2017 + Unemployment_rate_2018 + Unemployment_rate_2019 + Unemployment_rate_2020 + Unemployment_rate_2021 + Unemployment_rate_2022, data = processed_data)
+
+anova(model)
+plot(model)
+summary(model)
+
 
 ####IN PROGRESS###
 scatter_faceted_county <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
@@ -328,6 +336,74 @@ stacked_barplot_total_generation <- ggplot(processed_data, aes(x = CNTYNAME, y =
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(stacked_barplot_total_generation)
 
+
+#Income and the number of plants
+
+# Creating separate df with plants by FIPS_Code
+county_plants_table <- table(online_plants$FIPS_Code)
+view(county_plants_table)
+county_plants_df <- as.data.frame(county_plants_table)
+#Renaming columnnames
+colnames(county_plants_df)[colnames(county_plants_df) == "Var1"] <- "FIPS_Code"
+colnames(county_plants_df)[colnames(county_plants_df) == "Freq"] <- "Num_Plants"
+#add in income data
+merged_data <- merge(county_plants_df, income[, c("FIPS_Code", "MEDHHINC_2021")], by = "FIPS_Code", all.x = TRUE)
+# Merge back to original
+county_plants_df <- merged_data
+
+#Run regression analysis
+inc_plants_model <- lm(Num_Plants ~ MEDHHINC_2021, data = county_plants_df)
+summary(inc_plants_model)
+
+#Plot relationship
+ggplot(county_plants_df, aes(x = MEDHHINC_2021, y = Num_Plants)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Regression Analysis Between Power Plants and County Income",
+       x = "Median Household Income",
+       y = "Number of Power Plants")
+
+
+#Income and Nameplate Capacity
+
+#Calculate average nameplate capacity by county
+average_capacity <- aggregate(NAMEPCAP_plant ~ FIPS_Code, data = online_plants, FUN = mean)
+
+merged_data_capacity <- merge(average_capacity, income, by = "FIPS_Code")
+
+#Generation
+capacity_income_model <- lm(NAMEPCAP_plant ~ MEDHHINC_2021, data = merged_data_capacity)
+
+#Plot
+ggplot(merged_data_capacity, aes(x = MEDHHINC_2021, y = NAMEPCAP_plant)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Regression Analysis Between Nameplate Capacity and County Income",
+       x = "Median Household Income",
+       y = "Average Nameplate Capacity")
+
+
+
+#Income and Average Generation
+
+#Calculate average generation by county
+avg_generation <- aggregate(PLNGENAN ~ FIPS_Code, data = online_plants, FUN = mean)
+merged_data_generation <- merge(avg_generation, income, by = "FIPS_Code")
+
+#Regression
+generation_income_model <- lm(PLNGENAN ~ MEDHHINC_2021, data = merged_data_generation)
+summary(generation_income_model)
+
+#Plot
+ggplot(merged_data_generation, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Regression Analysis Between Average Generation and County Income",
+       x = "Median Household Income",
+       y = "Total Annual Generation")
+
+
+
 ```
 
 
@@ -342,7 +418,7 @@ income_NC_sf_join <-  merge(x = counties_sf,
                            by.x = 'GEOID', 
                            by.y = 'FIPS_Code')
 
-#Map total generator capacity by county
+#Map pct in poverty by county
 income_heat_map <-ggplot(data=income_NC_sf_join)+
   geom_sf(aes(fill=PCTPOV017_2021))
 income_heat_map
