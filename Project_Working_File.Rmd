@@ -58,13 +58,15 @@ unemployment <- read.csv(here('Data/Raw/Unemployment.csv'),
 #Selecting columns of interest from plant data
 plant_select <- plant %>%
   select(PSTATABB, ORISPL, FIPSST, FIPSCNTY, PLFUELCT, NAMEPCAP,
-         PLNGENAN,PLSO2RTA, PLCO2RTA, PLCH4RTA, PLN2ORTA, CNTYNAME, LAT,
+         PLNGENAN,PLSO2RTA, PLCO2RTA, PLCH4RTA, PLN2ORTA, PLCO2AN, 
+         PLSO2AN,PLCH4AN, CNTYNAME, LAT,
          LON, COALFLAG) %>%
   filter(PSTATABB == "NC") %>%
   unite(FIPS_Code, FIPSST, FIPSCNTY, sep = "")
 
 plant_select$PLNGENAN <- as.numeric(plant_select$PLNGENAN)
 plant_select$PLCO2RTA <- as.numeric(plant_select$PLCO2RTA)
+plant_select$PLCO2AN <- as.numeric(plant_select$PLCO2AN)
 plant_select$NAMEPCAP <- as.numeric(plant_select$NAMEPCAP)
 
 
