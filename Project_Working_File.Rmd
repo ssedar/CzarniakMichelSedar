@@ -281,6 +281,7 @@ ts_low_income <- ts(low_income_subset$Unemployment_rate_2000:low_income_subset$U
 
 ```{r Income and Fuel Category}
 
+########### DATA EXPLORATION / VIZ #######################
 #NC Breakdown of Fuel by Category
 fuel_summarized <- processed_data %>%
   group_by(PLFUELCT) %>%
@@ -299,13 +300,10 @@ pie_chart_percentage <- ggplot(fuel_summarized, aes(x = factor(1), fill = PLFUEL
        y = "Percentage of Total Generation (%)", x = NULL)
 print(pie_chart_percentage)
 
-
-
-
 #Relationship between income and fuel type
 processed_data$MEDHHINC_2021 <- as.numeric(processed_data$MEDHHINC_2021)
 
-#scatter vis
+#Scatter visualization
 scatter_income_generation <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
   geom_point() +
   labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
@@ -314,9 +312,7 @@ scatter_income_generation <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = P
        color = "Fuel Type")
 print(scatter_income_generation)
 
-
-
-####IN PROGRESS###
+#Scatter faceted
 scatter_faceted_county <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
   geom_point() +
   facet_wrap(~CNTYNAME, scales = "free") +
@@ -326,6 +322,7 @@ scatter_faceted_county <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = PLNG
        color = "Fuel Type")
 print(scatter_faceted_county)
 
+#Barplot Viz
 stacked_barplot_total_generation <- ggplot(processed_data, aes(x = CNTYNAME, y = PLNGENAN, fill = PLFUELCT)) +
   geom_bar(stat = "sum", position = "stack") +
   labs(title = "Total Annual Generation by Fuel Type and County",
