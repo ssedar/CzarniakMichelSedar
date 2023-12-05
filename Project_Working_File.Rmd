@@ -422,7 +422,7 @@ income_heat_map
 ```
 ```{r Unemployment and Retirements}
 
-############### GEN2020 WRANGLING ##########
+########## GEN2020 WRANGLING ##########
 gen20 <- read.csv(here('Data/Raw/GEN20.csv'),                 
                   stringsAsFactors = FALSE, skip = 1, 
                   colClasses = c('ORISPL' = 'character'))
@@ -449,6 +449,52 @@ processed_data_20 <- merge(ue_egrid_20, inc, by = "FIPS_Code")
 
 colnames(processed_data_20)
 
+##### WRANGLING UE DATASET ########
+
+colnames(ue)
+
+transposed_ue <- ue %>%
+  filter(str_starts(FIPS_Code, "37")) %>%  # Filter to include only FIPS_Codes starting with 37
+  pivot_longer(cols = starts_with("Unemployment_rate_"), 
+               names_to = "Year", 
+               values_to = "Unemployment") %>%
+  mutate(Year = gsub("Unemployment_rate_", "", Year, fixed = TRUE)) %>%
+  pivot_wider(names_from = "FIPS_Code", values_from = "Unemployment")
+
+generator_retirement_data <- processed_data_20 %>% 
+  select(FIPS_Code, GENYRRET)
+
+generator_retirement_data <- processed_data_20 %>% 
+  select(FIPS_Code, GENYRRET) %>%
+  na.omit() %>%
+  t() %>%
+  as.data.frame()
+
+
+print(generator_retirement_data)
+print(transposed_ue)
+
+# Convert "Year" column to numeric in transposed_ue
+transposed_ue$Year <- as.numeric(transposed_ue$Year)
+
+# Rename columns if needed
+colnames(generator_retirement_data) <- c("FIPS_Code", "Year")
+
+# Join the dataframes
+merged_data <- inner_join(transposed_ue, generator_retirement_data, by = c("FIPS_Code", "Year"))
+
+
+merged_data <- inner_join(transposed_ue, generator_retirement_data, by = c("FIPS_Code", "Year"))
+
+# Check column names of transposed_ue
+print(colnames(transposed_ue))
+
+# Check column names of generator_retirement_data
+print(colnames(generator_retirement_data))
+
+
+merged_data <- inner_join(transposed_ue, generator_retirement_data, by = c("FIPS_Code", "Year"))
+
 
 
 ######## TIME SERIES STUFF ################
@@ -457,44 +503,33 @@ processed_data_20$YEAR <- as.Date(processed_data_20$YEAR, format = "%Y")
 ts_data <- ts(processed_data_20$GENYRRET, start = min(processed_data_20$YEAR), 
               frequency = 1)
 
+# Extract relevant columns
+unemployment_columns <- grep("^Unemployment_rate_", names(processed_data_20), value = TRUE)
+generator_retirement_column <- "GENYRRET"
 
-# Step 2: Exploratory Data Analysis (EDA)
-# Autocorrelation
-
-processed_data_20$YEAR <- as.Date(processed_data_20$YEAR, format = "%Y")
+# Subset the data
+subset_data <- processed_data_20[, c(unemployment_columns, generator_retirement_column)]
 
 # Convert to ts (time series)
-ts_data <- ts(processed_data_20$GENYRRET, start = min(processed_data_20$YEAR), frequency = 1)
+ts_data <- ts(subset_data[, generator_retirement_column], start = 1, frequency = 1)
 
+# Correlation analysis
+correlation_matrix <- cor(subset_data, use = "complete.obs")
+print(correlation_matrix)
 
-# Seasonality decomposition
-seasonal_decomposition <- decompose(ts_data)
-seasonal_plot <- plot(seasonal_decomposition)
-
-# Step 3: Trend Analysis using tseries::trend.test
-trend_test_result <- trend.test(ts_data)
-print(trend_test_result)
-
-# Step 4: Addressing Seasonality
-# If seasonality is detected, you may consider deseasonalizing the data
-deseasonalized_data <- ts_data - seasonal_decomposition$season
-deseasonalized_plot <- plot(deseasonalized_data, col = "green")
-
-# Step 5: Covariance Analysis
-# Compute the covariance matrix (assuming other columns are in the data frame)
-cov_matrix <- cov(processed_data_20[, c("Unemployment_rate_2000", "Unemployment_rate_2001", "Unemployment_rate_2022", "GENYRRET")])
-
-# Step 6: Modeling (linear model)
-model <- lm(GENYRRET ~ Unemployment_rate_2000 + Unemployment_rate_2001 + ... + Unemployment_rate_2022, data = processed_data_20)
+# Regression analysis
+model <- lm(subset_data[, generator_retirement_column] ~ ., data = subset_data)
 summary(model)
 
-# Step 7: Heteroscedasticity Analysis
-# Conduct Breusch-Pagan test for heteroscedasticity
-heteroscedasticity_test <- bptest(model)
-print(heteroscedasticity_test)
 
+unemployment_columns <- grep("^Unemployment_rate_", names(processed_data_20), value = TRUE)
+generator_retirement_column <- "GENYRRET"
 
+# Subset the data
+subset_data <- processed_data_20[, c("FIPS_Code", unemployment_columns, generator_retirement_column)]
 
+subset_data <- subset_data %>%
+  distinct(FIPS_Code, .keep_all = TRUE)
 
 
 ```
