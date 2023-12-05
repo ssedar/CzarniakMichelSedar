@@ -25,6 +25,8 @@ library(leaflet)
 library(tseries)
 library(mapview); mapviewOptions(fgb = FALSE)
 
+knitr::opts_chunk$set (warning = FALSE)
+
 getwd()
 ```
 
@@ -50,7 +52,9 @@ income <- read.csv(here('Data/Raw/PovertyEstimates.csv'),
 unemployment <- read.csv(here('Data/Raw/Unemployment.csv'), 
                   stringsAsFactors = TRUE, skip = 4)
 
-
+SVI <-read.csv(here('Data/Raw/SVI_NorthCarolina_county.csv'),
+                  stringsAsFactors = TRUE)
+  
 ```
 
 
@@ -72,7 +76,6 @@ plant_select$PLNGENAN <- as.numeric(plant_select$PLNGENAN)
 plant_select$PLCO2RTA <- as.numeric(plant_select$PLCO2RTA)
 plant_select$PLCO2AN <- as.numeric(plant_select$PLCO2AN)
 plant_select$NAMEPCAP <- as.numeric(plant_select$NAMEPCAP)
-
 
 
 #Combining Generator and Plant df based on ORISPL
@@ -122,18 +125,18 @@ summary(processed_data)
 ```
 
 ```{r}
-#Load in counties data
+#Load in counties spatial data
 counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>% 
   filter(STATEFP==37)
 
 #Convert eGrid tabular data to spatial data
 plant_gen_sf <-plant_gen_data %>% st_as_sf(coords = c('LON','LAT'), crs=4269)
 
-#Create initial map of power plants
 ```
 
 
 ```{r}
+#Create initial map of power plants
 gens_counties_map <-ggplot()+
   geom_sf(data=counties_sf)+
   geom_sf(data=plant_gen_sf,size=0.8)+
@@ -154,7 +157,7 @@ counties_sf_join <-  merge(x = counties_sf,
 
 #Map total generator capacity by county
 gen_cap_map <-ggplot(data=counties_sf_join)+
-  geom_sf(aes(fill=NAMEPCAP_plant))
+  geom_sf(aes(fill=NAMEPCAP_plant))+labs(title="Generator Capacity by County",fill="Nameplate Capacity")
 gen_cap_map
 
 ```
@@ -403,7 +406,19 @@ ggplot(merged_data_generation, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
 ```
 
 
+```{r Generation and SVI Relationship Analysis}
+Generation_SVI <-merge(x = avg_generation,
+                           y = SVI, 
+                           by.x = 'FIPS_Code', 
+                           by.y = 'FIPS' )
+
+Generation_County_lm <- lm(PLNGENAN ~ RPL_THEMES + RPL_THEME1 + RPL_THEME2 + RPL_THEME3 + RPL_THEME4, data=Generation_SVI)
+summary(Generation_County_lm) 
+```
+
+
 ```{r Heat Maps}
+#Heat map of Income Data by County
 #Create data frame of NC income data
 income_NC <-income %>% 
   filter(Stabr=='NC')
@@ -416,10 +431,31 @@ income_NC_sf_join <-  merge(x = counties_sf,
 
 #Map pct in poverty by county
 income_heat_map <-ggplot(data=income_NC_sf_join)+
-  geom_sf(aes(fill=PCTPOV017_2021))
+  geom_sf(aes(fill=PCTPOV017_2021))+labs(title= "% of County in Poverty - 2021", fill="%")
 income_heat_map
 
+#Heat map of CO2 emissions by county
+#Compute sum of CO2 Emissions by county
+CO2_emissions <-plant_gen_data %>%
+  drop_na(PLCO2AN)%>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_CO2 = sum(PLCO2AN))
+
+#Join the eGrid attributes to the county spatial features
+CO2_counties_sf_join <-  merge(x = counties_sf,
+                           y = CO2_emissions, 
+                           by.x = 'NAME', 
+                           by.y = 'CNTYNAME')
+
+#Map total generator capacity by county
+CO2_map <-ggplot(data=CO2_counties_sf_join)+
+  geom_sf(aes(fill=Sum_CO2))+
+  labs(title="2021 CO2 Emissions",
+       fill="CO2 Emissions (tn)")
+CO2_map
 ```
+
+
 ```{r Unemployment and Retirements}
 
 ########## GEN2020 WRANGLING ##########
