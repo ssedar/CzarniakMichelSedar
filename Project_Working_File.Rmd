@@ -22,6 +22,7 @@ library(Kendall)
 library(tseries)
 library(sf)
 library(leaflet)
+library(tseries)
 library(mapview); mapviewOptions(fgb = FALSE)
 
 getwd()
@@ -48,11 +49,6 @@ income <- read.csv(here('Data/Raw/PovertyEstimates.csv'),
 
 unemployment <- read.csv(here('Data/Raw/Unemployment.csv'), 
                   stringsAsFactors = TRUE, skip = 4)
-
-
-gen20 <- read.csv(here('Data/Raw/GEN20.csv'), 
-                stringsAsFactors = FALSE, skip = 1, 
-                  colClasses = c('ORISPL' = 'character'))
 
 
 ```
@@ -424,4 +420,81 @@ income_heat_map <-ggplot(data=income_NC_sf_join)+
 income_heat_map
 
 ```
+```{r Unemployment and Retirements}
 
+############### GEN2020 WRANGLING ##########
+gen20 <- read.csv(here('Data/Raw/GEN20.csv'),                 
+                  stringsAsFactors = FALSE, skip = 1, 
+                  colClasses = c('ORISPL' = 'character'))
+
+
+gen20$NAMEPCAP <- as.numeric(gen20$NAMEPCAP)
+gen20$GENNTOZ <- as.numeric(gen20$GENNTOZ)
+
+summary(gen20)
+
+#Combining Gen20 and Plant df based on ORISPL
+plant_gen20 <- gen20 %>%
+  inner_join(plant_select, by = 'ORISPL', 
+             suffix = c("_gen", "_plant"))
+
+#Removing duplicate state abbreviation column
+plant_gen_data_20 <- plant_gen20[, -which(names(plant_gen) == "PSTATABB_plant")]
+
+#Merging with eGrid
+ue_egrid_20 <- merge(plant_gen_data_20, ue, by = "FIPS_Code")
+
+#Merging with income
+processed_data_20 <- merge(ue_egrid_20, inc, by = "FIPS_Code")
+
+colnames(processed_data_20)
+
+
+
+######## TIME SERIES STUFF ################
+processed_data_20$YEAR <- as.Date(processed_data_20$YEAR, format = "%Y")
+
+ts_data <- ts(processed_data_20$GENYRRET, start = min(processed_data_20$YEAR), 
+              frequency = 1)
+
+
+# Step 2: Exploratory Data Analysis (EDA)
+# Autocorrelation
+
+processed_data_20$YEAR <- as.Date(processed_data_20$YEAR, format = "%Y")
+
+# Convert to ts (time series)
+ts_data <- ts(processed_data_20$GENYRRET, start = min(processed_data_20$YEAR), frequency = 1)
+
+
+# Seasonality decomposition
+seasonal_decomposition <- decompose(ts_data)
+seasonal_plot <- plot(seasonal_decomposition)
+
+# Step 3: Trend Analysis using tseries::trend.test
+trend_test_result <- trend.test(ts_data)
+print(trend_test_result)
+
+# Step 4: Addressing Seasonality
+# If seasonality is detected, you may consider deseasonalizing the data
+deseasonalized_data <- ts_data - seasonal_decomposition$season
+deseasonalized_plot <- plot(deseasonalized_data, col = "green")
+
+# Step 5: Covariance Analysis
+# Compute the covariance matrix (assuming other columns are in the data frame)
+cov_matrix <- cov(processed_data_20[, c("Unemployment_rate_2000", "Unemployment_rate_2001", "Unemployment_rate_2022", "GENYRRET")])
+
+# Step 6: Modeling (linear model)
+model <- lm(GENYRRET ~ Unemployment_rate_2000 + Unemployment_rate_2001 + ... + Unemployment_rate_2022, data = processed_data_20)
+summary(model)
+
+# Step 7: Heteroscedasticity Analysis
+# Conduct Breusch-Pagan test for heteroscedasticity
+heteroscedasticity_test <- bptest(model)
+print(heteroscedasticity_test)
+
+
+
+
+
+```
