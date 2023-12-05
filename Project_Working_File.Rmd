@@ -414,6 +414,8 @@ Generation_SVI <-merge(x = avg_generation,
 
 Generation_County_lm <- lm(PLNGENAN ~ RPL_THEMES + RPL_THEME1 + RPL_THEME2 + RPL_THEME3 + RPL_THEME4, data=Generation_SVI)
 summary(Generation_County_lm) 
+
+census_tracts_sf<- st_read(here('Data/Spatial/tl_2021_37_tract.shp'))
 ```
 
 
@@ -447,7 +449,7 @@ CO2_counties_sf_join <-  merge(x = counties_sf,
                            by.x = 'NAME', 
                            by.y = 'CNTYNAME')
 
-#Map total generator capacity by county
+#Map CO2 emissions by county
 CO2_map <-ggplot(data=CO2_counties_sf_join)+
   geom_sf(aes(fill=Sum_CO2))+
   labs(title="2021 CO2 Emissions",
