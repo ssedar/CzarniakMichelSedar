@@ -453,8 +453,10 @@ colnames(processed_data_20)
 
 colnames(ue)
 
+#Transposing so FIPS code are columns across and years are reflected as years
+
 transposed_ue <- ue %>%
-  filter(str_starts(FIPS_Code, "37")) %>%  # Filter to include only FIPS_Codes starting with 37
+  filter(str_starts(FIPS_Code, "37")) %>%  # Filter to include only NC
   pivot_longer(cols = starts_with("Unemployment_rate_"), 
                names_to = "Year", 
                values_to = "Unemployment") %>%
@@ -462,74 +464,77 @@ transposed_ue <- ue %>%
   pivot_wider(names_from = "FIPS_Code", values_from = "Unemployment")
 
 generator_retirement_data <- processed_data_20 %>% 
-  select(FIPS_Code, GENYRRET)
-
-generator_retirement_data <- processed_data_20 %>% 
   select(FIPS_Code, GENYRRET) %>%
-  na.omit() %>%
-  t() %>%
-  as.data.frame()
+  na.omit()  #showing only generators that have retired
 
+summary(generator_retirement_data)
 
-print(generator_retirement_data)
-print(transposed_ue)
+# Use table to count the occurrences of each unique FIPS code
+fips_counts <- table(generator_retirement_data$FIPS_Code)
 
-# Convert "Year" column to numeric in transposed_ue
-transposed_ue$Year <- as.numeric(transposed_ue$Year)
+# Print counts for each FIPS code
+for (fips in names(fips_counts)) {
+  count <- fips_counts[fips]
+  cat("FIPS Code:", fips, "has", count, "rows.\n")}
 
-# Rename columns if needed
-colnames(generator_retirement_data) <- c("FIPS_Code", "Year")
-
-# Join the dataframes
-merged_data <- inner_join(transposed_ue, generator_retirement_data, by = c("FIPS_Code", "Year"))
-
-
-merged_data <- inner_join(transposed_ue, generator_retirement_data, by = c("FIPS_Code", "Year"))
-
-# Check column names of transposed_ue
-print(colnames(transposed_ue))
-
-# Check column names of generator_retirement_data
-print(colnames(generator_retirement_data))
-
-
-merged_data <- inner_join(transposed_ue, generator_retirement_data, by = c("FIPS_Code", "Year"))
-
+#FIPS Code 37159 (Rowan) and 37191 (Wayne) each have 7 rows: use these as counties of interest to run time series
 
 
 ######## TIME SERIES STUFF ################
-processed_data_20$YEAR <- as.Date(processed_data_20$YEAR, format = "%Y")
 
-ts_data <- ts(processed_data_20$GENYRRET, start = min(processed_data_20$YEAR), 
-              frequency = 1)
+colnames(transposed_ue)
 
-# Extract relevant columns
-unemployment_columns <- grep("^Unemployment_rate_", names(processed_data_20), value = TRUE)
-generator_retirement_column <- "GENYRRET"
+#Creating df for only columns.counties of interest
+rowan_ue <- transposed_ue[, c("Year", "37159")]
+wayne_ue <- transposed_ue[, c("Year", "37191")]
 
-# Subset the data
-subset_data <- processed_data_20[, c(unemployment_columns, generator_retirement_column)]
+rowan_ret <-  generator_retirement_data[generator_retirement_data$FIPS_Code == 37159, ]
 
-# Convert to ts (time series)
-ts_data <- ts(subset_data[, generator_retirement_column], start = 1, frequency = 1)
-
-# Correlation analysis
-correlation_matrix <- cor(subset_data, use = "complete.obs")
-print(correlation_matrix)
-
-# Regression analysis
-model <- lm(subset_data[, generator_retirement_column] ~ ., data = subset_data)
-summary(model)
+wayne_ret <-  generator_retirement_data[generator_retirement_data$FIPS_Code == 37191, ]
 
 
-unemployment_columns <- grep("^Unemployment_rate_", names(processed_data_20), value = TRUE)
-generator_retirement_column <- "GENYRRET"
+#Converting to date format
+rowan_ue$Year <- as.Date(rowan_ue$Year, format = "%Y")
+wayne_ue$Year <- as.Date(wayne_ue$Year, format = "%Y")
 
-# Subset the data
-subset_data <- processed_data_20[, c("FIPS_Code", unemployment_columns, generator_retirement_column)]
+#Plot
+ggplot(rowan_ue, aes(x = Year, y = `37159`)) +
+  geom_point(color = "blue") +
+  labs(title = "Unemployment in Rowan County",
+       x = "Year",
+       y = "Unemployment Rate (%)")
 
-subset_data <- subset_data %>%
-  distinct(FIPS_Code, .keep_all = TRUE)
+# Line plot for Rowan and Wayne
+ggplot() +
+  geom_line(data = rowan_ue, aes(x = Year, y = `37159`, color = "Rowan"), size = 1) +
+  geom_line(data = wayne_ue, aes(x = Year, y = `37191`, color = "Wayne"), size = 1) +
+  labs(title = "Unemployment in Wayne and Rowan Counties",
+       x = "Year",
+       y = "Unemployment Rate (%)",
+       color = "Dataset") +
+  scale_color_manual(values = c("Rowan" = "blue", "Wayne" = "yellow")) +
+  theme(legend.title = element_blank())  
+
+# Line plot for Rowan and Wayne with legend
+combined_plot <- ggplot() +
+  geom_line(data = rowan_ue, aes(x = Year, y = `37159`, color = "Rowan"), size = 1) +
+  geom_line(data = wayne_ue, aes(x = Year, y = `37191`, color = "Wayne"), size = 1) + 
+  geom_vline(xintercept = 2012, linetype = "dashed", color = "black", size = 1) + #DASHED LINE NOT WORKING
+  labs(title = "Unemployment in Wayne and Rowan Counties",
+       x = "Year",
+       y = "Unemployment Rate (%)",
+       color = "Dataset") +
+  scale_color_manual(values = c("Rowan" = "blue", "Wayne" = "green")) +
+  theme(legend.title = element_blank()) 
+
+print(combined_plot)
 
 
+# Add dashed line at year 2012 with legend
+combined_plot + 
+  geom_vline(xintercept = 2012, linetype = "dashed", color = "black", size = 1) +
+  labs(color = "Legend Title")
+
+
+#NEXT STEPS: Compare against county with no (or 1?) retirements
 ```
