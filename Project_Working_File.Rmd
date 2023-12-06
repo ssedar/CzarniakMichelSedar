@@ -46,6 +46,10 @@ gen <- read.csv(here('Data/Raw/GEN21.csv'),
                 stringsAsFactors = FALSE, skip = 1, 
                   colClasses = c('ORISPL' = 'character'))
 
+gen20 <- read.csv(here('Data/Raw/GEN20.csv'),                 
+                  stringsAsFactors = FALSE, skip = 1, 
+                  colClasses = c('ORISPL' = 'character'))
+
 income <- read.csv(here('Data/Raw/PovertyEstimates.csv'), 
                   stringsAsFactors = TRUE, skip = 4)
 
@@ -59,9 +63,9 @@ SVI <-read.csv(here('Data/Raw/SVI_NorthCarolina_county.csv'),
 
 
 ```{r}
-#####  DATA WRANGLING  #####
+######  DATA WRANGLING - BASELINE  ######
 
-#eGRID Data
+#EGRID DATA
 
 #Selecting columns of interest from plant data
 plant_select <- plant %>%
@@ -92,7 +96,7 @@ plant_gen$GENNTAN <- as.numeric(plant_gen$GENNTAN)
 plant_gen_data <- plant_gen[, -which(names(plant_gen) == "PSTATABB_plant")]
 
 
-#UNEMPLOYMENT
+#UNEMPLOYMENT DATA
 
 #Selecting columns of interest: unemployment rates: 2002-2022
 
@@ -103,7 +107,7 @@ ue <- unemployment %>%
 ue_egrid <- merge(plant_gen_data, ue, by = "FIPS_Code")
 
 
-#INCOME
+#INCOME DATA
 
 #Selecting columns of interest: 
 inc <- income %>%
@@ -117,10 +121,62 @@ colnames(processed_data)
 
 ```
 
-```{r}
-#EXPLORATION
+```{r - Exploration}
+
+########### DATA EXPLORATION - BASELINE ###########
+
 summary(processed_data)
 
+#NC Breakdown of Fuel by Category
+fuel_summarized <- processed_data %>%
+  group_by(PLFUELCT) %>%
+  summarise(total_generation = sum(PLNGENAN, na.rm = TRUE))
+print(fuel_summarized)
+
+#In percentages
+fuel_summarized$percentage <- fuel_summarized$total_generation / sum(fuel_summarized$total_generation) * 100
+
+#Pie chart with percent makeup of fuel in  NC
+pie_chart_percentage <- ggplot(fuel_summarized, aes(x = factor(1), fill = PLFUELCT, y = percentage)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  labs(title = "North Carolina Primary Fuel (% of Total Annual Generation)",
+       fill = "Primary Fuel Type",
+       y = "Percentage of Total Generation (%)", x = NULL)
+print(pie_chart_percentage)
+
+#Relationship between income and fuel type
+processed_data$MEDHHINC_2021 <- as.numeric(processed_data$MEDHHINC_2021)
+
+#Scatter visualization
+scatter_income_generation <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
+  geom_point() +
+  labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
+       x = "Median Household Income",
+       y = "Annual Generation",
+       color = "Fuel Type")
+print(scatter_income_generation)
+
+#Scatter faceted
+scatter_faceted_county <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
+  geom_point() +
+  facet_wrap(~CNTYNAME, scales = "free") +
+  labs(title = "Relationship Between Annual Generation, Fuel Type, and Income by County",
+       x = "Median Household Income",
+       y = "Annual Generation",
+       color = "Fuel Type")
+print(scatter_faceted_county)
+
+#Barplot visualization
+stacked_barplot_total_generation <- ggplot(processed_data, aes(x = CNTYNAME, y = PLNGENAN, fill = PLFUELCT)) +
+  geom_bar(stat = "sum", position = "stack") +
+  labs(title = "Total Annual Generation by Fuel Type and County",
+       x = "County",
+       y = "Total Annual Generation",
+       fill = "Fuel Type") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(stacked_barplot_total_generation)
 
 ```
 
@@ -280,68 +336,17 @@ ts_low_income <- ts(low_income_subset$Unemployment_rate_2000:low_income_subset$U
 
 ```{r Income and Fuel Category}
 
-########### DATA EXPLORATION / VIZ #######################
-#NC Breakdown of Fuel by Category
-fuel_summarized <- processed_data %>%
-  group_by(PLFUELCT) %>%
-  summarise(total_generation = sum(PLNGENAN, na.rm = TRUE))
-print(fuel_summarized)
+################ DATA ANALYSIS: INCOME AND POWER PLANTS ####################
 
-#In percentages
-fuel_summarized$percentage <- fuel_summarized$total_generation / sum(fuel_summarized$total_generation) * 100
+#Regression on Income and the Number of Power Plants
 
-#Pie chart with percent makeup of fuel in  NC
-pie_chart_percentage <- ggplot(fuel_summarized, aes(x = factor(1), fill = PLFUELCT, y = percentage)) +
-  geom_bar(width = 1, stat = "identity") +
-  coord_polar(theta = "y") +
-  labs(title = "North Carolina Primary Fuel (% of Total Annual Generation)",
-       fill = "Primary Fuel Type",
-       y = "Percentage of Total Generation (%)", x = NULL)
-print(pie_chart_percentage)
-
-#Relationship between income and fuel type
-processed_data$MEDHHINC_2021 <- as.numeric(processed_data$MEDHHINC_2021)
-
-#Scatter visualization
-scatter_income_generation <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
-  geom_point() +
-  labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
-       x = "Median Household Income",
-       y = "Annual Generation",
-       color = "Fuel Type")
-print(scatter_income_generation)
-
-#Scatter faceted
-scatter_faceted_county <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
-  geom_point() +
-  facet_wrap(~CNTYNAME, scales = "free") +
-  labs(title = "Relationship Between Annual Generation, Fuel Type, and Income by County",
-       x = "Median Household Income",
-       y = "Annual Generation",
-       color = "Fuel Type")
-print(scatter_faceted_county)
-
-#Barplot Viz
-stacked_barplot_total_generation <- ggplot(processed_data, aes(x = CNTYNAME, y = PLNGENAN, fill = PLFUELCT)) +
-  geom_bar(stat = "sum", position = "stack") +
-  labs(title = "Total Annual Generation by Fuel Type and County",
-       x = "County",
-       y = "Total Annual Generation",
-       fill = "Fuel Type") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-print(stacked_barplot_total_generation)
-
-
-
-###########SIMPLE REGRESSIONS ON INC AND GEN/CAP/NUM PLANTS ######
-
-#Income and the number of plants
+### Pre-Analysis Wrangling ###
 
 # Creating separate df with plants by FIPS_Code
 county_plants_table <- table(online_plants$FIPS_Code)
 view(county_plants_table)
 county_plants_df <- as.data.frame(county_plants_table)
+
 #Renaming columnnames
 colnames(county_plants_df)[colnames(county_plants_df) == "Var1"] <- "FIPS_Code"
 colnames(county_plants_df)[colnames(county_plants_df) == "Freq"] <- "Num_Plants"
@@ -350,7 +355,9 @@ merged_data <- merge(county_plants_df, income[, c("FIPS_Code", "MEDHHINC_2021")]
 # Merge back to original
 county_plants_df <- merged_data
 
-#Run regression analysis
+### Regression Analysis ###
+
+#Run simple regression
 inc_plants_model <- lm(Num_Plants ~ MEDHHINC_2021, data = county_plants_df)
 summary(inc_plants_model)
 
@@ -362,18 +369,20 @@ ggplot(county_plants_df, aes(x = MEDHHINC_2021, y = Num_Plants)) +
        x = "Median Household Income",
        y = "Number of Power Plants")
 
+#Regression on Income and Nameplate Capacity
 
-#Income and Nameplate Capacity
+## Pre-Analysis Wrangling ##
 
 #Calculate average nameplate capacity by county
 average_capacity <- aggregate(NAMEPCAP_plant ~ FIPS_Code, data = online_plants, FUN = mean)
-
 merged_data_capacity <- merge(average_capacity, income, by = "FIPS_Code")
 
-#Generation
+## Regression Analysis ##
+
+#Run simple regression
 capacity_income_model <- lm(NAMEPCAP_plant ~ MEDHHINC_2021, data = merged_data_capacity)
 
-#Plot
+#Plot relationship
 ggplot(merged_data_capacity, aes(x = MEDHHINC_2021, y = NAMEPCAP_plant)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
@@ -381,19 +390,21 @@ ggplot(merged_data_capacity, aes(x = MEDHHINC_2021, y = NAMEPCAP_plant)) +
        x = "Median Household Income",
        y = "Average Nameplate Capacity")
 
+#Regression on Income and Average Generation
 
-
-#Income and Average Generation
+## Pre-Analysis Wrangling ##
 
 #Calculate average generation by county
 avg_generation <- aggregate(PLNGENAN ~ FIPS_Code, data = online_plants, FUN = mean)
 merged_data_generation <- merge(avg_generation, income, by = "FIPS_Code")
 
-#Regression
+## Regression Analysis ##
+
+#Run simple regression
 generation_income_model <- lm(PLNGENAN ~ MEDHHINC_2021, data = merged_data_generation)
 summary(generation_income_model)
 
-#Plot
+#Plot relationship
 ggplot(merged_data_generation, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
@@ -460,18 +471,17 @@ CO2_map
 
 ```{r Unemployment and Retirements}
 
-########## GEN2020 WRANGLING ##########
-gen20 <- read.csv(here('Data/Raw/GEN20.csv'),                 
-                  stringsAsFactors = FALSE, skip = 1, 
-                  colClasses = c('ORISPL' = 'character'))
+################ DATA ANALYSIS: UNEMPLOYMENT AND GENERATOR RETIREMENTS ################ 
 
+### Pre-Analysis Wrangling ###
 
+#Set to numeric
 gen20$NAMEPCAP <- as.numeric(gen20$NAMEPCAP)
 gen20$GENNTOZ <- as.numeric(gen20$GENNTOZ)
 
 summary(gen20)
 
-#Combining Gen20 and Plant df based on ORISPL
+#Combining gen20 and plant dataframes based on ORISPL
 plant_gen20 <- gen20 %>%
   inner_join(plant_select, by = 'ORISPL', 
              suffix = c("_gen", "_plant"))
@@ -485,14 +495,15 @@ ue_egrid_20 <- merge(plant_gen_data_20, ue, by = "FIPS_Code")
 #Merging with income
 processed_data_20 <- merge(ue_egrid_20, inc, by = "FIPS_Code")
 
+#View existing column names to explore next steps
 colnames(processed_data_20)
-
-##### WRANGLING UE DATASET ########
-
 colnames(ue)
 
-#Transposing so FIPS code are columns across and years are reflected as years
+#Transposing and wrangling both in order to view:
+#   1. NC county unemployment by year, where we have a column for all years rather than each year having its own column
+#   2. Generator retirement by year, selecting only those with instances of retired generators
 
+#Unemployment
 transposed_ue <- ue %>%
   filter(str_starts(FIPS_Code, "37")) %>%  # Filter to include only NC
   pivot_longer(cols = starts_with("Unemployment_rate_"), 
@@ -501,39 +512,48 @@ transposed_ue <- ue %>%
   mutate(Year = gsub("Unemployment_rate_", "", Year, fixed = TRUE)) %>%
   pivot_wider(names_from = "FIPS_Code", values_from = "Unemployment")
 
+#Generator
 generator_retirement_data <- processed_data_20 %>% 
   select(FIPS_Code, GENYRRET) %>%
   na.omit()  #showing only generators that have retired
 
-summary(generator_retirement_data)
 
-# Use table to count the occurrences of each unique FIPS code
+######CONFIRM WHETHER THIS COUNT AS ANALYSIS #######
+
+#Use table to count the occurrences of each unique FIPS code to select counties of interest
 fips_counts <- table(generator_retirement_data$FIPS_Code)
 
-# Print counts for each FIPS code
-for (fips in names(fips_counts)) {
-  count <- fips_counts[fips]
+for (i in seq_along(fips_counts)) {
+  fips <- names(fips_counts)[i]
+  count <- fips_counts[i]
   cat("FIPS Code:", fips, "has", count, "rows.\n")}
 
+fips_counts <- table(generator_retirement_data$FIPS_Code)#identifies 2 counties with 7 instances of retirements
+
+
 #FIPS Code 37159 (Rowan) and 37191 (Wayne) each have 7 rows: use these as counties of interest to run time series
+#FIPS Code 37023  (Burke) 37041 (Chowan) 37049  (Craven) 37063 (Durham) 37067 (Forsyth) 37069 (Franklin) 37125 (Moore) each have 1 row: use these as counties of interest for comparison
 
-
-######## TIME SERIES STUFF ################
 
 colnames(transposed_ue)
 
 #Creating df for only columns.counties of interest
 rowan_ue <- transposed_ue[, c("Year", "37159")]
 wayne_ue <- transposed_ue[, c("Year", "37191")]
+durham_ue <- transposed_ue[, c("Year", "37063")] 
+Chowan_ue <- transposed_ue[, c("Year", "37049")] 
 
 rowan_ret <-  generator_retirement_data[generator_retirement_data$FIPS_Code == 37159, ]
-
 wayne_ret <-  generator_retirement_data[generator_retirement_data$FIPS_Code == 37191, ]
+durham_ret <-  generator_retirement_data[generator_retirement_data$FIPS_Code == 37063, ]
+Chowan_ret <-  generator_retirement_data[generator_retirement_data$FIPS_Code == 37049, ]
 
 
 #Converting to date format
 rowan_ue$Year <- as.Date(rowan_ue$Year, format = "%Y")
 wayne_ue$Year <- as.Date(wayne_ue$Year, format = "%Y")
+durham_ue$Year <- as.Date(durham_ue$Year, format = "%Y")
+Chowan_ue$Year <- as.Date(durham_ue$Year, format = "%Y")
 
 #Plot
 ggplot(rowan_ue, aes(x = Year, y = `37159`)) +
@@ -550,20 +570,21 @@ ggplot() +
        x = "Year",
        y = "Unemployment Rate (%)",
        color = "Dataset") +
-  scale_color_manual(values = c("Rowan" = "blue", "Wayne" = "yellow")) +
+  scale_color_manual(values = c("Rowan" = "blue", "Wayne" = "lightblue")) +
   theme(legend.title = element_blank())  
 
-# Line plot for Rowan and Wayne with legend
 combined_plot <- ggplot() +
   geom_line(data = rowan_ue, aes(x = Year, y = `37159`, color = "Rowan"), size = 1) +
-  geom_line(data = wayne_ue, aes(x = Year, y = `37191`, color = "Wayne"), size = 1) + 
-  geom_vline(xintercept = 2012, linetype = "dashed", color = "black", size = 1) + #DASHED LINE NOT WORKING
-  labs(title = "Unemployment in Wayne and Rowan Counties",
+  geom_line(data = wayne_ue, aes(x = Year, y = `37191`, color = "Wayne"), size = 1) +
+  geom_line(data = durham_ue, aes(x = Year, y = `37063`, color = "Durham"), size = 1) +
+  geom_line(data = Chowan_ue, aes(x = Year, y = `37049`, color = "Chowan"), size = 1) +
+  geom_vline(xintercept = 2012, linetype = "dashed", color = "black", size = 1) +
+  labs(title = "Unemployment in Wayne, Rowan, Durham, and Chowan Counties",
        x = "Year",
        y = "Unemployment Rate (%)",
        color = "Dataset") +
-  scale_color_manual(values = c("Rowan" = "blue", "Wayne" = "green")) +
-  theme(legend.title = element_blank()) 
+  scale_color_manual(values = c("Rowan" = "blue", "Wayne" = "lightblue", "Durham" = "darkgreen", "Chowan" = "lightgreen")) +
+  theme(legend.title = element_blank())
 
 print(combined_plot)
 
@@ -572,6 +593,23 @@ print(combined_plot)
 combined_plot + 
   geom_vline(xintercept = 2012, linetype = "dashed", color = "black", size = 1) +
   labs(color = "Legend Title")
+
+
+#Wrangling for regression
+rowan_data <- generator_retirement_data[generator_retirement_data$FIPS_Code == 37159, ]
+
+#Rename generator retirement year to year in order to combine for analysis
+colnames(rowan_data)[colnames(rowan_data) == "GENYRRET"] <- "Year"
+
+#Merge by year
+rowan_merged_data <- merge(rowan_data, rowan_ue, by = "Year", all.x = TRUE)
+
+
+analysis_rowan_data <- data.frame(
+  Year = rowan_merged_data$Year,
+  UnemploymentRate = rowan_merged_data$`37159`,
+  Retirements = your_data_column_for_retirements
+)
 
 
 #NEXT STEPS: Compare against county with no (or 1?) retirements
