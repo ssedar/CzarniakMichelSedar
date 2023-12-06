@@ -23,6 +23,8 @@ United States Environmental Protection Agency (EPA). 2023. “Emissions & Genera
 
 United States Census Bureau. Cartographic Boundary Files - Shapefile. 2018 County. https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html. Accessed on 11/15/2023.  
 
+United States Department of Agriculture / Economic Research Service. Poverty estimates for the U.S., States, and counties, 2021. https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/. Accessed on 11/1/2023. 
+
 United States Department of Agriculture / Economic Research Service. Unemployment and median household income for the U.S., States, and counties, 2000–22. https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/. Accessed on 11/1/2023.  
 
 Centers for Disease Control and Prevention/ Agency for Toxic Substances and Disease Registry/ Geospatial Research, Analysis, and Services Program. CDC/ATSDR Social Vulnerability Index 2020. Database North Carolina. https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html. Accessed on 12/6/2023.  
