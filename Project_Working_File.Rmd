@@ -70,7 +70,7 @@ SVI <-read.csv(here('Data/Raw/SVI_NorthCarolina_county.csv'),
 #Selecting columns of interest from plant data
 plant_select <- plant %>%
   select(PSTATABB, ORISPL, FIPSST, FIPSCNTY, PLFUELCT, NAMEPCAP,
-         PLNGENAN,PLSO2RTA, PLCO2RTA, PLCH4RTA, PLN2ORTA, PLCO2AN, 
+         PLNGENAN,PLSO2RTA, PLCO2RTA, PLCH4RTA, PLN2ORTA, PLCO2AN, PLN2OAN,PLNOXAN,
          PLSO2AN,PLCH4AN, CNTYNAME, LAT,
          LON, COALFLAG) %>%
   filter(PSTATABB == "NC") %>%
@@ -465,6 +465,88 @@ CO2_map <-ggplot(data=CO2_counties_sf_join)+
   labs(title="2021 CO2 Emissions",
        fill="CO2 Emissions (tn)")
 CO2_map
+
+#Heat map of NOx emissions by county
+#Compute sum of NOx Emissions by county
+NOx_emissions <-plant_gen_data %>%
+  drop_na(PLNOXAN)%>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_NOx = sum(PLNOXAN))
+
+#Join the eGrid attributes to the county spatial features
+NOx_counties_sf_join <-  merge(x = counties_sf,
+                           y = NOx_emissions, 
+                           by.x = 'NAME', 
+                           by.y = 'CNTYNAME')
+
+#Map NOx emissions by county
+NOx_map <-ggplot(data= NOx_counties_sf_join)+
+  geom_sf(aes(fill=Sum_NOx))+
+  labs(title="2021 NOx Emissions",
+       fill=" NOx Emissions (tn)")
+NOx_map
+
+#Heat map of SO2 emissions by county
+#Compute sum of SO2 Emissions by county
+SO2_emissions <-plant_gen_data %>%
+  drop_na(PLSO2AN)%>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_SO2 = sum(PLSO2AN))
+
+#Join the eGrid attributes to the county spatial features
+SO2_counties_sf_join <-  merge(x = counties_sf,
+                           y = SO2_emissions, 
+                           by.x = 'NAME', 
+                           by.y = 'CNTYNAME')
+
+#Map SO2 emissions by county
+SO2_map <-ggplot(data=SO2_counties_sf_join)+
+  geom_sf(aes(fill=Sum_SO2))+
+  labs(title="2021 SO2 Emissions",
+       fill="SO2 Emissions (tn)")
+SO2_map
+
+#Heat map of N2O emissions by county
+#Compute sum of N2O Emissions by county
+N2O_emissions <-plant_gen_data %>%
+  drop_na(PLN2OAN)%>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_N2O = sum(PLN2OAN))
+
+#Join the eGrid attributes to the county spatial features
+N2O_counties_sf_join <- merge(x = counties_sf,
+                           y = N2O_emissions, 
+                           by.x = 'NAME', 
+                           by.y = 'CNTYNAME')
+
+#Map N2O emissions by county
+N2O_map <-ggplot(data= N2O_counties_sf_join)+
+  geom_sf(aes(fill=Sum_N2O))+
+  labs(title="2021 N2O Emissions",
+       fill=" N2O Emissions (lbs)")
+N2O_map
+
+
+#Heat map of CH4 emissions by county
+#Compute sum of CH4 Emissions by county
+CH4_emissions <-plant_gen_data %>%
+  drop_na(PLCH4AN)%>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_CH4 = sum(PLCH4AN))
+
+#Join the eGrid attributes to the county spatial features
+CH4_counties_sf_join <- merge(x = counties_sf,
+                           y = CH4_emissions, 
+                           by.x = 'NAME', 
+                           by.y = 'CNTYNAME')
+
+#Map CH4 emissions by county
+CH4_map <-ggplot(data= CH4_counties_sf_join)+
+  geom_sf(aes(fill=Sum_CH4))+
+  labs(title="2021 CH4 Emissions",
+       fill="CH4 Emissions (lbs)")
+CH4_map
+
 ```
 
 
