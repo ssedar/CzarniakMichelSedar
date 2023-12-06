@@ -56,9 +56,11 @@ income <- read.csv(here('Data/Raw/PovertyEstimates.csv'),
 unemployment <- read.csv(here('Data/Raw/Unemployment.csv'), 
                   stringsAsFactors = TRUE, skip = 4)
 
-SVI <-read.csv(here('Data/Raw/SVI_NorthCarolina_county.csv'),
+SVI_county <-read.csv(here('Data/Raw/SVI_NorthCarolina_county.csv'),
                   stringsAsFactors = TRUE)
   
+SVI_tract <-read.csv(here('Data/Raw/SVI_NorthCarolina_tract.csv'),
+                  stringsAsFactors = TRUE)
 ```
 
 
@@ -213,12 +215,10 @@ counties_sf_join <-  merge(x = counties_sf,
 
 #Map total generator capacity by county
 gen_cap_map <-ggplot(data=counties_sf_join)+
-  geom_sf(aes(fill=NAMEPCAP_plant))+labs(title="Generator Capacity by County",fill="Nameplate Capacity")
+  geom_sf(aes(fill=NAMEPCAP_plant))+labs(title="Capacity by County",fill="Capacity (MW)")
 gen_cap_map
 
 ```
-
-
 
 
 ```{r Data Wrangling}
@@ -417,20 +417,48 @@ ggplot(merged_data_generation, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
 
 
 ```{r Generation and SVI Relationship Analysis}
+#Merge SVI and average generation by county data
 Generation_SVI <-merge(x = avg_generation,
                            y = SVI, 
                            by.x = 'FIPS_Code', 
                            by.y = 'FIPS' )
 
+#Run multiple regression to determine if there is a relationship
 Generation_County_lm <- lm(PLNGENAN ~ RPL_THEMES + RPL_THEME1 + RPL_THEME2 + RPL_THEME3 + RPL_THEME4, data=Generation_SVI)
+
+#Summary shows no relationship at the county level
 summary(Generation_County_lm) 
 
+#Investigating if there is a relationship at the tract level
+
+#Load in tract spatial data
 census_tracts_sf<- st_read(here('Data/Spatial/tl_2021_37_tract.shp'))
+
+mapview(census_tracts_sf)+mapview(plant_gen_sf)
+
+#Draw buffer around power plant locations. Buffer is intended to be ~3 miles and assumes that 0.621371 mi=1km and 1km=1000 buffer units.
+#plant_buffer <- plant_gen_sf %>% st_buffer(4828.03)
+
+#View the result
+mapview(plant_buffer)
+
+#Assign tracts to each plant  - FIX MEEEEEEEEEE
+tract_plant <- plant_gen_sf %>% mutate(Tract=sf::st_intersects(plant_gen_sf, census_tracts_sf))
+
+Generation_tract <-tract_plant %>%
+  group_by(Tract)%>%
+  summarize(Total_gen_tract = sum(PLNGENAN))
+
+#Join the tract generation attributes to the SVI data
+SVI_plants_join <-  merge(x = SVI_tract,
+                           y = Generation_tract, 
+                           by.x = 'FIPS', #OR LOCATION??????
+                           by.y = 'Tract' )
 ```
 
 
 ```{r Heat Maps}
-#Heat map of Income Data by County
+## Heat map of Income Data by County ##
 #Create data frame of NC income data
 income_NC <-income %>% 
   filter(Stabr=='NC')
