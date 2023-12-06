@@ -25,7 +25,7 @@ library(leaflet)
 library(tseries)
 library(mapview); mapviewOptions(fgb = FALSE)
 
-knitr::opts_chunk$set (warning = FALSE)
+knitr::opts_chunk$set (warning = FALSE, echo = FALSE)
 
 getwd()
 ```
