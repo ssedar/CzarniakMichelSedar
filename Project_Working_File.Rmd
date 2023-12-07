@@ -4,6 +4,8 @@ author: "Gaby Czarniak, Mara Michel, Sam Sedar"
 date: "2023-11-14"
 output: pdf_document
 ---
+#Research Rationale
+*[RATIONALE HERE]*
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -29,7 +31,6 @@ knitr::opts_chunk$set (warning = FALSE, echo = FALSE)
 
 getwd()
 ```
-
 
 
 ```{r Data Load}
@@ -58,9 +59,6 @@ unemployment <- read.csv(here('Data/Raw/Unemployment.csv'),
 
 SVI_county <-read.csv(here('Data/Raw/SVI_NorthCarolina_county.csv'),
                   stringsAsFactors = TRUE)
-  
-SVI_tract <-read.csv(here('Data/Raw/SVI_NorthCarolina_tract.csv'),
-                  stringsAsFactors = TRUE)
 
 EBM_countytract <-read.csv(here('Data/Raw/EBM_NorthCarolina.csv'),
                   stringsAsFactors = TRUE)
@@ -69,7 +67,8 @@ SVI_2018_tract <-read.csv(here('Data/Raw/SVI2018_NorthCarolina.csv'),
                   stringsAsFactors = TRUE)
 ```
 
-
+#Data Wrangling
+*[TEXT SUMMARY OF DATA WRANGLING + TABLE HERE]*.
 ```{r}
 ######  DATA WRANGLING - BASELINE  ######
 
@@ -129,6 +128,8 @@ colnames(processed_data)
 
 ```
 
+#Exploratory Analysis
+*[Description of analysis here]*
 ```{r - Exploration}
 
 ########### DATA EXPLORATION - FUEL TYPES ###########
@@ -424,7 +425,7 @@ unique(robeson_online_plants$GENID) # 32 unique GENIDs
 robeson_year <- year(robeson_online_plants$GENYRONL)
 robeson_FIPS_code <- robeson_online_plants$FIPS_Code
 ## MARKING WHERE GC LEFT OFF
-robeson_plant_count <- tally(robeson_online_plants$PNAME, wt = NULL, sort = FALSE, name = NULL)
+#robeson_plant_count <- tally(robeson_online_plants$PNAME, wt = NULL, sort = FALSE, name = NULL)
 is.Date(robeson_online_plants$GENYRONL)
 
 ## WILL LIKELY NOT NEED 
@@ -445,7 +446,8 @@ high_income_subset <- processed_data[processed_data$MEDHHINC_2021 >= medium_thre
 ts_low_income <- ts(low_income_subset$Unemployment_rate_2000:low_income_subset$Unemployment_rate_2022, start = min(low_income_subset$YEAR), end = max(low_income_subset$YEAR))
 ```
 
-
+#Question 1: Is there a relationship between socioeconomic status and the number or size of power plants at the county level?
+*[Description here]*
 ```{r Income and Fuel Category}
 
 ################ DATA ANALYSIS: INCOME AND POWER PLANTS ####################
@@ -523,90 +525,35 @@ ggplot(merged_data_generation, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
   labs(title = "Regression Analysis Between Average Generation and County Income",
        x = "Median Household Income",
        y = "Total Annual Generation")
-
-
-
 ```
-
 
 ```{r Generation and SVI Relationship Analysis}
 #Calculate sum of generation by county
-nameplate_capacity <-plant_gen_data %>%
+Total_Generation_County <-plant_gen_data %>%
   group_by(CNTYNAME)%>%
-  summarize(Sum_NAMEPCAP = sum(NAMEPCAP_plant))
+  summarize(Total_Generation = sum(PLNGENAN))
 
-#Merge SVI and average generation by county data
-
-
-Generation_SVI <-merge(x = nameplate_capacity,
+#Merge SVI and total generation by county data
+Generation_SVI <-merge(x = Total_Generation_County,
                            y = SVI_county, 
                            by.x = 'CNTYNAME', 
                            by.y = 'COUNTY' )
 
-#Run multiple regression to determine if there is a relationship
-Generation_County_lm <- lm(Sum_NAMEPCAP ~ RPL_THEMES + RPL_THEME1 + RPL_THEME2 + RPL_THEME3 + RPL_THEME4, data=Generation_SVI)
+#Run regression to determine if there is a relationship
+Generation_County_lm <- lm(Total_Generation ~ RPL_THEMES, data=Generation_SVI)
 
 #Summary shows no relationship at the county level
 summary(Generation_County_lm)
 
+#Visualize the linear regression
 tract_generation_SVI_plot <- ggplot(Generation_SVI, 
-                                    aes(x = Sum_NAMEPCAP, 
-                                        y = RPL_THEMES)) +
-  geom_point()+ylim(0,1)+
-  stat_smooth(method = "lm", col = "red")
-print(tract_generation_SVI_plot) 
-
-#Investigating if there is a relationship at the tract level
-
-#Load in tract spatial data
-census_tracts_sf<- st_read(here('Data/Spatial/tl_2021_37_tract.shp'))
-
-mapview(census_tracts_sf)+mapview(plant_gen_sf)
-
-#Draw buffer around power plant locations. Buffer is intended to be ~3 miles and assumes that 0.621371 mi=1km and 1km=1000 buffer units.
-plant_buffer <- plant_gen_sf %>% st_buffer(4828.03)
-
-#View the result
-mapview(plant_buffer)
-
-#Merge census tract shape files with SVI census tract data
-SVI_tract[c('Location_Tract', 'Location_County','Location_State')] <- str_split_fixed(SVI_tract$LOCATION, ',', 3) #Reformat tract codes to match across data frames
-
-SVI_tract_df <-merge(x = SVI_tract,
-                           y = census_tracts_sf, 
-                           by.x = 'Location_Tract', 
-                           by.y = 'NAMELSAD')
-
-SVI_tract_sf <-SVI_tract_df%>% 
-  st_as_sf(coords = c('INTPTLON',
-                      'INTPTLAT'),
-           crs=4269)
-
-#Merge plant and SVI data by tract using a geographic join
-tract_plant <-st_join(plant_gen_sf, SVI_tract_sf)
-
-#Analyze the data
-
-tract_plant_df <- as.data.frame(tract_plant)
-  
-tract_generation <-tract_plant_df %>% group_by(NAME)%>% 
-  summarize(Total_Generation = sum(PLNGENAN))
-  
-tract_generation_SVI <- merge(x=tract_generation,
-                              y=SVI_tract_df,
-                              by='NAME')
-
-#Run multiple regression to determine if there is a relationship between power plant generation and SVI
-Generation_Tract_lm_overall <- lm(Total_Generation ~ RPL_THEMES + NAME, data=tract_generation_SVI)
-
-summary(Generation_Tract_lm_overall) 
-
-#Graph the regression
-tract_generation_SVI_plot <- ggplot(tract_generation_SVI, 
                                     aes(x = Total_Generation, 
                                         y = RPL_THEMES)) +
-  geom_point()+ylim(0,1)
+  geom_point()+ylim(0,1)+
+  stat_smooth(method = "lm", col = "red")+labs(Y='Overall SVI Value', X='Total Generation in 2021 (mWh)',title= 
+"Total Power Plant Generation and SVI by county",caption="The chart above shows the relationship between the Social Vulnerability Index (SVI) and 2021 annual generation across all power plants in a county.")
 print(tract_generation_SVI_plot) 
+
 
 ```
 
@@ -731,7 +678,7 @@ CH4_map
 
 ```
 
-
+# Question 2: Is there a relationship between power plant retirements and unemployment?
 ```{r Unemployment and Retirements}
 
 ################ DATA ANALYSIS: UNEMPLOYMENT AND GENERATOR RETIREMENTS ################ 
@@ -915,6 +862,9 @@ print(cor_test_result)
 #A correlation coefficient of -0.731 suggests that as the retired nameplate capacity (MW) increases, the unemployment rate tends to decrease, contrary to our initial hypothesis. 
 
 ```
+
+#Question 3: What is the relationship between air quality and health issues?
+*[Description here]*
 
 ```{r EBM Variables Relationship Analysis}
 #Environmental Burden
