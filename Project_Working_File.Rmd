@@ -61,6 +61,12 @@ SVI_county <-read.csv(here('Data/Raw/SVI_NorthCarolina_county.csv'),
   
 SVI_tract <-read.csv(here('Data/Raw/SVI_NorthCarolina_tract.csv'),
                   stringsAsFactors = TRUE)
+
+EBM_countytract <-read.csv(here('Data/Raw/EBM_NorthCarolina.csv'),
+                  stringsAsFactors = TRUE)
+
+SVI_2018_tract <-read.csv(here('Data/Raw/SVI2018_NorthCarolina.csv'),
+                  stringsAsFactors = TRUE)
 ```
 
 
@@ -762,5 +768,64 @@ print(cor_test_result)
 
 ```
 
+```{r EBM Variables Relationship Analysis}
+#Environmental Burden
 
+# E_PM = Annual mean days above PM2.5 regulatory standard - 3-year average
+# E_DSLPM = Ambient concentrations of diesel PM/m3
+# E_OZONE = Annual mean days above O3 regulatory standard - 3-year average
+# EP_BPHIGH = Percentage of individuals with Raw high blood pressures values
+# EP_ASTHMA = Percentage of individuals with asthma
+
+#To what extent does high PM exposure explain asthma in NC 
+PM_asthma_lm<- lm(data = EBM_countytract, EP_ASTHMA ~ E_PM)
+summary(PM_asthma_lm)
+# p-value < 0.05
+# the R-squared value of .0097 signifies that elevated PM concentrations only explain less than 1% of the variability in asthma in NC tracts
+cor.test(EBM_countytract$EP_ASTHMA, EBM_countytract$E_PM)
+# -.098 signifies a negative and significant but not super strong correlation
+
+#To what extent does high PM exposure explain high blood pressure in NC 
+PM_bphigh_lm<- lm(data = EBM_countytract, EP_BPHIGH ~ E_PM)
+summary(PM_bphigh_lm)
+# p-value < 0.05
+# the R-squared value of .0927 signifies that elevated PM concentrations explain 9.27% of the variability in high blood pressure in NC tracts
+cor.test(EBM_countytract$EP_BPHIGH, EBM_countytract$E_PM)
+# -0.30 signifies a negative and significant but not super strong correlation
+
+#Multiple regression looking at whether coal proximity, PM, and ozone might explain high blood pressure
+EBM_highbp_lm <- lm(EP_BPHIGH ~ E_PM + E_DSLPM + E_OZONE, data=EBM_countytract)
+step(EBM_highbp_lm)
+
+#Multiple regression looking at whether coal proximity, PM, and ozone might explain asthma
+EBM_asthma_lm <- lm(EP_ASTHMA ~ E_PM + E_DSLPM + E_OZONE, data=EBM_countytract)
+step(EBM_asthma_lm)
+
+#Run the multiple regression to determine whether there is a relationship
+EBM_multivar_lm <- lm(EP_UNINSUR ~ EP_ASTHMA + EP_BPHIGH + E_IMPWTR + 
+                        E_COAL + E_PM + E_OZONE,
+                        data=EBM_countytract)
+step(EBM_multivar_lm)
+
+EBM_lead_wtr_lm <- lm(EP_UNINSUR ~ E_IMPWTR + 
+                        E_PM,
+                        data=EBM_countytract)
+step(EBM_lead_wtr_lm)
+#Summarize the multiple regression
+summary(EBM_multivar_lm)
+
+# ------------- PROBABLY WON'T INCLUDE WHAT'S BELOW, LET'S DISCUSS -------------
+# to what extent does proximity to coal explain PM -- FRUITLESS BC COAL IS ZEROES 
+coal_PM_lm<- lm(data = EBM_countytract, E_PM ~ E_COAL)
+summary(coal_PM_lm)
+
+# to what extent does proximity to coal explain asthma -- FRUITLESS BC COAL IS ZEROES
+coal_asthma_lm<- lm(data = EBM_countytract, EP_ASTHMA ~ E_COAL)
+summary(coal_asthma_lm)
+
+# to what extent does proximity to coal explain high blood pressure -- FRUITLESS BC COAL IS ZEROES
+coal_highbp_lm<- lm(data = EBM_countytract, EP_BPHIGH ~ E_COAL)
+summary(coal_highbp_lm)
+
+```
 
