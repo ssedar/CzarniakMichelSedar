@@ -530,17 +530,31 @@ ggplot(merged_data_generation, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
 
 
 ```{r Generation and SVI Relationship Analysis}
+#Calculate sum of generation by county
+nameplate_capacity <-plant_gen_data %>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_NAMEPCAP = sum(NAMEPCAP_plant))
+
 #Merge SVI and average generation by county data
-Generation_SVI <-merge(x = avg_generation,
-                           y = SVI, 
-                           by.x = 'FIPS_Code', 
-                           by.y = 'FIPS' )
+
+
+Generation_SVI <-merge(x = nameplate_capacity,
+                           y = SVI_county, 
+                           by.x = 'CNTYNAME', 
+                           by.y = 'COUNTY' )
 
 #Run multiple regression to determine if there is a relationship
-Generation_County_lm <- lm(PLNGENAN ~ RPL_THEMES + RPL_THEME1 + RPL_THEME2 + RPL_THEME3 + RPL_THEME4, data=Generation_SVI)
+Generation_County_lm <- lm(Sum_NAMEPCAP ~ RPL_THEMES + RPL_THEME1 + RPL_THEME2 + RPL_THEME3 + RPL_THEME4, data=Generation_SVI)
 
 #Summary shows no relationship at the county level
-summary(Generation_County_lm) 
+summary(Generation_County_lm)
+
+tract_generation_SVI_plot <- ggplot(Generation_SVI, 
+                                    aes(x = Sum_NAMEPCAP, 
+                                        y = RPL_THEMES)) +
+  geom_point()+ylim(0,1)+
+  stat_smooth(method = "lm", col = "red")
+print(tract_generation_SVI_plot) 
 
 #Investigating if there is a relationship at the tract level
 
@@ -550,23 +564,50 @@ census_tracts_sf<- st_read(here('Data/Spatial/tl_2021_37_tract.shp'))
 mapview(census_tracts_sf)+mapview(plant_gen_sf)
 
 #Draw buffer around power plant locations. Buffer is intended to be ~3 miles and assumes that 0.621371 mi=1km and 1km=1000 buffer units.
-#plant_buffer <- plant_gen_sf %>% st_buffer(4828.03)
+plant_buffer <- plant_gen_sf %>% st_buffer(4828.03)
 
 #View the result
 mapview(plant_buffer)
 
-#Assign tracts to each plant  - FIX MEEEEEEEEEE
-tract_plant <- plant_gen_sf %>% mutate(Tract=sf::st_intersects(plant_gen_sf, census_tracts_sf))
+#Merge census tract shape files with SVI census tract data
+SVI_tract[c('Location_Tract', 'Location_County','Location_State')] <- str_split_fixed(SVI_tract$LOCATION, ',', 3) #Reformat tract codes to match across data frames
 
-Generation_tract <-tract_plant %>%
-  group_by(Tract)%>%
-  summarize(Total_gen_tract = sum(PLNGENAN))
+SVI_tract_df <-merge(x = SVI_tract,
+                           y = census_tracts_sf, 
+                           by.x = 'Location_Tract', 
+                           by.y = 'NAMELSAD')
 
-#Join the tract generation attributes to the SVI data
-SVI_plants_join <-  merge(x = SVI_tract,
-                           y = Generation_tract, 
-                           by.x = 'FIPS', #OR LOCATION??????
-                           by.y = 'Tract' )
+SVI_tract_sf <-SVI_tract_df%>% 
+  st_as_sf(coords = c('INTPTLON',
+                      'INTPTLAT'),
+           crs=4269)
+
+#Merge plant and SVI data by tract using a geographic join
+tract_plant <-st_join(plant_gen_sf, SVI_tract_sf)
+
+#Analyze the data
+
+tract_plant_df <- as.data.frame(tract_plant)
+  
+tract_generation <-tract_plant_df %>% group_by(NAME)%>% 
+  summarize(Total_Generation = sum(PLNGENAN))
+  
+tract_generation_SVI <- merge(x=tract_generation,
+                              y=SVI_tract_df,
+                              by='NAME')
+
+#Run multiple regression to determine if there is a relationship between power plant generation and SVI
+Generation_Tract_lm_overall <- lm(Total_Generation ~ RPL_THEMES + NAME, data=tract_generation_SVI)
+
+summary(Generation_Tract_lm_overall) 
+
+#Graph the regression
+tract_generation_SVI_plot <- ggplot(tract_generation_SVI, 
+                                    aes(x = Total_Generation, 
+                                        y = RPL_THEMES)) +
+  geom_point()+ylim(0,1)
+print(tract_generation_SVI_plot) 
+
 ```
 
 
