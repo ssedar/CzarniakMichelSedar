@@ -131,7 +131,7 @@ colnames(processed_data)
 
 ```{r - Exploration}
 
-########### DATA EXPLORATION - BASELINE ###########
+########### DATA EXPLORATION - FUEL TYPES ###########
 
 summary(processed_data)
 
@@ -160,32 +160,139 @@ processed_data$MEDHHINC_2021 <- as.numeric(processed_data$MEDHHINC_2021)
 scatter_income_generation <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
   geom_point() +
   labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
-       x = "Median Household Income",
-       y = "Annual Generation",
+       x = "Median Household Income ($)",
+       y = "Total Plant Annual Generation (MWh)",
        color = "Fuel Type")
 print(scatter_income_generation)
 
-#Scatter faceted
-scatter_faceted_county <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
+#Scatter ex-nuclear
+scatter_income_generation_ex_nuc <- ggplot(subset(processed_data, PLFUELCT != "NUCLEAR"), 
+                                     aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
   geom_point() +
-  facet_wrap(~CNTYNAME, scales = "free") +
-  labs(title = "Relationship Between Annual Generation, Fuel Type, and Income by County",
-       x = "Median Household Income",
-       y = "Annual Generation",
+  labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
+       x = "Median Household Income ($)",
+       y = "Total Plant Annual Generation (MWh)",
        color = "Fuel Type")
-print(scatter_faceted_county)
+print(scatter_income_generation_ex_nuc)
+
+selected_fuel_data <- subset(processed_data, PLFUELCT %in% c("COAL", "SOLAR", "OIL", "WIND", "GAS"))
+
+# Scatter plot for selected fuel types
+scatter_income_generation_selected <- ggplot(selected_fuel_data, 
+                                              aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
+  geom_point() +
+  labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
+       x = "Median Household Income ($)",
+       y = "Total Plant Annual Generation (MWh)",
+       color = "Fuel Type")
+print(scatter_income_generation_selected)
+
+
+
+selected_fuel_data <- subset(processed_data, PLFUELCT %in% c("COAL", "SOLAR", "OIL", "WIND", "GAS"))
+
+# Scatter plot for selected fuel types
+scatter_income_generation_selected <- ggplot(selected_fuel_data, 
+                                              aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
+  geom_point() +
+  labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
+       x = "Median Household Income ($)",
+       y = "Total Plant Annual Generation (MWh)",
+       color = "Fuel Type")
+print(scatter_income_generation_selected)
+
 
 #Barplot visualization
 stacked_barplot_total_generation <- ggplot(processed_data, aes(x = CNTYNAME, y = PLNGENAN, fill = PLFUELCT)) +
   geom_bar(stat = "sum", position = "stack") +
   labs(title = "Total Annual Generation by Fuel Type and County",
        x = "County",
-       y = "Total Annual Generation",
+       y = "Total Plant Annual Generation (MWh)",
        fill = "Fuel Type") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-print(stacked_barplot_total_generation)
+print(stacked_barplot_total_generation) 
 
+#Visualization of all counties is very messy --- split by top 10/bottom 10 income
+
+
+#Top 10 counties based on median household income
+top_income_counties <- processed_data %>%
+  group_by(CNTYNAME) %>%
+  summarize(median_income = median(MEDHHINC_2021, na.rm = TRUE)) %>%
+  top_n(10, median_income) %>%
+  pull(CNTYNAME)
+
+filtered_data_income <- processed_data %>%
+  filter(CNTYNAME %in% top_income_counties)
+
+#Stacked bar plot
+stacked_barplot_top_income_counties <- ggplot(filtered_data_income, aes(x = CNTYNAME, y = PLNGENAN, fill = PLFUELCT)) +
+  geom_bar(stat = "sum", position = "stack") +
+  labs(title = "Total Annual Generation by Fuel Type and County (Top 10 by Median Income)",
+       x = "County",
+       y = "Total Plant Annual Generation (MWh)",
+       fill = "Fuel Type") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(stacked_barplot_top_income_counties)
+
+
+#Bottom 10 counties based on median household income
+bottom_income_counties <- processed_data %>%
+  group_by(CNTYNAME) %>%
+  summarize(median_income = median(MEDHHINC_2021, na.rm = TRUE)) %>%
+  arrange(median_income) %>%
+  slice_head(n = 10) %>%
+  pull(CNTYNAME)
+
+filtered_data_bottom_income <- processed_data %>%
+  filter(CNTYNAME %in% bottom_income_counties)
+
+#Stacked bar plot
+stacked_barplot_bottom_income_counties <- ggplot(filtered_data_bottom_income, aes(x = CNTYNAME, y = PLNGENAN, fill = PLFUELCT)) +
+  geom_bar(stat = "sum", position = "stack") +
+  labs(title = "Total Annual Generation by Fuel Type and County (Bottom 10 by Median Income)",
+       x = "County",
+       y = "Total Plant Annual Generation (MWh)",
+       fill = "Fuel Type") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(stacked_barplot_bottom_income_counties)
+
+
+```
+```{r - Anlaysis}
+
+########### DATA ANALYSIS - INCOME AND FUEL TYPE ###########
+
+#Coal linear regression
+coal_data <- subset(processed_data, PLFUELCT == "COAL")
+linear_model_coal <- lm(PLNGENAN ~ MEDHHINC_2021, data = coal_data)
+summary(linear_model_coal)
+#The estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. However, the coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. Additionally, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income.
+
+#Visualize relationship
+scatter_coal <- ggplot(coal_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Linear Regression for Coal Generation",
+       x = "Median Household Income ($)",
+       y = "Coal Generation (MWh)")
+print(scatter_coal)
+
+#Solar linear regression
+solar_data <- subset(processed_data, PLFUELCT == "SOLAR")
+linear_model_solar <- lm(PLNGENAN ~ MEDHHINC_2021, data = solar_data)
+summary(linear_model_solar) 
+# The linear regression suggests that there might be a relationship between income and generation. The statistically significant coefficient indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is relatively low (about 0.56%), and other factors not included in the model may contribute to the variability in generation for solar.
+
+#Visualize relationship
+scatter_solar <- ggplot(solar_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Linear Regression for Solar Generation",
+       x = "Median Household Income ($)",
+       y = "Solar Generation (MWh)")
+print(scatter_solar)
 ```
 
 ```{r}
