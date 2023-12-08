@@ -68,7 +68,11 @@ SVI_2018_tract <-read.csv(here('Data/Raw/SVI2018_NorthCarolina.csv'),
 ```
 
 #Data Wrangling
-*[TEXT SUMMARY OF DATA WRANGLING + TABLE HERE]*.
+The intial step in our research, once loaded, was data wrangling on the three distinct datasets: eGRID, unemployment, and income data. For the eGRID dataset, the code selects specific columns related to power plant information in North Carolina, converts certain columns to numeric format, and then combines the generator and plant data based on a common identifier. Duplicate columns are removed, resulting in the plant_gen_data dataframe. The code then proceeds to handle the unemployment dataset, selecting relevant columns covering the years 2002-2022 and merging it with the plant_gen_data dataframe using the FIPS code as a key. Similarly, the income dataset is processed by selecting specific columns, and the final step involves merging this income data with the previously created dataframe. The resulting dataset, named processed_data, contains information on power plants, unemployment rates, and income data, and the column names are displayed at the end of the code.
+
+#CONFIRM WHETHER TABLE IS NEEDED
+
+
 ```{r}
 ######  DATA WRANGLING - BASELINE  ######
 
@@ -129,7 +133,8 @@ colnames(processed_data)
 ```
 
 #Exploratory Analysis
-*[Description of analysis here]*
+*We then began data exploration and visualization for the processed_data dataframe, focusing on fuel types, income, and electricity generation in North Carolina. The summary(processed_data) provides a general overview of the dataset. The code then generates a pie chart to illustrate the percentage makeup of primary fuel types in North Carolina based on total annual generation. Subsequently, scatter plots depict the relationship between median household income and total plant annual generation, with points colored by fuel type. The analysis further drills down to scatter plots excluding nuclear data and for a selected set of fuel types (COAL, SOLAR, OIL, WIND, GAS). Additionally, stacked bar plots visualize the total annual generation by fuel type and county, and for better clarity, separate plots are created for the top 10 and bottom 10 counties based on median household income. These visualizations help explore and understand the relationships between fuel types, income levels, and electricity generation in different counties of North Carolina.
+
 ```{r - Exploration}
 
 ########### DATA EXPLORATION - FUEL TYPES ###########
@@ -151,7 +156,8 @@ pie_chart_percentage <- ggplot(fuel_summarized, aes(x = factor(1), fill = PLFUEL
   coord_polar(theta = "y") +
   labs(title = "North Carolina Primary Fuel (% of Total Annual Generation)",
        fill = "Primary Fuel Type",
-       y = "Percentage of Total Generation (%)", x = NULL)
+       y = "Percentage of Total Generation (%)", x = NULL,
+caption = "Figure 1: Pie chart illustrating the percentage distribution of primary fuel types in North Carolina based on total annual generation.")
 print(pie_chart_percentage)
 
 #Relationship between income and fuel type
@@ -163,7 +169,8 @@ scatter_income_generation <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = P
   labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
        x = "Median Household Income ($)",
        y = "Total Plant Annual Generation (MWh)",
-       color = "Fuel Type")
+       color = "Fuel Type",
+caption = "Figure 2: Scatter plot depicting the relationship between median household income and total annual generation, with points colored by fuel type. Due to the nature of nuclear power plants generating far more energy, the plot fails to display any clear relationship, leading to necessary adjustments.")
 print(scatter_income_generation)
 
 #Scatter ex-nuclear
@@ -173,7 +180,8 @@ scatter_income_generation_ex_nuc <- ggplot(subset(processed_data, PLFUELCT != "N
   labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
        x = "Median Household Income ($)",
        y = "Total Plant Annual Generation (MWh)",
-       color = "Fuel Type")
+       color = "Fuel Type",
+caption = "Figure 3: Considering nuclear's idiosyncratic properties, the scatter plot depicting the relationship between median household income and total annual generation was regenerated and reflects a potential trend, particularly at the $70,000 median income mark.")
 print(scatter_income_generation_ex_nuc)
 
 selected_fuel_data <- subset(processed_data, PLFUELCT %in% c("COAL", "SOLAR", "OIL", "WIND", "GAS"))
@@ -185,21 +193,8 @@ scatter_income_generation_selected <- ggplot(selected_fuel_data,
   labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
        x = "Median Household Income ($)",
        y = "Total Plant Annual Generation (MWh)",
-       color = "Fuel Type")
-print(scatter_income_generation_selected)
-
-
-
-selected_fuel_data <- subset(processed_data, PLFUELCT %in% c("COAL", "SOLAR", "OIL", "WIND", "GAS"))
-
-# Scatter plot for selected fuel types
-scatter_income_generation_selected <- ggplot(selected_fuel_data, 
-                                              aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
-  geom_point() +
-  labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
-       x = "Median Household Income ($)",
-       y = "Total Plant Annual Generation (MWh)",
-       color = "Fuel Type")
+       color = "Fuel Type",
+caption = "Figure 4: To narrow our exploration further, we selected key energy sources: coal, gas, oil, wind, and solar.")
 print(scatter_income_generation_selected)
 
 
@@ -211,7 +206,8 @@ stacked_barplot_total_generation <- ggplot(processed_data, aes(x = CNTYNAME, y =
        y = "Total Plant Annual Generation (MWh)",
        fill = "Fuel Type") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+caption = "Figure 5: Stacked bar plot illustrating the total annual generation by fuel type and county in North Carolina. Given the number of counties in NC, this visualization did not prove fruitful in depicting any further analysis.")
 print(stacked_barplot_total_generation) 
 
 #Visualization of all counties is very messy --- split by top 10/bottom 10 income
@@ -234,7 +230,8 @@ stacked_barplot_top_income_counties <- ggplot(filtered_data_income, aes(x = CNTY
        x = "County",
        y = "Total Plant Annual Generation (MWh)",
        fill = "Fuel Type") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+caption = "Figure 6: To explore the total annual generation by fuel type and county in a more digestable manner, we first show the top 10 counties (by median income) in North Carolina.")
 print(stacked_barplot_top_income_counties)
 
 
@@ -256,11 +253,14 @@ stacked_barplot_bottom_income_counties <- ggplot(filtered_data_bottom_income, ae
        x = "County",
        y = "Total Plant Annual Generation (MWh)",
        fill = "Fuel Type") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+caption = "Figure 7: To get a balanced view of the total annual generation by fuel type and county in a more digestable manner, we then show the bottom 10 counties (by median income) in North Carolina.")
 print(stacked_barplot_bottom_income_counties)
 
-
 ```
+
+
+
 ```{r - Anlaysis}
 
 ########### DATA ANALYSIS - INCOME AND FUEL TYPE ###########
@@ -269,7 +269,7 @@ print(stacked_barplot_bottom_income_counties)
 coal_data <- subset(processed_data, PLFUELCT == "COAL")
 linear_model_coal <- lm(PLNGENAN ~ MEDHHINC_2021, data = coal_data)
 summary(linear_model_coal)
-#The estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. However, the coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. Additionally, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income.
+#The estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. However, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income.
 
 #Visualize relationship
 scatter_coal <- ggplot(coal_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
