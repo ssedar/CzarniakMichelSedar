@@ -164,13 +164,12 @@ print(fuel_summarized)
 fuel_summarized$percentage <- fuel_summarized$total_generation / sum(fuel_summarized$total_generation) * 100
 
 #Pie chart with percent makeup of fuel in  NC
-pie_chart_percentage <- ggplot(fuel_summarized, aes(x = factor(1), fill = PLFUELCT, y = percentage)) +
-  geom_bar(width = 1, stat = "identity") +
-  coord_polar(theta = "y") +
+pie_chart_percentage <- ggplot(fuel_summarized, aes(x = factor(1), fill = PLFUELCT, y = percentage)) + 
   labs(title = "North Carolina Primary Fuel (% of Total Annual Generation)",
        fill = "Primary Fuel Type",
-       y = "Percentage of Total Generation (%)", x = NULL,
-caption = "Figure 1: Pie chart illustrating the percentage distribution of primary fuel types in North Carolina based on total annual generation.")
+       y = "Percentage of Total Generation (%)", x = NULL, caption = "Figure 1: Pie chart illustrating the percentage distribution of primary fuel types in North Carolina based on total annual generation.") +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y")
 print(pie_chart_percentage)
 
 #Relationship between income and fuel type
@@ -183,7 +182,7 @@ scatter_income_generation <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = P
        x = "Median Household Income ($)",
        y = "Total Plant Annual Generation (MWh)",
        color = "Fuel Type",
-caption = "Figure 2: Scatter plot depicting the relationship between median household income and total annual generation, with points colored by fuel type. Due to the nature of nuclear power plants generating far more energy, the plot fails to display any clear relationship, leading to necessary adjustments.")
+       caption = "Figure 2: Scatter plot depicting the relationship between median household income and total annual generation, with points colored by fuel type. Due to the nature of nuclear power plants generating far more energy, the plot fails to display any clear relationship, leading to necessary adjustments.")
 print(scatter_income_generation)
 
 #Scatter ex-nuclear
@@ -217,10 +216,10 @@ stacked_barplot_total_generation <- ggplot(processed_data, aes(x = CNTYNAME, y =
   labs(title = "Total Annual Generation by Fuel Type and County",
        x = "County",
        y = "Total Plant Annual Generation (MWh)",
-       fill = "Fuel Type") +
+       fill = "Fuel Type",
+caption = "Figure 5: Stacked bar plot illustrating the total annual generation by fuel type and county in North Carolina. Given the number of counties in NC, this visualization did not prove fruitful in depicting any further analysis.") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-caption = "Figure 5: Stacked bar plot illustrating the total annual generation by fuel type and county in North Carolina. Given the number of counties in NC, this visualization did not prove fruitful in depicting any further analysis.")
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(stacked_barplot_total_generation) 
 
 #Visualization of all counties is very messy --- split by top 10/bottom 10 income
@@ -242,9 +241,9 @@ stacked_barplot_top_income_counties <- ggplot(filtered_data_income, aes(x = CNTY
   labs(title = "Total Annual Generation by Fuel Type and County (Top 10 by Median Income)",
        x = "County",
        y = "Total Plant Annual Generation (MWh)",
-       fill = "Fuel Type") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-caption = "Figure 6: To explore the total annual generation by fuel type and county in a more digestable manner, we first show the top 10 counties (by median income) in North Carolina.")
+       fill = "Fuel Type",
+caption = "Figure 6: To explore the total annual generation by fuel type and county in a more digestable manner, we first show the top 10 counties (by median income) in North Carolina.") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(stacked_barplot_top_income_counties)
 
 
@@ -265,14 +264,14 @@ stacked_barplot_bottom_income_counties <- ggplot(filtered_data_bottom_income, ae
   labs(title = "Total Annual Generation by Fuel Type and County (Bottom 10 by Median Income)",
        x = "County",
        y = "Total Plant Annual Generation (MWh)",
-       fill = "Fuel Type") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-caption = "Figure 7: To get a balanced view of the total annual generation by fuel type and county in a more digestable manner, we then show the bottom 10 counties (by median income) in North Carolina.")
+       fill = "Fuel Type",
+caption = "Figure 7: To get a balanced view of the total annual generation by fuel type and county in a more digestable manner, we then show the bottom 10 counties (by median income) in North Carolina.") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(stacked_barplot_bottom_income_counties)
 
 ```
 
-*We then created initial maps to better understand the landscape of North Carolina in terms of socioeconomic status and geographic distribution of power plants.Figure 8 below shows the mapping of power plants across the state and helped us to visualize the concentration of power plants across the state.Figure 9 maps the nameplate capacity of those power plants by county. We noticed that multiple counties, especially Richmond county, stood out as having a high concentration of capacity. Figure 10 demonstrates a heat map of the percentage of each county's population living in poverty as of 2021. Richmond county is once again a clear visual outlier on this map.
+*We then created initial maps to better understand the landscape of North Carolina in terms of socioeconomic status and geographic distribution of power plants. Figure 8 below shows the mapping of power plants across the state and helped us to visualize the concentration of power plants across the state.Figure 9 maps the nameplate capacity of those power plants by county. We noticed that multiple counties, especially Richmond county, stood out as having a high concentration of capacity. Figure 10 demonstrates a heat map of the percentage of each county's population living in poverty as of 2021. Richmond county is once again a clear visual outlier on this map.
 
 ```{r Initial Maps}
 #Load in counties spatial data
@@ -321,6 +320,118 @@ income_NC_sf_join <-  merge(x = counties_sf,
 income_heat_map <-ggplot(data=income_NC_sf_join)+
   geom_sf(aes(fill=PCTPOV017_2021))+labs(title= "% of County in Poverty - 2021", fill="%", caption="Figure 10: Percent of total county population living in poverty in 2021, as defined by the USDA Economic Research Service")
 print (income_heat_map)
+```
+
+Our final stage of exploratory analysis was to visualize the power plant emissions geographically. Figures 11-15 demonstrate the aggregated power plant emissions per county in 2021 for CO2, NOx, SO2, N20, and CH4 respectively. Unfortunately eGrid did not provide data for Mercury (Hg) in 2021 so that was not analyzed. N20 and CH4 are provided in lbs while CO2, NOx, and SO2 are in short tons. For CO2 emissions, Richmond county stood out. For NOx emissions, Catawba county stood out. For SO2 emissions, Catawba, Haywood, and Person counties stood out.For N20 and CH4 emissions, Catawba and Person counties stood out.
+
+
+```{r Power Plant Emissions Heat Maps}
+
+#Heat map of CO2 emissions by county
+#Compute sum of CO2 Emissions by county
+CO2_emissions <-plant_gen_data %>%
+  drop_na(PLCO2AN)%>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_CO2 = sum(PLCO2AN))
+
+#Join the eGrid attributes to the county spatial features
+CO2_counties_sf_join <-  merge(x = counties_sf,
+                           y = CO2_emissions, 
+                           by.x = 'NAME', 
+                           by.y = 'CNTYNAME')
+
+#Map CO2 emissions by county
+CO2_map <-ggplot(data=CO2_counties_sf_join)+geom_sf(data=counties_sf)+
+  geom_sf(aes(fill=Sum_CO2))+
+  labs(title="2021 CO2 Emissions",
+       fill="CO2 Emissions (tn)",caption="Figure 11: Total CO2 Emissions in 2021 across North Carolina Power Plants")
+print(CO2_map)
+
+#Heat map of NOx emissions by county
+#Compute sum of NOx Emissions by county
+NOx_emissions <-plant_gen_data %>%
+  drop_na(PLNOXAN)%>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_NOx = sum(PLNOXAN))
+
+#Join the eGrid attributes to the county spatial features
+NOx_counties_sf_join <-  merge(x = counties_sf,
+                           y = NOx_emissions, 
+                           by.x = 'NAME', 
+                           by.y = 'CNTYNAME')
+
+#Map NOx emissions by county
+NOx_map <-ggplot(data= NOx_counties_sf_join)+
+  geom_sf(data=counties_sf)+
+  geom_sf(aes(fill=Sum_NOx))+
+  labs(title="2021 NOx Emissions",
+       fill=" NOx Emissions (tn)",caption="Figure 12: Total NOx Emissions in 2021 across North Carolina Power Plants")
+print(NOx_map)
+
+#Heat map of SO2 emissions by county
+#Compute sum of SO2 Emissions by county
+SO2_emissions <-plant_gen_data %>%
+  drop_na(PLSO2AN)%>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_SO2 = sum(PLSO2AN))
+
+#Join the eGrid attributes to the county spatial features
+SO2_counties_sf_join <-  merge(x = counties_sf,
+                           y = SO2_emissions, 
+                           by.x = 'NAME', 
+                           by.y = 'CNTYNAME')
+
+#Map SO2 emissions by county
+SO2_map <-ggplot(data=SO2_counties_sf_join)+
+  geom_sf(data=counties_sf)+
+  geom_sf(aes(fill=Sum_SO2))+
+  labs(title="2021 SO2 Emissions",
+       fill="SO2 Emissions (tn)",caption="Figure 13: Total SO2 Emissions in 2021 across North Carolina Power Plants")
+print(SO2_map)
+
+#Heat map of N2O emissions by county
+#Compute sum of N2O Emissions by county
+N2O_emissions <-plant_gen_data %>%
+  drop_na(PLN2OAN)%>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_N2O = sum(PLN2OAN))
+
+#Join the eGrid attributes to the county spatial features
+N2O_counties_sf_join <- merge(x = counties_sf,
+                           y = N2O_emissions, 
+                           by.x = 'NAME', 
+                           by.y = 'CNTYNAME')
+
+#Map N2O emissions by county
+N2O_map <-ggplot(data= N2O_counties_sf_join)+
+  geom_sf(data=counties_sf)+
+  geom_sf(aes(fill=Sum_N2O))+
+  labs(title="2021 N2O Emissions",
+       fill=" N2O Emissions (lbs)",caption="Figure 14: Total N20 Emissions in 2021 across North Carolina Power Plants")
+print(N2O_map)
+
+
+#Heat map of CH4 emissions by county
+#Compute sum of CH4 Emissions by county
+CH4_emissions <-plant_gen_data %>%
+  drop_na(PLCH4AN)%>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_CH4 = sum(PLCH4AN))
+
+#Join the eGrid attributes to the county spatial features
+CH4_counties_sf_join <- merge(x = counties_sf,
+                           y = CH4_emissions, 
+                           by.x = 'NAME', 
+                           by.y = 'CNTYNAME')
+
+#Map CH4 emissions by county
+CH4_map <-ggplot(data= CH4_counties_sf_join)+
+  geom_sf(data=counties_sf)+
+  geom_sf(aes(fill=Sum_CH4))+
+  labs(title="2021 CH4 Emissions",
+       fill="CH4 Emissions (lbs)",caption="Figure 15: Total CH4 Emissions in 2021 across North Carolina Power Plants")
+print(CH4_map)
+
 ```
 
 
@@ -471,7 +582,7 @@ high_income_subset <- processed_data[processed_data$MEDHHINC_2021 >= medium_thre
 ts_low_income <- ts(low_income_subset$Unemployment_rate_2000:low_income_subset$Unemployment_rate_2022, start = min(low_income_subset$YEAR), end = max(low_income_subset$YEAR))
 ```
 
-#Question 1: Is there a relationship between socioeconomic status and the number or size of power plants at the county level?
+#Question 1: Are there more/larger power plants in counties with lower average socioeconomic status?
 *[Description here]*
 ```{r Income and Fuel Category}
 
@@ -587,112 +698,6 @@ tract_generation_SVI_plot <- ggplot(Generation_SVI,
 "Total Power Plant Generation and SVI by county",caption="The chart above shows the relationship between the Social Vulnerability Index (SVI) and 2021 annual generation across all power plants in a county.")
 print(tract_generation_SVI_plot) 
 
-
-```
-
-
-```{r Heat Maps}
-
-#Heat map of CO2 emissions by county
-#Compute sum of CO2 Emissions by county
-CO2_emissions <-plant_gen_data %>%
-  drop_na(PLCO2AN)%>%
-  group_by(CNTYNAME)%>%
-  summarize(Sum_CO2 = sum(PLCO2AN))
-
-#Join the eGrid attributes to the county spatial features
-CO2_counties_sf_join <-  merge(x = counties_sf,
-                           y = CO2_emissions, 
-                           by.x = 'NAME', 
-                           by.y = 'CNTYNAME')
-
-#Map CO2 emissions by county
-CO2_map <-ggplot(data=CO2_counties_sf_join)+
-  geom_sf(aes(fill=Sum_CO2))+
-  labs(title="2021 CO2 Emissions",
-       fill="CO2 Emissions (tn)")
-CO2_map
-
-#Heat map of NOx emissions by county
-#Compute sum of NOx Emissions by county
-NOx_emissions <-plant_gen_data %>%
-  drop_na(PLNOXAN)%>%
-  group_by(CNTYNAME)%>%
-  summarize(Sum_NOx = sum(PLNOXAN))
-
-#Join the eGrid attributes to the county spatial features
-NOx_counties_sf_join <-  merge(x = counties_sf,
-                           y = NOx_emissions, 
-                           by.x = 'NAME', 
-                           by.y = 'CNTYNAME')
-
-#Map NOx emissions by county
-NOx_map <-ggplot(data= NOx_counties_sf_join)+
-  geom_sf(aes(fill=Sum_NOx))+
-  labs(title="2021 NOx Emissions",
-       fill=" NOx Emissions (tn)")
-NOx_map
-
-#Heat map of SO2 emissions by county
-#Compute sum of SO2 Emissions by county
-SO2_emissions <-plant_gen_data %>%
-  drop_na(PLSO2AN)%>%
-  group_by(CNTYNAME)%>%
-  summarize(Sum_SO2 = sum(PLSO2AN))
-
-#Join the eGrid attributes to the county spatial features
-SO2_counties_sf_join <-  merge(x = counties_sf,
-                           y = SO2_emissions, 
-                           by.x = 'NAME', 
-                           by.y = 'CNTYNAME')
-
-#Map SO2 emissions by county
-SO2_map <-ggplot(data=SO2_counties_sf_join)+
-  geom_sf(aes(fill=Sum_SO2))+
-  labs(title="2021 SO2 Emissions",
-       fill="SO2 Emissions (tn)")
-SO2_map
-
-#Heat map of N2O emissions by county
-#Compute sum of N2O Emissions by county
-N2O_emissions <-plant_gen_data %>%
-  drop_na(PLN2OAN)%>%
-  group_by(CNTYNAME)%>%
-  summarize(Sum_N2O = sum(PLN2OAN))
-
-#Join the eGrid attributes to the county spatial features
-N2O_counties_sf_join <- merge(x = counties_sf,
-                           y = N2O_emissions, 
-                           by.x = 'NAME', 
-                           by.y = 'CNTYNAME')
-
-#Map N2O emissions by county
-N2O_map <-ggplot(data= N2O_counties_sf_join)+
-  geom_sf(aes(fill=Sum_N2O))+
-  labs(title="2021 N2O Emissions",
-       fill=" N2O Emissions (lbs)")
-N2O_map
-
-
-#Heat map of CH4 emissions by county
-#Compute sum of CH4 Emissions by county
-CH4_emissions <-plant_gen_data %>%
-  drop_na(PLCH4AN)%>%
-  group_by(CNTYNAME)%>%
-  summarize(Sum_CH4 = sum(PLCH4AN))
-
-#Join the eGrid attributes to the county spatial features
-CH4_counties_sf_join <- merge(x = counties_sf,
-                           y = CH4_emissions, 
-                           by.x = 'NAME', 
-                           by.y = 'CNTYNAME')
-
-#Map CH4 emissions by county
-CH4_map <-ggplot(data= CH4_counties_sf_join)+
-  geom_sf(aes(fill=Sum_CH4))+
-  labs(title="2021 CH4 Emissions",
-       fill="CH4 Emissions (lbs)")
-CH4_map
 
 ```
 
