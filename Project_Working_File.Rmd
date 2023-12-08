@@ -57,7 +57,7 @@ income <- read.csv(here('Data/Raw/PovertyEstimates.csv'),
 unemployment <- read.csv(here('Data/Raw/Unemployment.csv'), 
                   stringsAsFactors = TRUE, skip = 4)
 
-SVI_county <-read.csv(here('Data/Raw/SVI_NorthCarolina_county.csv'),
+SVI_county_raw <-read.csv(here('Data/Raw/SVI_NorthCarolina_county.csv'),
                   stringsAsFactors = TRUE)
 
 EBM_countytract <-read.csv(here('Data/Raw/EBM_NorthCarolina.csv'),
@@ -106,6 +106,8 @@ plant_gen$GENNTAN <- as.numeric(plant_gen$GENNTAN)
 #Removing duplicate state abbreviation column
 plant_gen_data <- plant_gen[, -which(names(plant_gen) == "PSTATABB_plant")]
 
+#Exporting to CSV:
+write.csv(plant_gen_data,'Data/Processed/PLNT_GEN21.csv', row.names=FALSE)
 
 #UNEMPLOYMENT DATA
 
@@ -114,8 +116,14 @@ plant_gen_data <- plant_gen[, -which(names(plant_gen) == "PSTATABB_plant")]
 ue <- unemployment %>%
   select(FIPS_Code,	Unemployment_rate_2000,	Unemployment_rate_2001,	Unemployment_rate_2002,	Unemployment_rate_2003,	Unemployment_rate_2004,	Unemployment_rate_2005,	Unemployment_rate_2006,	Unemployment_rate_2007,	Unemployment_rate_2008,	Unemployment_rate_2009,	Unemployment_rate_2010,	Unemployment_rate_2011,	Unemployment_rate_2012,	Unemployment_rate_2013,	Unemployment_rate_2014,	Unemployment_rate_2015,	Unemployment_rate_2016,	Unemployment_rate_2017,	Unemployment_rate_2018,	Unemployment_rate_2019,	Unemployment_rate_2020,	Unemployment_rate_2021,	Unemployment_rate_2022)
 
+#Exporting to CSV:
+write.csv(ue,'Data/Processed/Unemployment2000_2022.csv', row.names=FALSE)
+
 #Merging with eGrid
 ue_egrid <- merge(plant_gen_data, ue, by = "FIPS_Code")
+
+#Exporting to CSV:
+write.csv(ue_egrid,'Data/Processed/Unemployment2000_2022_eGrid21.csv', row.names=FALSE)
 
 
 #INCOME DATA
@@ -124,16 +132,21 @@ ue_egrid <- merge(plant_gen_data, ue, by = "FIPS_Code")
 inc <- income %>%
   select(FIPS_Code, PCTPOVALL_2021, MEDHHINC_2021)
 
+#Exporting to CSV:
+write.csv(inc,'Data/Processed/Income2021.csv', row.names=FALSE)
+
 #Merging
 processed_data <- merge(ue_egrid, inc, by = "FIPS_Code")
 
 colnames(processed_data)
 
+#Exporting to CSV:
+write.csv(processed_data,'Data/Processed/Income_Unemployment_eGrid.csv', row.names=FALSE)
 
 ```
 
 #Exploratory Analysis
-*We then began data exploration and visualization for the processed_data dataframe, focusing on fuel types, income, and electricity generation in North Carolina. The summary(processed_data) provides a general overview of the dataset. The code then generates a pie chart to illustrate the percentage makeup of primary fuel types in North Carolina based on total annual generation. Subsequently, scatter plots depict the relationship between median household income and total plant annual generation, with points colored by fuel type. The analysis further drills down to scatter plots excluding nuclear data and for a selected set of fuel types (COAL, SOLAR, OIL, WIND, GAS). Additionally, stacked bar plots visualize the total annual generation by fuel type and county, and for better clarity, separate plots are created for the top 10 and bottom 10 counties based on median household income. These visualizations help explore and understand the relationships between fuel types, income levels, and electricity generation in different counties of North Carolina.
+*We then began data exploration and visualization for the processed_data dataframe, focusing on fuel types, income, and electricity generation in North Carolina. The summary(processed_data) provides a general overview of the dataset. Figure 1 illustrates the percentage makeup of primary fuel types in North Carolina based on total annual generation - the majority of which is natural gas. Subsequently, the scatter plot in figures 2 depicts the relationship between median household income and total plant annual generation, with points colored by fuel type. The analysis further drills down to scatter plots in figures 3 and 4 excluding nuclear data and for a selected set of fuel types (COAL, SOLAR, OIL, WIND, GAS). Additionally, stacked bar plots in figures 5, 6, and 7 visualize the total annual generation by fuel type and county, and for better clarity, separate plots are created for the top 10 and bottom 10 counties based on median household income. These visualizations help explore and understand the relationships between fuel types, income levels, and electricity generation in different counties of North Carolina.
 
 ```{r - Exploration}
 
@@ -259,6 +272,56 @@ print(stacked_barplot_bottom_income_counties)
 
 ```
 
+*We then created initial maps to better understand the landscape of North Carolina in terms of socioeconomic status and geographic distribution of power plants.Figure 8 below shows the mapping of power plants across the state and helped us to visualize the concentration of power plants across the state.Figure 9 maps the nameplate capacity of those power plants by county. We noticed that multiple counties, especially Richmond county, stood out as having a high concentration of capacity. Figure 10 demonstrates a heat map of the percentage of each county's population living in poverty as of 2021. Richmond county is once again a clear visual outlier on this map.
+
+```{r Initial Maps}
+#Load in counties spatial data
+counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>% 
+  filter(STATEFP==37)
+
+#Convert eGrid tabular data to spatial data
+plant_gen_sf <-plant_gen_data %>% st_as_sf(coords = c('LON','LAT'), crs=4269)
+
+#Create initial map of power plants
+gens_counties_map <-ggplot()+
+  geom_sf(data=counties_sf)+
+  geom_sf(data=plant_gen_sf,size=0.8)+
+  labs(title = "Locations of NC Power Plants",caption="Figure 8:Black dots on this map represent the locations of power plants across North Carolina.")
+
+print(gens_counties_map)
+
+#Compute sum of nameplate capacity by county
+nameplate_capacity <-plant_gen_data %>%
+  group_by(CNTYNAME)%>%
+  summarize(Sum_NAMEPCAP = sum(NAMEPCAP_plant))
+
+#Join the eGrid attributes to the county spatial features
+counties_sf_join <-  merge(x = counties_sf,
+                           y = plant_gen_data, 
+                           by.x = 'NAME', 
+                           by.y = 'CNTYNAME' )
+
+#Map total generator capacity by county
+gen_cap_map <-ggplot(data=counties_sf_join)+
+  geom_sf(aes(fill=NAMEPCAP_plant))+labs(title="Capacity by County",fill="Capacity (MW)",caption="Figure 9: This map shows the total nameplate capacity in Megawatts of each county in North Carolina. Multiple counties have no power plants and are blank. Richmond County is an interesting outlier which the highest capacity of all the counties.")
+gen_cap_map
+
+## Heat map of Income Data by County ##
+#Create data frame of NC income data
+income_NC <-income %>% 
+  filter(Stabr=='NC')
+
+#Join the income attributes to the county spatial features
+income_NC_sf_join <-  merge(x = counties_sf,
+                           y = income_NC, 
+                           by.x = 'GEOID', 
+                           by.y = 'FIPS_Code')
+
+#Map pct in poverty by county
+income_heat_map <-ggplot(data=income_NC_sf_join)+
+  geom_sf(aes(fill=PCTPOV017_2021))+labs(title= "% of County in Poverty - 2021", fill="%", caption="Figure 10: Percent of total county population living in poverty in 2021, as defined by the USDA Economic Research Service")
+print (income_heat_map)
+```
 
 
 ```{r - Anlaysis}
@@ -294,44 +357,6 @@ scatter_solar <- ggplot(solar_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
        x = "Median Household Income ($)",
        y = "Solar Generation (MWh)")
 print(scatter_solar)
-```
-
-```{r}
-#Load in counties spatial data
-counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>% 
-  filter(STATEFP==37)
-
-#Convert eGrid tabular data to spatial data
-plant_gen_sf <-plant_gen_data %>% st_as_sf(coords = c('LON','LAT'), crs=4269)
-
-```
-
-
-```{r}
-#Create initial map of power plants
-gens_counties_map <-ggplot()+
-  geom_sf(data=counties_sf)+
-  geom_sf(data=plant_gen_sf,size=0.8)+
-  labs(title = "Locations of NC Power Plants")
-
-gens_counties_map
-
-#Compute sum of nameplate capacity by county
-nameplate_capacity <-plant_gen_data %>%
-  group_by(CNTYNAME)%>%
-  summarize(Sum_NAMEPCAP = sum(NAMEPCAP_plant))
-
-#Join the eGrid attributes to the county spatial features
-counties_sf_join <-  merge(x = counties_sf,
-                           y = plant_gen_data, 
-                           by.x = 'NAME', 
-                           by.y = 'CNTYNAME' )
-
-#Map total generator capacity by county
-gen_cap_map <-ggplot(data=counties_sf_join)+
-  geom_sf(aes(fill=NAMEPCAP_plant))+labs(title="Capacity by County",fill="Capacity (MW)")
-gen_cap_map
-
 ```
 
 
@@ -533,6 +558,14 @@ Total_Generation_County <-plant_gen_data %>%
   group_by(CNTYNAME)%>%
   summarize(Total_Generation = sum(PLNGENAN))
 
+#Wrangle SVI DATA
+
+#Selecting columns of interest:
+SVI_county<-SVI_county_raw %>% select(ST_ABBR, STCNTY,COUNTY,FIPS, LOCATION, RPL_THEMES, RPL_THEME1, RPL_THEME2, RPL_THEME3, RPL_THEME4)
+
+#Exporting to CSV:
+write.csv(SVI_county,'Data/Processed/SVI_County_Processed.csv', row.names=FALSE)
+
 #Merge SVI and total generation by county data
 Generation_SVI <-merge(x = Total_Generation_County,
                            y = SVI_county, 
@@ -559,21 +592,6 @@ print(tract_generation_SVI_plot)
 
 
 ```{r Heat Maps}
-## Heat map of Income Data by County ##
-#Create data frame of NC income data
-income_NC <-income %>% 
-  filter(Stabr=='NC')
-
-#Join the income attributes to the county spatial features
-income_NC_sf_join <-  merge(x = counties_sf,
-                           y = income_NC, 
-                           by.x = 'GEOID', 
-                           by.y = 'FIPS_Code')
-
-#Map pct in poverty by county
-income_heat_map <-ggplot(data=income_NC_sf_join)+
-  geom_sf(aes(fill=PCTPOV017_2021))+labs(title= "% of County in Poverty - 2021", fill="%")
-income_heat_map
 
 #Heat map of CO2 emissions by county
 #Compute sum of CO2 Emissions by county
