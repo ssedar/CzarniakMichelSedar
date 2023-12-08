@@ -32,6 +32,16 @@ knitr::opts_chunk$set (warning = FALSE, echo = FALSE)
 getwd()
 ```
 
+#Data Set Information
+Data used in this analysis comes from a variety of sources. A brief overview of each source is outlined below and full citations can be found in the ReadMe file. More information on the metadata for each source can be found in the 'Metadata' folder.
+
+*eGRID - 2020 and 2021 data from the U.S. EPA on all power plants in the U.S. Data includes information on plant locations, production, retirements,and emissions.The 2020 data set was only utilized for historical retirement data as that was removed from the 2021 data set.
+
+*Income - 2021 data from the USDA on percentage of people in each US county living in poverty. 
+
+*Unemployment - 2000-2022 data from the USDA on unemployment rates in each US county.
+
+*Social Vulnerability Index - 2020 data from the US CDC on key vulnerability criteria including socioeconomic status, household characteristics, racial & ethnic minority status, and house type & transportation.
 
 ```{r Data Load}
 
