@@ -4,10 +4,10 @@ author: "Gaby Czarniak, Mara Michel, Sam Sedar"
 date: "2023-11-14"
 output: html_document
 ---
-#Research Rationale
-The impetus behind this research lies in the imperative to address the intricate interplay between socioeconomic factors and the power plants. As the global energy landscape undergoes a transformative shift towards sustainability, it becomes paramount to understand how these changes might impact communities, particularly those situated in lower-income communities. The socio-spatial lens through which this study is conducted aims to unearth patterns of power plant distribution across North Carolina. The overarching question is whether certain communities bear a disproportionate burden of environmentally impactful energy sources, framing the discourse within the realms of environmental justice and equity.
+# Research Rationale
+### The impetus behind this research lies in the imperative to address the intricate interplay between socioeconomic factors and the power plants. As the global energy landscape undergoes a transformative shift towards sustainability, it becomes paramount to understand how these changes might impact communities, particularly those situated in lower-income communities. The socio-spatial lens through which this study is conducted aims to unearth patterns of power plant distribution across North Carolina. The overarching question is whether certain communities bear a disproportionate burden of environmentally impactful energy sources, framing the discourse within the realms of environmental justice and equity.
 
-As a key aspect of this exploration, the research considers various socioeconomic indicators, including but not limited to unemployment rates. This is motivated by a concern and eye for environmental justice, as power plants have often served as major employers in low income areas. This research extends its focus beyond energy sources to examine the broader impacts of power plants on health, social vulnerability, and scrutinizes disparities in pollution exposure and associated health risks. Through a comprehensive exploration, encompassing various socioeconomic indicators, this research contributes to a nuanced understanding of the multifaceted impacts of power plants.
+### As a key aspect of this exploration, the research considers various socioeconomic indicators, including but not limited to unemployment rates. This is motivated by a concern and eye for environmental justice, as power plants have often served as major employers in low income areas. This research extends its focus beyond energy sources to examine the broader impacts of power plants on health, social vulnerability, and scrutinizes disparities in pollution exposure and associated health risks. Through a comprehensive exploration, encompassing various socioeconomic indicators, this research contributes to a nuanced understanding of the multifaceted impacts of power plants.
 
 
 ```{r setup, include=FALSE}
@@ -69,8 +69,8 @@ SVI_2018_tract <-read.csv(here('Data/Raw/SVI2018_NorthCarolina.csv'),
                   stringsAsFactors = TRUE)
 ```
 
-#Data Wrangling
-The intial step in our research, once loaded, was data wrangling on the three distinct datasets: eGRID, unemployment, and income data. For the eGRID dataset, the code selects specific columns related to power plant information in North Carolina, converts certain columns to numeric format, and then combines the generator and plant data based on a common identifier. Duplicate columns are removed, resulting in the plant_gen_data dataframe. The code then proceeds to handle the unemployment dataset, selecting relevant columns covering the years 2002-2022 and merging it with the plant_gen_data dataframe using the FIPS code as a key. Similarly, the income dataset is processed by selecting specific columns, and the final step involves merging this income data with the previously created dataframe. The resulting dataset, named processed_data, contains information on power plants, unemployment rates, and income data, and the column names are displayed at the end of the code.
+# Data Wrangling
+### The intial step in our research, once loaded, was data wrangling on the three distinct datasets: eGRID, unemployment, and income data. For the eGRID dataset, the code selects specific columns related to power plant information in North Carolina, converts certain columns to numeric format, and then combines the generator and plant data based on a common identifier. Duplicate columns are removed, resulting in the plant_gen_data dataframe. The code then proceeds to handle the unemployment dataset, selecting relevant columns covering the years 2002-2022 and merging it with the plant_gen_data dataframe using the FIPS code as a key. Similarly, the income dataset is processed by selecting specific columns, and the final step involves merging this income data with the previously created dataframe. The resulting dataset, named processed_data, contains information on power plants, unemployment rates, and income data, and the column names are displayed at the end of the code.
 
 
 ```{r, echo=FALSE, warning=FALSE, error=FALSE}
@@ -131,14 +131,12 @@ processed_data <- merge(ue_egrid, inc, by = "FIPS_Code")
 
 ```
 
-#Exploratory Analysis
-*We then began data exploration and visualization for the processed_data dataframe, focusing on fuel types, income, and electricity generation in North Carolina. The summary(processed_data) provides a general overview of the dataset. The code then generates a pie chart to illustrate the percentage makeup of primary fuel types in North Carolina based on total annual generation. Subsequently, scatter plots depict the relationship between median household income and total plant annual generation, with points colored by fuel type. The analysis further drills down to scatter plots excluding nuclear data and for a selected set of fuel types (COAL, SOLAR, OIL, WIND, GAS). Additionally, stacked bar plots visualize the total annual generation by fuel type and county, and for better clarity, separate plots are created for the top 10 and bottom 10 counties based on median household income. These visualizations help explore and understand the relationships between fuel types, income levels, and electricity generation in different counties of North Carolina.
+# Exploratory Analysis
+### This analysis then initiates data exploration and visualization for the processed_data dataframe, focusing on fuel types, income, and electricity generation in North Carolina. The summary(processed_data) provides a general overview of the dataset. The code then generates a pie chart to illustrate the percentage makeup of primary fuel types in North Carolina based on total annual generation. Subsequently, scatter plots depict the relationship between median household income and total plant annual generation, with points colored by fuel type. The analysis further drills down to scatter plots excluding nuclear data and for a selected set of fuel types (COAL, SOLAR, OIL, WIND, GAS). Additionally, stacked bar plots visualize the total annual generation by fuel type and county, and for better clarity, separate plots are created for the top 10 and bottom 10 counties based on median household income. These visualizations help explore and understand the relationships between fuel types, income levels, and electricity generation in different counties of North Carolina.
 
 ```{r, Exploration, echo=FALSE, warning=FALSE, error=FALSE}
 
 ########### DATA EXPLORATION - FUEL TYPES ###########
-
-summary(processed_data)
 
 #NC Breakdown of Fuel by Category
 fuel_summarized <- processed_data %>%
@@ -157,24 +155,32 @@ pie_chart_percentage <- ggplot(fuel_summarized, aes(x = "", fill = PLFUELCT, y =
     title = "North Carolina Primary Fuel (% of Total Annual Generation)",
     fill = "Primary Fuel Type",
     y = "Percentage of Total Generation (%)",
-    x = NULL,
-    caption = "Figure 1: Pie chart illustrating the percentage distribution of primary fuel \n types in North Carolina based on total annual generation.")
+    x = NULL)
 print(pie_chart_percentage)
+```
+
+##### Figure 1: Pie chart illustrating the percentage distribution of primary fuel types in North Carolina based on total annual generation. 
 
 
+```{r, income_type, echo=FALSE, warning=FALSE, error=FALSE}
 #Relationship between income and fuel type
 processed_data$MEDHHINC_2021 <- as.numeric(processed_data$MEDHHINC_2021)
 
 #Scatter visualization
 scatter_income_generation <- ggplot(processed_data, aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
   geom_point() +
-  labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
+  labs(title = "Income and Annual Generation by Fuel Type",
        x = "Median Household Income ($)",
        y = "Total Plant Annual Generation (MWh)",
        color = "Fuel Type",
-caption = "Figure 2: Scatter plot depicting the relationship between median household income \n and total annual generation, with points colored by fuel type. Due to the nature of \n  nuclear power plants generating far more energy, the plot fails to display any \n clear relationship, leading to necessary adjustments.")
+caption = "")
 print(scatter_income_generation)
+```
 
+##### Figure 2: Scatter plot illustrating the correlation between median household income and total annual generation, color-coded by fuel type. Owing to the unique characteristics of nuclear power plants, operating at significantly higher capacity factors than other sources, the plot lacks a discernible relationship, prompting necessary adjustments. 
+
+
+```{r, ex_nuclear, echo=FALSE, warning=FALSE, error=FALSE}
 #Scatter ex-nuclear
 scatter_income_generation_ex_nuc <- ggplot(subset(processed_data, PLFUELCT != "NUCLEAR"), 
                                      aes(x = MEDHHINC_2021, y = PLNGENAN, color = PLFUELCT)) +
@@ -182,9 +188,14 @@ scatter_income_generation_ex_nuc <- ggplot(subset(processed_data, PLFUELCT != "N
   labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
        x = "Median Household Income ($)",
        y = "Total Plant Annual Generation (MWh)",
-       color = "Fuel Type",
-caption = "Figure 3: Considering nuclear's idiosyncratic properties, the scatter plot \n depicting the relationship between median household income and total annual generation was \n regenerated and reflects a potential trend, particularly at the $70,000 median income mark.")
+       color = "Fuel Type")
 print(scatter_income_generation_ex_nuc)
+
+```
+
+##### Figure 3: Exploring energy patterns, this scatter plot analyzes the connection between median household income and total annual generation, excluding nuclear energy. The updated chart reveals a potential trend, especially around the $70,000 median income mark, where data points for generation are sparse.
+
+```{r, select, echo=FALSE, warning=FALSE, error=FALSE}
 
 selected_fuel_data <- subset(processed_data, PLFUELCT %in% c("COAL", "SOLAR", "OIL", "WIND", "GAS"))
 
@@ -195,10 +206,14 @@ scatter_income_generation_selected <- ggplot(selected_fuel_data,
   labs(title = "Relationship Between Annual Generation, Fuel Type, and Income",
        x = "Median Household Income ($)",
        y = "Total Plant Annual Generation (MWh)",
-       color = "Fuel Type",
-caption = "Figure 4: To narrow our exploration further, we selected key energy sources: \n coal, gas, oil, wind, and solar.")
+       color = "Fuel Type")
 print(scatter_income_generation_selected)
 
+```
+
+##### Figure 4: To narrow our exploration further, we selected key energy sources: coal, gas, oil, wind, and solar.
+
+```{r, top10, echo=FALSE, warning=FALSE, error=FALSE}
 #Top 10 counties based on median household income
 top_income_counties <- processed_data %>%
   group_by(CNTYNAME) %>%
@@ -215,13 +230,15 @@ stacked_barplot_top_income_counties <- ggplot(filtered_data_income, aes(x = CNTY
   labs(title = "Total Annual Generation by Fuel Type and County (Top 10 by Median Income)",
        x = "County",
        y = "Total Plant Annual Generation (MWh)",
-       caption = "Figure 5: Stacked bar plot illustrating the total annual generation by fuel type in the \n top 10 counties in North Carolina by income.",
        fill = "Fuel Type") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-        
+print(stacked_barplot_top_income_counties)
+```
 
 
+##### Figure 5: Stacked bar plot illustrating the total annual generation by fuel type in the top 10 counties (by median income) in North Carolina by income.
 
+```{r, bottom10, echo=FALSE, warning=FALSE, error=FALSE}
 #Bottom 10 counties based on median household income
 bottom_income_counties <- processed_data %>%
   group_by(CNTYNAME) %>%
@@ -239,15 +256,16 @@ stacked_barplot_bottom_income_counties <- ggplot(filtered_data_bottom_income, ae
   labs(title = "Total Annual Generation by Fuel Type and County (Bottom 10 by Median Income)",
        x = "County",
        y = "Total Plant Annual Generation (MWh)",
-       caption = "Figure 6: To get a balanced view of the total annual generation by fuel type and county, \n we then show the bottom 10 counties (by median income) in North Carolina. This identified Richmond county as a county of interest.",
        fill = "Fuel Type") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(stacked_barplot_bottom_income_counties)
-
 ```
 
+##### Figure 6: To get a balanced view of the total annual generation by fuel type and county, we then show the bottom 10 counties (by median income) in North Carolina. This identified Richmond county as a county of interest.
+
+
 #Question 1: How does income impact power plant characteristics at the county level?
-*[Description here]*
+##### This analysis begins by examining the impact that income has on various power plant characteristics. This first analysis uses income as the highest-level socioeconomic indicator, as income often dictates an array of follow-on indicators. Several regresions are conducted including the impact of income on the fuel type (differentiating between clean and dirty sources), number of plants, and nameplate capacity. 
 
 ```{r, Income_and_Fuel, echo=FALSE, warning=FALSE, error=FALSE}
 
@@ -259,20 +277,21 @@ linear_model_coal <- lm(PLNGENAN ~ MEDHHINC_2021, data = coal_data)
 summary_table <- summary(linear_model_coal)$coef
 
 knitr::kable(summary(linear_model_coal)$coef, format = "html", caption = "Linear Regression Results - Coal")
-```
 
-#The estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. However, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income.
-
-```{r, coal_viz, echo=FALSE, warning=FALSE, error=FALSE}
 #Visualize relationship
 scatter_coal <- ggplot(coal_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = "Linear Regression for Coal Generation",
+  labs(title = "County Income and Coal Generation",
        x = "Median Household Income ($)",
-       y = "Coal Generation (MWh)",
-       caption = "A visualization of the trend.")
+       y = "Coal Generation (MWh)")
 print(scatter_coal)
+```
+
+##### The estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. However, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income.
+
+```{r, solar, echo=FALSE, warning=FALSE, error=FALSE}
+
 
 #Solar linear regression
 solar_data <- subset(processed_data, PLFUELCT == "SOLAR")
@@ -280,20 +299,21 @@ linear_model_solar <- lm(PLNGENAN ~ MEDHHINC_2021, data = solar_data)
 summary(linear_model_solar) 
 
 knitr::kable(summary(linear_model_solar)$coef, format = "html", caption = "Linear Regression Results - Solar")
-```
 
-## The linear regression suggests that there might be a relationship between income and generation. The statistically significant coefficient indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is relatively low (about 0.56%), and other factors not included in the model may contribute to the variability in generation for solar.
-
-```{r, viz_solar, echo=FALSE, warning=FALSE, error=FALSE}
 #Visualize relationship
 scatter_solar <- ggplot(solar_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = "Linear Regression for Solar Generation",
+  labs(title = "County Income and Solar Generation",
        x = "Median Household Income ($)",
-       y = "Solar Generation (MWh)",
-       caption = "A visualization of the trend.")
+       y = "Solar Generation (MWh)")
 print(scatter_solar)
+```
+
+##### The linear regression suggests that there might be a relationship between income and solar generation. The statistically significant coefficient indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is relatively low (about 0.56%), and other factors not included in the model may contribute to the variability in generation for solar.
+
+```{r, viz_solar, echo=FALSE, warning=FALSE, error=FALSE}
+
 
 ################ DATA ANALYSIS: INCOME AND POWER PLANTS ####################
 
@@ -320,6 +340,7 @@ online_plants <- processed_data %>%
 
 # Creating separate df with plants by FIPS_Code
 county_plants_table <- table(online_plants$FIPS_Code)
+view(county_plants_table)
 county_plants_df <- as.data.frame(county_plants_table)
 
 #Renaming columnnames
@@ -335,23 +356,21 @@ county_plants_df <- merged_data
 #Run simple regression
 inc_plants_model <- lm(Num_Plants ~ MEDHHINC_2021, data = county_plants_df)
 
-
 knitr::kable(summary(inc_plants_model)$coef, format = "html", caption = "Linear Regression Results - Number of Plants")
-```
-
-## The linear regression suggests that there might be a relationship between income and generation. The statistically significant coefficient indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is relatively low (about 0.56%), and other factors not included in the model may contribute to the variability in generation for solar.
-
-```{r, num_plants_npcap, echo=FALSE, warning=FALSE, error=FALSE}
-#Visualize relationship
 
 #Plot relationship
 ggplot(county_plants_df, aes(x = MEDHHINC_2021, y = Num_Plants)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  labs(title = "Regression Analysis Between Power Plants and County Income",
+  labs(title = "County Income and Number of Power Plants",
        x = "Median Household Income",
        y = "Number of Power Plants")
+```
 
+##### The linear regression results indicate that median household income does not show a statistically significant association with the number of plants. The coefficient is estimated to be -0.0000786, with a standard error of 0.0000922, a t-value of -0.85, and a p-value of 0.3962. This suggests that, based on the available data, changes in median household income do not appear to be statistically linked to variations in the number of plants.
+
+
+```{r, npcap, echo=FALSE, warning=FALSE, error=FALSE}
 #Regression on Income and Nameplate Capacity
 
 ## Pre-Analysis Wrangling ##
@@ -367,50 +386,18 @@ capacity_income_model <- lm(NAMEPCAP_plant ~ MEDHHINC_2021, data = merged_data_c
 
 knitr::kable(summary(capacity_income_model)$coef, format = "html", caption = "Linear Regression Results - Namepate Capacity")
 
-```
-
-## The linear regression suggests that there might be a relationship between income and generation. The statistically significant coefficient indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is relatively low (about 0.56%), and other factors not included in the model may contribute to the variability in generation for solar.
-
-```{r, NP_generation, echo=FALSE, warning=FALSE, error=FALSE}
-
 #Plot relationship
 ggplot(merged_data_capacity, aes(x = MEDHHINC_2021, y = NAMEPCAP_plant)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  labs(title = "Regression Analysis Between Nameplate Capacity and County Income",
+  labs(title = "County Income and Nameplate",
        x = "Median Household Income",
        y = "Average Nameplate Capacity")
 
-#Regression on Income and Average Generation
-
-## Pre-Analysis Wrangling ##
-
-#Calculate average generation by county
-avg_generation <- aggregate(PLNGENAN ~ FIPS_Code, data = online_plants, FUN = mean)
-merged_data_generation <- merge(avg_generation, income, by = "FIPS_Code")
-
-## Regression Analysis ##
-
-#Run simple regression
-generation_income_model <- lm(PLNGENAN ~ MEDHHINC_2021, data = merged_data_generation)
-
-
-knitr::kable(summary(generation_income_model)$coef, format = "html", caption = "Linear Regression Results - Generation")
-
 ```
 
-## The linear regression suggests that there might be a relationship between income and generation. The statistically significant coefficient indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is relatively low (about 0.56%), and other factors not included in the model may contribute to the variability in generation for solar.
+##### The linear regression yields a coefficient of 0.0019239, accompanied by a standard error of 0.0023465. This implies that, theoretically, an increase in median household income is associated with a slight corresponding increase in Nameplate Capacity. However, the non-significant p-value of 0.4145 means we do not have sufficient evidence to reject the null hypothesis and the observed association between median household income and Nameplate Capacity may be coincidental.
 
-```{r, viz_gen, echo=FALSE, warning=FALSE, error=FALSE}
-
-#Plot relationship
-ggplot(merged_data_generation, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  labs(title = "Regression Analysis Between Average Generation and County Income",
-       x = "Median Household Income",
-       y = "Total Annual Generation")
-```
 
 
 
@@ -566,10 +553,6 @@ CH4_map
 ```
 
 
-
-
-
-
 ```{r}
 #Load in counties spatial data
 counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>% 
@@ -705,7 +688,8 @@ is.Date(robeson_online_plants$GENYRONL)
 ```
 
 
-# Question 2: Is there a relationship between power plant retirements and unemployment?
+# Question 2: Do power plant retirements have a significant impact on unemployment?
+### The primary motivation behind this analysis is to delve into the nuanced equilibrium inherent in a just energy transition. The imperative of shifting energy fuel sources from carbon-intensive to fossil fuel-free must be achieved without detriment to communities. In this examination, we initially pinpoint counties in North Carolina with the highest and lowest numbers of retirements, comparing them to their respective unemployment rates over time. To conduct a more pointed analysis, a statistical examination is performed on a specific county of interest.
 ```{r, Unemployment_Retirements, echo=FALSE, warning=FALSE, error=FALSE}
 
 ################ DATA ANALYSIS: UNEMPLOYMENT AND GENERATOR RETIREMENTS ################ 
@@ -715,7 +699,6 @@ is.Date(robeson_online_plants$GENYRONL)
 #Set to numeric
 gen20$NAMEPCAP <- as.numeric(gen20$NAMEPCAP)
 gen20$GENNTOZ <- as.numeric(gen20$GENNTOZ)
-
 
 
 #Combining gen20 and plant dataframes based on ORISPL
@@ -764,12 +747,13 @@ for (i in seq_along(fips_counts)) {
 
 fips_counts <- table(generator_retirement_data$FIPS_Code)#identifies 2 counties with 7 instances of retirements
 
+```
+
+### FIPS Code 37159 (Rowan) and 37191 (Wayne) each have the highest number of retirements at 7 rows.
+### FIPS Code 37023  (Burke) 37041 (Chowan) 37049  (Craven) 37063 (Durham) 37067 (Forsyth) 37069 (Franklin) 37125 (Moore) each have 1 row.
 
 
-#FIPS Code 37159 (Rowan) and 37191 (Wayne) each have 7 rows: use these as counties of interest to run time series
-#FIPS Code 37023  (Burke) 37041 (Chowan) 37049  (Craven) 37063 (Durham) 37067 (Forsyth) 37069 (Franklin) 37125 (Moore) each have 1 row: use these as counties of interest for comparison
-
-
+```{r, cols_interest, echo=FALSE, warning=FALSE, error=FALSE}
 
 #Creating df for only columns.counties of interest
 rowan_ue <- transposed_ue[, c("Year", "37159")]
@@ -790,23 +774,6 @@ durham_ue$Year <- as.Date(durham_ue$Year, format = "%Y")
 Chowan_ue$Year <- as.Date(durham_ue$Year, format = "%Y")
 
 #Plot
-ggplot(rowan_ue, aes(x = Year, y = `37159`)) +
-  geom_point(color = "blue") +
-  labs(title = "Unemployment in Rowan County",
-       x = "Year",
-       y = "Unemployment Rate (%)")
-
-# Line plot for Rowan and Wayne
-ggplot() +
-  geom_line(data = rowan_ue, aes(x = Year, y = `37159`, color = "Rowan"), size = 1) +
-  geom_line(data = wayne_ue, aes(x = Year, y = `37191`, color = "Wayne"), size = 1) +
-  labs(title = "Unemployment in Wayne and Rowan Counties",
-       x = "Year",
-       y = "Unemployment Rate (%)",
-       color = "Dataset") +
-  scale_color_manual(values = c("Rowan" = "blue", "Wayne" = "lightblue")) +
-  theme(legend.title = element_blank())  
-
 combined_plot <- ggplot() +
   geom_line(data = rowan_ue, aes(x = Year, y = `37159`, color = "Rowan"), size = 1) +
   geom_line(data = wayne_ue, aes(x = Year, y = `37191`, color = "Wayne"), size = 1) +
@@ -822,7 +789,7 @@ combined_plot <- ggplot() +
 
 print(combined_plot)
 ```
-Here, counties with both a high and low number of generator retirements are identified to investigate whether fluctuations in unemployment rates are influenced by generator retirements or if the rates exhibit a similar trend regardless of such retirements. By selecting counties like Rowan and Wayne, which have the highest number of generator retirements, alongside counties like Burke and Craven with the least retirements, the exploratory analysis aims to discern any distinctive patterns in unemployment dynamics. As the plot shows instances in which the unemployment rates do not follow the hypothesized pattern, another variable was chosen for statistical analysis.
+##### In this analysis, counties experiencing both high (blue)and low (green)numbers of generator retirements, such as Rowan and Wayne (high retirements) and Burke and Craven (low retirements), are singled out. The objective is to investigate whether fluctuations in unemployment rates are influenced by generator retirements or if the rates exhibit similar trends irrespective of such retirements. Through this exploratory analysis, the goal is to discern any distinctive patterns in unemployment dynamics. As the plot shows instances in which the unemployment rates do not follow the hypothesized pattern, another variable was chosen for statistical analysis.
 
 
 ```{r, echo=FALSE, warning=FALSE, error=FALSE}
@@ -851,10 +818,8 @@ rowan_generator_retirement_NPACP <- processed_data_20 %>%
 #Converting to date format
 rowan_generator_retirement_NPACP$Year <- as.Date(paste(rowan_generator_retirement_NPACP$Year, "12-06", sep = "-"), format = "%Y-%m-%d")
 
-
 #Merging
 rowan_merged_data_NPCAP <- merge(rowan_generator_retirement_NPACP, rowan_ue, by = "Year", all.x = TRUE)
-
 
 #### Data Analysis ###
 
@@ -863,24 +828,9 @@ lm_result <- lm(`Rowan UE (%)` ~ NAMEPCAP_gen, data = rowan_merged_data_NPCAP)
 summary(lm_result) 
 ```
 
-#Contrary to the initial hypothesis, this regression indicates that for each MW increase in retired nameplate capacity, the unemployment rate unemployment rate in Rowan is expected to decrease by approximately 0.02428 percentage points. The p-value is greater than 0.05,but given that it is only marginally higher (at 0.0619) we can theoretically interpret there to be a weak relationship. However, it must be understood that the sample size is small and therefore we would need much more data for any reliable conclusions.
+##### Contrary to the initial hypothesis, this regression indicates that for each MW increase in retired nameplate capacity, the unemployment rate unemployment rate in Rowan is expected to decrease by approximately 0.02428 percentage points. The p-value is greater than 0.05,but given that it is only marginally higher (at 0.0619) we can theoretically interpret there to be a weak relationship. However, it must be understood that the sample size is small and therefore we would need much more data for any reliable conclusions.
 
-#The Multiple R-squared value of 0.5346 represents the proportion of the variance in the response variable (Rowan UE (%)) that can be explained by the predictor variable retired nameplate capacity (MW).
-
-```{r, vis_npcap, echo=FALSE}
-# Visualize the relationship
-ggplot(rowan_merged_data_NPCAP, aes(x = NAMEPCAP_gen, y = `Rowan UE (%)`)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  labs(title = "Relationship between Retired Nameplate Capacity and Unemployment Rate",
-       x = "Retired Nameplate Capacity (MW)",
-       y = "Unemployment Rate (%)")
-
-#Evaluate correlation
-cor_test_result <- cor.test(rowan_merged_data_NPCAP$`Rowan UE (%)`, rowan_merged_data_NPCAP$NAMEPCAP_gen)
-print(cor_test_result)
-
-#A correlation coefficient of -0.731 suggests that as the retired nameplate capacity (MW) increases, the unemployment rate tends to decrease, contrary to our initial hypothesis. 
+##### The Multiple R-squared value of 0.5346 represents the proportion of the variance in the response variable (Rowan UE (%)) that can be explained by the predictor variable retired nameplate capacity (MW).
 
 ```
 
