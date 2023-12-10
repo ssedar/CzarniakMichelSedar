@@ -327,6 +327,7 @@ counties_sf_join <-  merge(x = counties_sf,
 #Map total generator capacity by county
 gen_cap_map <-ggplot(data=counties_sf_join)+
   geom_sf(aes(fill=NAMEPCAP_plant))+labs(title="Capacity by County",fill="Capacity (MW)")
+print(gen_cap_map)
 ```
 
 
@@ -912,9 +913,13 @@ summary(lm_result)
 The examination of the impact resulting from the retirement of power plant generators failed to produce definitive results; nevertheless, it contributes to the expanding field of advocating for an environmental justice perspective. This research goes beyond the reliance on the reduction of tons of carbon dioxide equivalents in emissions as a measure of the energy transition's success. It underscores the importance of adopting a holistic approach to key performance indicators, particularly given that large power plants are often situated in rural areas where communities heavily depend on utilities for employment. The analytical methodology adheres to best practices, incorporating counties with varying numbers of retirements to control for factors external to the retirements themselves. Additionally, the analysis delves into the actual nameplate capacity of retired assets, recognizing the plausible implication that a smaller capacity may employ fewer individuals compared to a larger plant. Contrary to the initial hypothesis, the findings reveal a statistically significant relationship, wherein each megawatt increase in retired nameplate capacity is associated with a marginal decrease in the unemployment rate. However, the inherent data limitations within this relatively small sample size necessitate cautious interpretation. It is crucial to acknowledge that while this analysis falls short of providing conclusive results, it serves as a foundation for further exploration in subsequent analyses and environmental justice research.
 
 # Question 3: Is there a relationship between power plant distribution and impacts to human health?
-Power plants are known to be a major stationary point source of air pollution. As such, in the United States they are subject to regulation under the Clean Air Act, which sets National Ambient Air Quality Standards on six criteria air pollutants--particulate matter (PM2.5 and PM10), atmospheric ozone, carbon monoxide, lead, nitrogen dioxide, and sulfur dioxide. These pollutants reach widespread exposure (millions of people) due to their numerous and diverse sources. Causal and/or likely causal evidence pointing to negative health endpoints exists for each one of them. For carbon monoxide (CO), the regulatory standards have been informed, above all, by research on cardiovascular effects. For nitrogen dioxide (NO2) and sulfur dioxide (SO2), on the other hand, the standard-setting has been most heavily informed by research on respiratory effects. It should be noted that nitrogen oxides also contribute to the formation of atmospheric ozone.
+Among the emissions types tracked as part of the eGRID data set explored above, nitrogen oxides (NOx) and sulfur dioxide merit further exploration, as they form part of and/or contribute to criteria air pollutants regulated by EPA. Under the Clean Air Act, US EPA has set National Ambient Air Quality Standards on six criteria air pollutants--particulate matter (PM2.5 and PM10), atmospheric ozone, carbon monoxide, lead, nitrogen dioxide, and sulfur dioxide. These pollutants reach widespread exposure--millions of people--due to their numerous and diverse sources. Causal or likely causal evidence pointing to a variety of negative health endpoints exists for each one of them. 
 
-While the Clean Air Act and its various amendments have been in effect for decades, its effectiveness in reducing air pollution in the U.S. by way of regulating emissions of criteria air pollutants has varied over time and varied by pollutant. Air pollution continues to affect millions in the United States. This study uses data from CDC's Environmental Burden piece of its Environmental Justice Index to test the hypothesis that greater presence of power plants in a county makes that county more likely to see elevated NOx and SOx levels, and consequently more respiratory and cardiovascular problems in comparison to those counties with fewer power plants.
+Power plants have historically made up a major stationary point source of air pollution, including SO2 and NO2, in particular. For nitrogen dioxide (NO2) and sulfur dioxide (SO2), the regulatory emissions standard-setting has been most heavily informed by research on respiratory effects. It should be noted that nitrogen oxides (NOx) also contribute to the formation of atmospheric ozone, which causes respiratory problems. 
+
+The following section of analyses explore relationships between emissions of SO2 and NOx and respiratory effects using eGRID data as well as data from the Environmental Burden and Health Vulnerability modules in the Environmental Justice Index (EJI). The development of the EJI is relatively new and the index has limitations. In accordance with its limitations, which can be found in detail within the technical documentation linked in the Metadata folder, this high-level exploration is not intended to define individuals at risk, represent risk or exposure for a community, or suggest that the markers explored form a full or near-full representation of environmental or health characteristics. This brief exploration merely examines whether a statistically significant relationship can be detected among select local factors such as power plant emissions and human health effects at a point in time across North Carolina. Based on established knowledge regarding air pollution and its impacts to human health, the expectation would be that higher emissions of NOx and SO2 are associated with higher rates of respiratory disease. 
+
+FIGURE OUT HOW/WHERE TO NOTE DATA COLLECTION YEAR: As stated in the technical documentation for the Environmental Justice Index 2022, "indicators representing environmental burden, social vulnerability, and health vulnerability were selected based on a thorough literature review conducted by the EJI research team between December 2020 and December 2021." 
 
 ```{r EBM Variables Relationship Analysis}
 #Environmental Burden
@@ -988,21 +993,36 @@ step(EBM_lead_wtr_lm)
 summary(EBM_multivar_lm)
 
 # ------------- PROBABLY WON'T INCLUDE WHAT'S BELOW, LET'S DISCUSS -------------
-# to what extent does proximity to coal explain PM -- FRUITLESS BC COAL IS ZEROES 
+# to what extent does proximity to coal explain PM -- COAL IS ZEROES, MOVE TO EXPLO?
 coal_PM_lm<- lm(data = EBM_countytract, E_PM ~ E_COAL)
 summary(coal_PM_lm)
 
-# to what extent does proximity to coal explain asthma -- FRUITLESS BC COAL IS ZEROES
+# to what extent does proximity to coal explain asthma -- COAL IS ZEROES, MOVE TO EXPLO?
 coal_asthma_lm<- lm(data = EBM_countytract, EP_ASTHMA ~ E_COAL)
 summary(coal_asthma_lm)
 
-# to what extent does proximity to coal explain high blood pressure -- FRUITLESS BC COAL IS ZEROES
+# to what extent does proximity to coal explain high blood pressure --COAL IS ZEROES, MOVE TO EXPLO?
 coal_highbp_lm<- lm(data = EBM_countytract, EP_BPHIGH ~ E_COAL)
 summary(coal_highbp_lm)
 
 ```
 
+
+
+```{r EBM Variables Relationship Analysis}
+#xx
+
+```
+
 ## Summary
+This study used data from CDC's Environmental Burden piece of its Environmental Justice Index to test the hypothesis that greater presence of power plants in a county is correlated with elevated NOx and SOx levels in that county, and consequently more respiratory and cardiovascular problems in comparison to those counties with fewer power plants.
+- Results 
+- Expect that in the 2020s, NO2 and SO2 emissions would be showing effects of decades of regulation / technologies used to decrease NO2 emissions (changing temperature of combustion in power plants to reduce their formation) and SO2 (touch on atmospheric deposition)
+
+While the Clean Air Act and its various amendments have been in effect for decades, its effectiveness in reducing air pollution in the U.S. by way of regulating emissions of criteria air pollutants has varied over time and varied by pollutant. Air pollution continues to affect millions in the United States. 
+- Future tracking of PM in eGRID
+- PM currently regulated based on particle size
+- Hypothesis that PM associated with coal-fired power plants has higher toxicity than general particulate matter https://www.science.org/doi/10.1126/science.adf4915 
 
 
 # References
@@ -1014,4 +1034,6 @@ summary(coal_highbp_lm)
 
 *United States Department of Agriculture / Economic Research Service. Unemployment and median household income for the U.S., States, and counties, 2000–22. https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/. Accessed on 11/1/2023.
 
-*Centers for Disease Control and Prevention/ Agency for Toxic Substances and Disease Registry/ Geospatial Research, Analysis, and Services Program. CDC/ATSDR Social Vulnerability Index 2020. Database North Carolina. https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html. Accessed on 12/6/2023.
+*Centers for Disease Control and Prevention and Agency for Toxic Substances Disease Registry/ Geospatial Research, Analysis, and Services Program. CDC/ATSDR Social Vulnerability Index 2020. Database North Carolina. https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html. Accessed on 12/6/2023.
+
+*Centers for Disease Control and Prevention and Agency for Toxic Substances Disease Registry. 2022 Environmental Justice Index. https://www.atsdr.cdc.gov/placeandhealth/eji/index.html. Accessed on 12/5/2023.
