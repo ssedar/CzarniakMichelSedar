@@ -54,6 +54,8 @@ Data Source | U.S. EPA
 
 *Social Vulnerability Index - 2020 data from the US CDC on key vulnerability criteria including socioeconomic status, household characteristics, racial & ethnic minority status, and house type & transportation.
 
+*Environmental Justice Index - 2022 report including "indicators representing environmental burden, social vulnerability, and health vulnerability were selected based on a thorough literature review conducted by the EJI research team between December 2020 and December 2021." 
+
 ```{r, Data_Load, echo=FALSE, warning=FALSE, error= FALSE}
 
 #Loading Data into Raw Data folder
@@ -918,8 +920,6 @@ Power plants have historically made up a major stationary point source of air po
 
 The following section of analyses explore relationships between emissions of SO2 and NOx and respiratory effects using eGRID data as well as data from the Environmental Burden and Health Vulnerability modules in the Environmental Justice Index (EJI). The development of the EJI is relatively new and the index has limitations. In accordance with its limitations, which can be found in detail within the technical documentation linked in the Metadata folder, this high-level exploration is not intended to define individuals at risk, represent risk or exposure for a community, or suggest that the markers explored form a full or near-full representation of environmental or health characteristics. This brief exploration merely examines whether a statistically significant relationship can be detected among select local factors such as power plant emissions and human health effects at a point in time across North Carolina. Based on established knowledge regarding air pollution and its impacts to human health, the expectation would be that higher emissions of NOx and SO2 are associated with higher rates of respiratory disease. 
 
-FIGURE OUT HOW/WHERE TO NOTE DATA COLLECTION YEAR: As stated in the technical documentation for the Environmental Justice Index 2022, "indicators representing environmental burden, social vulnerability, and health vulnerability were selected based on a thorough literature review conducted by the EJI research team between December 2020 and December 2021." 
-
 ```{r EBM Variables Relationship Analysis}
 #Environmental Burden
 
@@ -928,9 +928,16 @@ FIGURE OUT HOW/WHERE TO NOTE DATA COLLECTION YEAR: As stated in the technical do
 # E_OZONE = Annual mean days above O3 regulatory standard - 3-year average
 # EP_BPHIGH = Percentage of individuals with Raw high blood pressures values
 # EP_ASTHMA = Percentage of individuals with asthma
+# PLNOXAN = Plant Annual NOx Emissions (PLNOXAN) – The total annual NOx emissions, in short tons, for the plant. Biogas components are adjusted. For CHP plants, the value is adjusted by the electric allocation factor. This adjusted emissions field is estimated by first making the biogas adjustment (if it exists) and then applying the electric allocation factor (if the plant is a CHP).
+# PLSO2AN = Plant Annual SO2 Emissions (PLSO2AN) – The total annual SO2 emissions, in short tons, for the plant. Landfill gas components are adjusted. For CHP plants, the value is adjusted by the electric allocation factor. This adjusted emissions field is estimated by first making the landfill gas adjustment (if it exists) and then applying the electric allocation factor (if the plant is a CHP).
+# NOx_emissions = sum of NOx emissions by county across plants
+# SO2_emissions = sum of SO2 emissions by county across plants
+# NOx_map = map of NOx emissions by county
+# NOx_counties_sf_join = attribute of total NOx emissions attached to spatial frame
+# SO2_counties_sf_join = attribute of total SO2 emissions attached to spatial frame
 
-#Establish shared GEOID format
-EBM_countytract$CountyFP <- GEOID = stringr::str_extract(EBM_countytract$GEOID, "^.{5}")
+#KEEPEstablish shared GEOID format
+EBM_countytract$CountyFIPS <- stringr::str_extract(EBM_countytract$GEOID, "^.{5}")
 
 #Add nameplate capacity by county to EBM data for analysis
 EBM_select <- EBM_countytract %>% 
@@ -939,8 +946,45 @@ EBM_select <- EBM_countytract %>%
   rename(CNTYNAME = COUNTY)  # Renaming the column
 EBM_nameplate_merge <- merge(EBM_select, nameplate_capacity, by = "CNTYNAME")
 
+#KEEP map NOx emissions by county and overlay dots with color by tract-level asthma
+#KEEP get 2021 spatial census data to convert tract GEOID to mapped coordinates
+spatial_tracts <- tigris::tracts(state = 37)
+class(spatial_tracts)
+#KEEP mapview(spatial_tracts)
+
+#KEEPJoin the eGrid attributes to the county spatial features
+tracts_EJI_sf_join <-  merge(x = spatial_tracts,
+                           y = EBM_countytract, 
+                           by.x = 'GEOID', 
+                           by.y = 'GEOID' )
+
+#KEEPSelect variables of interest
+tracts_EJI_sf_select <- tracts_EJI_sf_join %>%
+  select(GEOID, CountyFIPS, TRACTCE.x, StateAbbr, COUNTY, E_TOTPOP, M_TOTPOP, 
+         E_PM, E_DSLPM, E_COAL, E_LEAD, EP_UNINSUR, EP_AGE65, 
+         EP_ASTHMA, EP_BPHIGH, EP_CANCER, EP_MHLTH, geometry) %>%
+  #na.omit() %>% #selecting only data with retirements
+  rename(TractCode = TRACTCE.x)  # Renaming the column
+
+#KEEPMap asthma prevalence by tract
+tracts_map <- ggplot(data = tracts_EJI_sf_select) +
+  geom_sf(data = tracts_EJI_sf_join)+
+  geom_sf(aes(fill = EP_ASTHMA)) +
+  labs(title = "Estimated Asthma Prevalence by NC Tract",
+       subtitle = "2021",
+       fill = "Percentage of Individuals with Asthma")
+print(tracts_map)
+
+#Merge EJI and total NOx emitted by county
+NOx_EJI <-merge(x = Total_Generation_County,
+                           y = EBM_select, 
+                           by.x = 'CNTYNAME', 
+                           by.y = 'COUNTY' )
+
+
+
 #Exporting to CSV:
-write.csv(EBM_select,'Data/Processed/EBM_Processed.csv', row.names=FALSE)
+#write.csv(EBM_select,'Data/Processed/EBM_Processed.csv', row.names=FALSE)
 
 ## Regression Analysis ##
 namepcap_healtheff <- lm(Sum_NAMEPCAP ~ EP_BPHIGH + EP_ASTHMA + E_PM + E_DSLPM + E_OZONE, data = EBM_nameplate_merge)
