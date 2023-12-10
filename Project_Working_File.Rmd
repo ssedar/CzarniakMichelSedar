@@ -42,7 +42,6 @@ Table: Table 1: eGRID
 
 Attribute    | Description
 -------------| -------------
-Key Variables   | Cell 2
 Data Hierarchy | Generators are associated to plants, plants are associated to counties and FIPS codes
 Data Range | 2020 (data set used only to reference historical retirement data) and 2021 (all other data)
 Data Source | U.S. EPA
@@ -939,6 +938,9 @@ EBM_select <- EBM_countytract %>%
          E_PM, E_OZONE, E_DSLPM) %>%
   rename(CNTYNAME = COUNTY)  # Renaming the column
 EBM_nameplate_merge <- merge(EBM_select, nameplate_capacity, by = "CNTYNAME")
+
+#Exporting to CSV:
+write.csv(EBM_select,'Data/Processed/EBM_Processed.csv', row.names=FALSE)
 
 ## Regression Analysis ##
 namepcap_healtheff <- lm(Sum_NAMEPCAP ~ EP_BPHIGH + EP_ASTHMA + E_PM + E_DSLPM + E_OZONE, data = EBM_nameplate_merge)
