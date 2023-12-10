@@ -8,9 +8,9 @@ output:
   
 ---
 # Research Rationale
-The impetus behind this research lies in the imperative to address the intricate interplay between socioeconomic factors and the power plants. As the global energy landscape undergoes a transformative shift towards sustainability, it becomes paramount to understand how these changes might impact communities, particularly those situated in lower-income communities. The socio-spatial lens through which this study is conducted aims to unearth patterns of power plant distribution across North Carolina. North Carolina is home to 100 counties and 843 power plants made up of 1190 generators (Source: US EPA). The overarching question is whether certain communities bear a disproportionate burden of environmentally impactful energy sources, framing the discourse within the realms of environmental justice and equity.
+The impetus behind this research lies in the imperative to address the intricate interplay between socioeconomic factors and the power plants. As the global energy landscape undergoes a transformative shift toward sustainability, it becomes paramount to understand how these changes might impact communities, particularly those situated in lower-income communities. The socio-spatial lens through which this study is conducted aims to unearth patterns of power plant distribution across North Carolina. North Carolina is home to 100 counties and 843 power plants made up of 1190 generators (Source: US EPA). The overarching question is whether certain communities bear a disproportionate burden of environmentally impactful energy sources, framing the discourse within the realms of environmental justice and equity.
 
-As a key aspect of this exploration, the research considers various socioeconomic indicators, including but not limited to unemployment rates. This is motivated by a concern and eye for environmental justice, as power plants have often served as major employers in low income areas. This research extends its focus beyond energy sources to examine the broader impacts of power plants on health, social vulnerability, and scrutinizes disparities in pollution exposure and associated health risks. Through a comprehensive exploration, encompassing various socioeconomic indicators, this research contributes to a nuanced understanding of the multifaceted impacts of power plants.
+As a key aspect of this exploration, the research considers the connection between power plant location and emissions and various socioeconomic indicators, including but not limited to unemployment rates. This exploration is motivated by a concern and eye for environmental justice, as power plants have often served as major employers in low-income areas. This research extends its focus beyond energy sources to examine the broader impacts of power plants on health, social vulnerability, and scrutinizes disparities in pollution exposure and associated health risks at a high level, using publicly available data. Through an exploration that encompasses various socioeconomic indicators, this research contributes to a more nuanced understanding of the multifaceted impacts of power plants.
 
 
 ```{r setup, include=FALSE}
@@ -283,7 +283,7 @@ print(stacked_barplot_bottom_income_counties)
 
 
 
-We then created initial maps to better understand the landscape of North Carolina in terms of socioeconomic status and geographic distribution of power plants.Figure 8 below shows the mapping of power plants across the state and helped us to visualize the concentration of power plants across the state.Figure 9 maps the nameplate capacity of those power plants by county. We noticed that multiple counties, especially Richmond county, stood out as having a high concentration of capacity. Figure 10 demonstrates a heat map of the percentage of each county's population living in poverty as of 2021. Richmond county is once again a clear visual outlier on this map.
+We then created initial maps to better understand the landscape of North Carolina in terms of socioeconomic status and geographic distribution of power plants. Figure 8 below shows the mapping of power plants across the state and helped us to visualize the concentration of power plants across the state. Figure 9 maps the nameplate capacity of those power plants by county. We noticed that multiple counties, especially Richmond county, stood out as having a high concentration of capacity. Figure 10 demonstrates a heat map of the percentage of each county's population living in poverty as of 2021. Richmond county is once again a clear visual outlier on this map.
 
 ##### Figure 8: Active power plants across North Carolina as of 2021. Each black dot is a power plant.
 
@@ -461,7 +461,7 @@ print(CH4_map)
 # Question 1: How does income impact power plant characteristics at the county level?
 This analysis begins by examining the impact that income has on various power plant characteristics. This first analysis uses income as the highest-level socioeconomic indicator, as income often dictates an array of follow-on indicators. Several regressions are conducted including the impact of income on the fuel type (differentiating between clean and dirty sources), number of plants, and nameplate capacity. 
 
-Examining only the impact of income on coal plants, the estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. However, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income.Figure 16 below visualizes this relationship.
+Examining only the impact of income on coal plants, the estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. However, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income. Figure 16 below visualizes this relationship.
 
 ```{r, Income_and_Fuel, echo=FALSE, warning=FALSE, error=FALSE}
 
@@ -592,7 +592,7 @@ merged_data_capacity <- merge(average_capacity, income, by = "FIPS_Code")
 #Run simple regression
 capacity_income_model <- lm(NAMEPCAP_plant ~ MEDHHINC_2021, data = merged_data_capacity)
 
-knitr::kable(summary(capacity_income_model)$coef, format = "html", caption = "Linear Regression Results - Namepate Capacity")
+knitr::kable(summary(capacity_income_model)$coef, format = "html", caption = "Linear Regression Results - Nameplate Capacity")
 ```
 
 ##### Figure 19: Relationship of Median Household Income on Average Nameplate Capacity (MW) by county in 2021.
@@ -896,8 +896,10 @@ The Multiple R-squared value of 0.5346 represents the proportion of the variance
 ## Summary
 The examination of the impact resulting from the retirement of power plant generators failed to produce definitive results; nevertheless, it contributes to the expanding field of advocating for an environmental justice perspective. This research goes beyond the reliance on the reduction of tons of carbon dioxide equivalents in emissions as a measure of the energy transition's success. It underscores the importance of adopting a holistic approach to key performance indicators, particularly given that large power plants are often situated in rural areas where communities heavily depend on utilities for employment. The analytical methodology adheres to best practices, incorporating counties with varying numbers of retirements to control for factors external to the retirements themselves. Additionally, the analysis delves into the actual nameplate capacity of retired assets, recognizing the plausible implication that a smaller capacity may employ fewer individuals compared to a larger plant. Contrary to the initial hypothesis, the findings reveal a statistically significant relationship, wherein each megawatt increase in retired nameplate capacity is associated with a marginal decrease in the unemployment rate. However, the inherent data limitations within this relatively small sample size necessitate cautious interpretation. It is crucial to acknowledge that while this analysis falls short of providing conclusive results, it serves as a foundation for further exploration in subsequent analyses and environmental justice research.
 
-# Question 3: What is the relationship between air quality and health issues?
-*[Description here]*
+# Question 3: Is there a relationship between power plant distribution and impacts to human health?
+Power plants are known to be a major stationary point source of air pollution. As such, in the United States they are subject to regulation under the Clean Air Act, which sets National Ambient Air Quality Standards on six criteria air pollutants--particulate matter (PM2.5 and PM10), atmospheric ozone, carbon monoxide, lead, nitrogen dioxide, and sulfur dioxide. These pollutants reach widespread exposure (millions of people) due to their numerous and diverse sources. Causal and/or likely causal evidence pointing to negative health endpoints exists for each one of them. For carbon monoxide (CO), the regulatory standards have been informed, above all, by research on cardiovascular effects. For nitrogen dioxide (NO2) and sulfur dioxide (SO2), on the other hand, the standard-setting has been most heavily informed by research on respiratory effects. It should be noted that nitrogen oxides also contribute to the formation of atmospheric ozone.
+
+While the Clean Air Act and its various amendments have been in effect for decades, its effectiveness in reducing air pollution in the U.S. by way of regulating emissions of criteria air pollutants has varied over time and varied by pollutant. Air pollution continues to affect millions in the United States. This study uses data from CDC's Environmental Burden piece of its Environmental Justice Index to test the hypothesis that greater presence of power plants in a county makes that county more likely to see elevated NOx and SOx levels, and consequently more respiratory and cardiovascular problems in comparison to those counties with fewer power plants.
 
 ```{r EBM Variables Relationship Analysis}
 #Environmental Burden
@@ -907,6 +909,31 @@ The examination of the impact resulting from the retirement of power plant gener
 # E_OZONE = Annual mean days above O3 regulatory standard - 3-year average
 # EP_BPHIGH = Percentage of individuals with Raw high blood pressures values
 # EP_ASTHMA = Percentage of individuals with asthma
+
+#Establish shared GEOID format
+EBM_countytract$CountyFP <- GEOID = stringr::str_extract(EBM_countytract$GEOID, "^.{5}")
+
+#Add nameplate capacity by county to EBM data for analysis
+EBM_select <- EBM_countytract %>% 
+  select(COUNTY, CountyFIPS, EP_ASTHMA, EP_BPHIGH, EP_UNINSUR, 
+         E_PM, E_OZONE, E_DSLPM) %>%
+  rename(CNTYNAME = COUNTY)  # Renaming the column
+EBM_nameplate_merge <- merge(EBM_select, nameplate_capacity, by = "CNTYNAME")
+
+## Regression Analysis ##
+namepcap_healtheff <- lm(Sum_NAMEPCAP ~ EP_BPHIGH + EP_ASTHMA + E_PM + E_DSLPM + E_OZONE, data = EBM_nameplate_merge)
+step(namepcap_healtheff)
+#Keep only EP_ASTHMA (AIC = 34593) because all other variables increase AIC
+knitr::kable(summary(namepcap_healtheff)$coef, format = "html", caption = "Linear Regression Results - Nameplate Capacity and Air Quality")
+
+namepcap_asthma <- lm(data = EBM_nameplate_merge, Sum_NAMEPCAP ~ EP_ASTHMA)
+summary(namepcap_asthma)
+plot(namepcap_asthma)
+
+#Run simple regression
+capacity_income_model <- lm(NAMEPCAP_plant ~ MEDHHINC_2021, data = merged_data_capacity)
+
+knitr::kable(summary(capacity_income_model)$coef, format = "html", caption = "Linear Regression Results - Namepate Capacity")
 
 #To what extent does high PM exposure explain asthma in NC 
 PM_asthma_lm<- lm(data = EBM_countytract, EP_ASTHMA ~ E_PM)
