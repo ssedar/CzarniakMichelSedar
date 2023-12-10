@@ -14,7 +14,7 @@ As a key aspect of this exploration, the research considers the connection betwe
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE,warning = FALSE,message=FALSE)
 library(tidyverse)
 library(lubridate)
 library(here); here()
@@ -33,11 +33,19 @@ library(leaflet)
 library(tseries)
 library(knitr)
 library(mapview); mapviewOptions(fgb = FALSE)
-knitr::opts_chunk$set (warning = FALSE, echo = FALSE)
 getwd()
 ```
 # Data Set Information
 Data used in this analysis comes from a variety of sources. A brief overview of each source is outlined below and full citations can be found at the end of this report. More information on the metadata for each source can be found in the 'Metadata' folder.
+
+Table: Table 1: eGRID
+
+Attribute    | Description
+-------------| -------------
+Key Variables   | Cell 2
+Data Hierarchy | Generators are associated to plants, plants are associated to counties and FIPS codes
+Data Range | 2020 (data set used only to reference historical retirement data) and 2021 (all other data)
+Data Source | U.S. EPA
 
 *eGRID - 2020 and 2021 data from the U.S. EPA on all power plants in the U.S. Data includes information on plant locations, production, retirements,and emissions.The 2020 data set was only utilized for historical retirement data as that was removed from the 2021 data set.
 
@@ -366,7 +374,7 @@ print(CO2_map)
 
 ##### Figure 12: Total NOx Emissions in 2021 across North Carolina Power Plants.
 
-```{r, CO2 Emissions}
+```{r, NOX Emissions}
 #Heat map of NOx emissions by county
 #Compute sum of NOx Emissions by county
 NOx_emissions <-plant_gen_data %>%
@@ -611,8 +619,7 @@ ggplot(merged_data_capacity, aes(x = MEDHHINC_2021, y = NAMEPCAP_plant)) +
 
 Finally, we briefly explored if we could find a statistical relationship between power plants and the social vulnerability index (SVI) instead of income. A linear regression of SVI on total annual generation by county was conducted. The coefficient is 3643958 and is positive, suggesting that an increase in the SVI leads to an increase in generation. However, the multiple R-squared value is very small (0.005408), signaling that this model does not fit the data well. Ultimately, the p-value is not statistically significant (0.5278) and so conclusions can not be drawn here. Figure 20 illustrates this relationship.
 
-##### Figure 20: The relationship between the Social Vulnerability Index (SVI) and 2021 annual generation in MWh across all power plants in a county.
-```{r Generation and SVI Relationship Analysis}
+```{r Generation and SVI Relationship Analysis LM}
 #Wrangle SVI DATA
 
 #Selecting columns of interest:
@@ -639,6 +646,10 @@ summary_table_SVI <- summary(Generation_County_lm)$coef
 
 knitr::kable(summary(Generation_County_lm)$coef, format = "html", caption = "Linear Regression Results - SVI and Total Generation")
 
+```
+
+##### Figure 20: The relationship between the Social Vulnerability Index (SVI) and 2021 annual generation in MWh across all power plants in a county.
+```{r Generation and SVI Relationship Analysis Plot}
 #Visualize the linear regression
 tract_generation_SVI_plot <- ggplot(Generation_SVI, 
                                     aes(x = Total_Generation, 
@@ -751,6 +762,10 @@ This study's initial inquiry sought to uncover how income, a significant socioec
 
 # Question 2: Do power plant retirements have a significant impact on unemployment?
 The primary motivation behind this analysis is to delve into the nuanced equilibrium inherent in a just energy transition. The imperative of shifting energy fuel sources from carbon-intensive to fossil fuel-free must be achieved without detriment to communities. In this examination, we initially pinpoint counties in North Carolina with the highest and lowest numbers of retirements, comparing them to their respective unemployment rates over time. To conduct a more pointed analysis, a statistical examination is performed on a specific county of interest.
+
+Power plant retirements were analyzed (using data contained in the 2020 eGRID dataset) to identify which counties had the most number of retired power plants.Counties with no retirements were also selected to provide a comparison. 
+
+##### Figure 21: Number of historical power plant retirements per county based on 2020 eGRID data set
 ```{r, Unemployment_Retirements, echo=FALSE, warning=FALSE, error=FALSE}
 
 ################ DATA ANALYSIS: UNEMPLOYMENT AND GENERATOR RETIREMENTS ################ 
@@ -810,10 +825,11 @@ fips_counts <- table(generator_retirement_data$FIPS_Code)#identifies 2 counties 
 
 ```
 
-### FIPS Code 37159 (Rowan) and 37191 (Wayne) each have the highest number of retirements at 7 rows.
-### FIPS Code 37023  (Burke) 37041 (Chowan) 37049  (Craven) 37063 (Durham) 37067 (Forsyth) 37069 (Franklin) 37125 (Moore) each have 1 row.
+Based on the data set above, FIPS Code 37159 (Rowan) and 37191 (Wayne) each have the highest number of retirements at 7 rows.FIPS Code 37023  (Burke) 37041 (Chowan) 37049  (Craven) 37063 (Durham) 37067 (Forsyth) 37069 (Franklin) 37125 (Moore) each have 1 row.
 
+In this analysis, counties experiencing both high (blue) and low (green) numbers of generator retirements, such as Rowan and Wayne (high retirements) and Burke and Craven (low retirements), are singled out. The objective is to investigate whether fluctuations in unemployment rates are influenced by generator retirements or if the rates exhibit similar trends irrespective of such retirements. Through this exploratory analysis, the goal is to discern any distinctive patterns in unemployment dynamics. As the plot in figure 22 below shows instances in which the unemployment rates do not follow the hypothesized pattern, another variable was chosen for statistical analysis.
 
+##### Figure 22: Historical unemployment rates in Wayne, Rowan, Durham, and Chowan Counties
 ```{r, cols_interest, echo=FALSE, warning=FALSE, error=FALSE}
 
 #Creating df for only columns.counties of interest
@@ -850,15 +866,20 @@ combined_plot <- ggplot() +
 
 print(combined_plot)
 ```
-In this analysis, counties experiencing both high (blue)and low (green)numbers of generator retirements, such as Rowan and Wayne (high retirements) and Burke and Craven (low retirements), are singled out. The objective is to investigate whether fluctuations in unemployment rates are influenced by generator retirements or if the rates exhibit similar trends irrespective of such retirements. Through this exploratory analysis, the goal is to discern any distinctive patterns in unemployment dynamics. As the plot shows instances in which the unemployment rates do not follow the hypothesized pattern, another variable was chosen for statistical analysis.
 
+Contrary to the initial hypothesis, this regression indicates that for each MW increase in retired nameplate capacity, the unemployment rate unemployment rate in Rowan is expected to decrease by approximately 0.02428 percentage points. The p-value is greater than 0.05,but given that it is only marginally higher (at 0.0619) we can theoretically interpret there to be a weak relationship. However, it must be understood that the sample size is small and therefore we would need much more data for any reliable conclusions.
 
-```{r, echo=FALSE, warning=FALSE, error=FALSE}
+The Multiple R-squared value of 0.5346 represents the proportion of the variance in the response variable (Rowan UE (%)) that can be explained by the predictor variable retired nameplate capacity (MW).
+
+```{r Rowan analysis, echo=FALSE, warning=FALSE, error=FALSE}
 #Selecting Rowan only
 rowan_data <- generator_retirement_data[generator_retirement_data$FIPS_Code == 37159, ]
 
 #Rename generator retirement year to year in order to combine for analysis
 colnames(rowan_data)[colnames(rowan_data) == "GENYRRET"] <- "Year"
+
+#Reformat year in rowan_ue as numeric for merging
+rowan_ue$Year <- as.numeric(format(rowan_ue$Year, "%Y"))
 
 #Merge by year
 rowan_merged_data <- merge(rowan_data, rowan_ue, by = "Year", all.x = TRUE)
@@ -876,9 +897,6 @@ rowan_generator_retirement_NPACP <- processed_data_20 %>%
   na.omit() %>% #selecting only data with retirements
   rename(Year = GENYRRET)  # Renaming the column
 
-#Converting to date format
-rowan_generator_retirement_NPACP$Year <- as.Date(paste(rowan_generator_retirement_NPACP$Year, "12-06", sep = "-"), format = "%Y-%m-%d")
-
 #Merging
 rowan_merged_data_NPCAP <- merge(rowan_generator_retirement_NPACP, rowan_ue, by = "Year", all.x = TRUE)
 
@@ -889,9 +907,6 @@ lm_result <- lm(`Rowan UE (%)` ~ NAMEPCAP_gen, data = rowan_merged_data_NPCAP)
 summary(lm_result) 
 ```
 
-Contrary to the initial hypothesis, this regression indicates that for each MW increase in retired nameplate capacity, the unemployment rate unemployment rate in Rowan is expected to decrease by approximately 0.02428 percentage points. The p-value is greater than 0.05,but given that it is only marginally higher (at 0.0619) we can theoretically interpret there to be a weak relationship. However, it must be understood that the sample size is small and therefore we would need much more data for any reliable conclusions.
-
-The Multiple R-squared value of 0.5346 represents the proportion of the variance in the response variable (Rowan UE (%)) that can be explained by the predictor variable retired nameplate capacity (MW).
 
 ## Summary
 The examination of the impact resulting from the retirement of power plant generators failed to produce definitive results; nevertheless, it contributes to the expanding field of advocating for an environmental justice perspective. This research goes beyond the reliance on the reduction of tons of carbon dioxide equivalents in emissions as a measure of the energy transition's success. It underscores the importance of adopting a holistic approach to key performance indicators, particularly given that large power plants are often situated in rural areas where communities heavily depend on utilities for employment. The analytical methodology adheres to best practices, incorporating counties with varying numbers of retirements to control for factors external to the retirements themselves. Additionally, the analysis delves into the actual nameplate capacity of retired assets, recognizing the plausible implication that a smaller capacity may employ fewer individuals compared to a larger plant. Contrary to the initial hypothesis, the findings reveal a statistically significant relationship, wherein each megawatt increase in retired nameplate capacity is associated with a marginal decrease in the unemployment rate. However, the inherent data limitations within this relatively small sample size necessitate cautious interpretation. It is crucial to acknowledge that while this analysis falls short of providing conclusive results, it serves as a foundation for further exploration in subsequent analyses and environmental justice research.
