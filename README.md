@@ -1,15 +1,10 @@
 # CzarniakMichelSedar
-<General notes: add as much information as is relevant for your repository. Some overarching guidelines are provided, but feel free to expand on these guidelines.>
-<More resources found here: https://www.dataone.org/all-best-practices>
-<Delete the text inside the brackets when formatting your file.>
 
 ## Summary
-<describe the purpose of this repository, the information it contains, and any relevant analysis goals. What, why, where, when, how?>
-
 This repository contains the data and analysis conducted in R as part of the Czarniak, Michel, and Sedar EDE 872 Final group project. Analysis was conducted over the span of November and December 2023 to explore three key questions regarding the relationship between power plants in North Carolina and the impacts on the surrounding communities:
-1. 
-2. 
-3.
+1. How does income impact power plant characteristics at the county level?
+2. Do power plant retirements have a significant impact on unemployment?
+3. Is there a relationship between power plant distribution and impacts to human health?
 
 ## Investigators
 Gaby Czarniak, Duke University - Nicholas School of the Environment, gabriella.czarniak@duke.edu  
@@ -58,4 +53,4 @@ Metadata for each of the data sets can be found linked below. In the case of eGR
 To review the scripts and code associated with the preparation of this report, please refer to the 'Code' folder. Code is notated with comments to describe the purpose and desired outcome of each step.
 
 ## Quality assurance/quality control
-Our team did not conduct any QA/QC on the accuracy of the raw data as our analysis assumes accuracy of our sources. However, the following QA/QC practices were implemented on our analyses. During the wrangling process, we checked for unintuitive values or results, such as NAs or negatives when all values should have been positive. Code was written to include descriptive comments of the purpose of each step. After each team member created their respective analysis code, the other team members would review for accuracy and reproducability. 
+Our team did not conduct QA/QC on the accuracy of the raw data as our analysis assumes accuracy of our sources. However, the following QA/QC practices were implemented on our analyses. During the wrangling process, we checked for unintuitive values or results, such as NAs or negatives when all values should have been positive. Code was written to include descriptive comments of the purpose of each step. After each team member created their respective analysis code, the other team members would review for accuracy and reproducability. 
