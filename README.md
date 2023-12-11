@@ -39,7 +39,7 @@ Sources for data used in this analysis are outlined below:
 *Output - Folder containing final report in .pdf format.
 
 ## Metadata
-Metadata for each of the data sets can be found linked below. In the case of eGRID and SVI data, the publishers created downloadable PDFs that are included in the 'Metadata' folder. The remaining datasets utilize an online format which must be accessed via web.  
+Metadata for each of the data sets can be found linked below. In the case of eGRID, SVI, and EJI data, the publishers created downloadable PDFs that are included in the 'Metadata' folder. The remaining datasets utilize an online format which must be accessed via web.  
 
 *eGRID - United States Environmental Protection Agency (EPA). 2023. “eGRID 2021 Technical Guide” Washington, DC: Office of Atmospheric Protection, Clean Air Markets Division.https://www.epa.gov/system/files/documents/2023-01/eGRID2021_technical_guide.pdf  
 
