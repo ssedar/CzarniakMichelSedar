@@ -1,16 +1,16 @@
 ---
-title: "EDE Group Project"
+title: "Examining the Socioeconomic Dimension of Power Plant Impacts"
 author: "Gaby Czarniak, Mara Michel, Sam Sedar"
-date: "12-9-2023"
+date: "12-11-2023"
 output: 
   html_document:
     toc: true
   
 ---
 # Research Rationale
-The impetus behind this research lies in the imperative to address the intricate interplay between socioeconomic factors and the power plants. As the global energy landscape undergoes a transformative shift toward sustainability, it becomes paramount to understand how these changes might impact communities, particularly those situated in lower-income communities. The socio-spatial lens through which this study is conducted aims to unearth patterns of power plant distribution across North Carolina. North Carolina is home to 100 counties and 843 power plants made up of 1190 generators (Source: US EPA). The overarching question is whether certain communities bear a disproportionate burden of environmentally impactful energy sources, framing the discourse within the realms of environmental justice and equity.
+The impetus behind this research lies in the imperative to address the intricate interplay between socioeconomic factors and power plants. As the global energy landscape undergoes a transformative shift toward sustainability, it becomes paramount to understand how these changes might impact communities, particularly those situated in lower-income communities. The socio-spatial lens through which this study is conducted aims to unearth patterns of power plant distribution across North Carolina. North Carolina is home to 100 counties and 843 power plants made up of 1190 generators (US EPA, 2021). The overarching question is whether certain communities bear a disproportionate burden of environmentally impactful energy sources, framing the discourse within the realms of environmental justice and equity.
 
-As a key aspect of this exploration, the research considers the connection between power plant location and emissions and various socioeconomic indicators, including but not limited to unemployment rates. This exploration is motivated by a concern and eye for environmental justice, as power plants have often served as major employers in low-income areas. This research extends its focus beyond energy sources to examine the broader impacts of power plants on health, social vulnerability, and scrutinizes disparities in pollution exposure and associated health risks at a high level, using publicly available data. Through an exploration that encompasses various socioeconomic indicators, this research contributes to a more nuanced understanding of the multifaceted impacts of power plants.
+As a key aspect of this exploration, the research considers the connection between power plant location and emissions and various socioeconomic indicators, including but not limited to unemployment rates. This exploration is motivated by a concern and eye for environmental justice, as power plants have often served as major employers in low-income areas (Union of Concerned Scientists, 2021). This research extends its focus beyond energy sources to examine the broader impacts of power plants on health, and social vulnerability, and scrutinizes disparities in pollution exposure and associated health risks at a high level, using publicly available data. Through an exploration that encompasses various socioeconomic indicators, this research contributes to a more nuanced understanding of the multifaceted impacts of power plants.
 
 
 ```{r setup, include=FALSE}
@@ -38,23 +38,55 @@ getwd()
 # Data Set Information
 Data used in this analysis comes from a variety of sources. A brief overview of each source is outlined below and full citations can be found at the end of this report. More information on the metadata for each source can be found in the 'Metadata' folder.
 
-Table: Table 1: eGRID
 
-Attribute    | Description
--------------| -------------
-Data Hierarchy | Generators are associated to plants, plants are associated to counties and FIPS codes
-Data Range | 2020 (data set used only to reference historical retirement data) and 2021 (all other data)
-Data Source | U.S. EPA
+### Emissions & Generation Resource Integrated Database (eGRID)
+The study utilizes the 2020 and 2021 eGRID provided by the U.S. Environmental Protection Agency to acquire essential power plant characteristics. This annually updated database offers comprehensive details on emissions, emission rates, generation, heat input, resource mix, location, and various other indicators. For the specific analyses undertaken in this research, key data elements employed included the plant Federal Information Processing Standards (FIPS) code, generation, nameplate capacity, and emissions by plant.
+To process this dataset, the plant and generator sheets undergo individual modifications before being integrated. Notably, columns relevant to the analyses were selected, an additional column was introduced to consolidate state and county FIPS codes into a unified county FIPS code, and the overall dataset was filtered to North Carolina, exclusively. A parallel procedure is executed for the generator sheet before merging the two datasets using the unique ORISPL code.
 
-*eGRID - 2020 and 2021 data from the U.S. EPA on all power plants in the U.S. Data includes information on plant locations, production, retirements,and emissions.The 2020 data set was only utilized for historical retirement data as that was removed from the 2021 data set.
+It is important to highlight that although the most recent eGRID database available was from 2021, this version lacked historical generator retirement data. Consequently, the 2020 eGRID database is incorporated to facilitate the analysis of unemployment trends related to generator retirements.
 
-*Income - 2021 data from the USDA on percentage of people in each US county living in poverty and median household income.
+### Economic Research Service Data Sets: Median Household Income
+To establish a nexus between power plants and socioeconomic factors, household income data is derived from data compiled by the Economic Research Service of the United States Department of Agriculture. This data includes metrics such as household income and poverty rates at the county level, with identification facilitated by the Federal Information Processing Standards (FIPS) Code. The preparation of this dataset involves the extraction of pertinent columns, specifically median household income, followed by integration with the initial eGRID dataframe. The unifying factor for this integration is the FIPS Code, which served as the common column linking the two datasets.
 
-*Unemployment - 2000-2022 data from the USDA on unemployment rates in each US county.
+### Economic Research Service Data Sets: Unemployment
+As an additional facet of investigation, the analysis incorporates unemployment data obtained from the Economic Research Service of the United States Department of Agriculture. The dataset, spanning the years 2000 through 2021, comprises comprehensive information on the total labor force, the number of employed individuals, the number of unemployed individuals, and the unemployment rate. The data wrangling process for this dataset unfolds in two distinct stages. Initially, the columns of interest, specifically those pertaining to the unemployment rate, are  selected. Following this, the identified columns undergo appropriate conversions to their intended data types before being merged with the existing dataset, utilizing the county FIPS code as the linking identifier.
+
+The subsequent phase of data wrangling introduces additional steps specifically tailored for conducting regression analyses between generator retirements and unemployment rates. To facilitate this analysis, the code executes a transposition of the data. This transformation presents North Carolina county unemployment rates by year in a more streamlined format, allocating a dedicated column for each year. 
+
+### Social Vulnerability Index – 
+2020 data from the US CDC on key vulnerability criteria including socioeconomic status, household characteristics, racial & ethnic minority status, and house type & transportation.
+Table: Table 1: Dataset Information
+
+
+Table: Table 1: Dataset Information
+
+Dataset |  Attribute    | Description
+----------- |---------------| -------------
+eGRID  |  Key Variables | Plant locations, production, capacity, retirements, and emissions.
+eGRID  |Data Hierarchy | Generators are associated to plants, plants are associated to counties and FIPS codes
+eGRID  |Data Range | 2020 (data set used only to reference historical retirement data) and 2021 (all other data)
+eGRID  |Data Source |The United States Environmental Protection Agency
+Income  |  Key Variables | Median Household Income, FIPS codes
+Income |Data Hierarchy | Income data is associated with FIPS county code
+Income |Data Range | 2021
+Income |Data Source | The Economic Research Service of the United States Department of Agriculture
+Unemployment  |  Key Variables | Unemployment rate, FIPS code
+Unemployment    |Data Hierarchy | Unemployment rates are associated with FIPS county code
+Unemployment    |Data Range | 2000 to 2021
+Unemployment  |Data Source | The Economic Research Service of the United States Department of Agriculture
+Social Vulnerability Index  |  Key Variables | Socioeconomic status, household characteristics, racial & ethnic minority status, and house type & transportation
+Social Vulnerability Index  |Data Hierarchy | ***********************
+Social Vulnerability Index  |Data Range | 2020
+Social Vulnerability Index  |Data Source | The United States Centers for Disease Control and Prevention/Agency for Toxic Substances and Disease Registry Social Vulnerability Index (CDC/ATSDR SVI)
+Environmental Justice Index  |  Key Variables | Environmental burden, social vulnerability, and health vulnerability
+Environmental Justice Index  |Data Hierarchy | *********************************
+Environmental Justice Index  |Data Range | 2020
+Environmental Justice Index  |Data Source | The United States Agency for Toxic Substances and Disease
 
 *Social Vulnerability Index - 2020 data from the US CDC on key vulnerability criteria including socioeconomic status, household characteristics, racial & ethnic minority status, and house type & transportation.
 
 *Environmental Justice Index - 2022 report including "indicators representing environmental burden, social vulnerability, and health vulnerability were selected based on a thorough literature review conducted by the EJI research team between December 2020 and December 2021." 
+
 
 ```{r, Data_Load, echo=FALSE, warning=FALSE, error= FALSE}
 
@@ -91,7 +123,7 @@ SVI_2018_tract <-read.csv(here('Data/Raw/SVI2018_NorthCarolina.csv'),
 ```
 
 # Data Wrangling
-The intial step in our research, once loaded, was data wrangling on the three distinct datasets: eGRID, unemployment, and income data. For the eGRID dataset, the code selects specific columns related to power plant information in North Carolina, converts certain columns to numeric format, and then combines the generator and plant data based on a common identifier. Duplicate columns are removed, resulting in the plant_gen_data dataframe. The code then proceeds to handle the unemployment dataset, selecting relevant columns covering the years 2002-2022 and merging it with the plant_gen_data dataframe using the FIPS code as a key. Similarly, the income dataset is processed by selecting specific columns, and the final step involves merging this income data with the previously created dataframe. The resulting dataset, named processed_data, contains information on power plants, unemployment rates, and income data, and the column names are displayed at the end of the code.
+The intial step in our research, once loaded, was data wrangling on the eGRID, unemployment, and income datasets. For the eGRID dataset, the code selects specific columns related to power plant information in North Carolina, converts certain columns to numeric format, and then combines the generator and plant data based on a common identifier. Duplicate columns are removed, resulting in the plant_gen_data dataframe. The code then proceeds to handle the unemployment dataset, selecting relevant columns covering the years 2002-2022 and merging it with the plant_gen_data dataframe using the FIPS code as a key. Similarly, the income dataset is processed by selecting specific columns, and the final step involves merging this income data with the previously created dataframe. The resulting dataset, named processed_data, contains information on power plants, unemployment rates, and income data, and the column names are displayed at the end of the code.
 
 
 ```{r, echo=FALSE, warning=FALSE, error=FALSE}
@@ -163,7 +195,7 @@ write.csv(processed_data,'Data/Processed/Income_Unemployment_eGrid.csv', row.nam
 ```
 
 # Exploratory Analysis
-This analysis initiates data exploration and visualization for the processed_data dataframe, focusing on fuel types, income, and electricity generation in North Carolina. The summary(processed_data) provides a general overview of the dataset. Figure 1 then generates a pie chart to illustrate the percentage makeup of primary fuel types in North Carolina based on total annual generation. Subsequently, the scatter plot in figure 2 depicts the relationship between median household income and total plant annual generation, with points colored by fuel type. The analysis further drills down to scatter plots excluding nuclear data and for a selected set of fuel types (COAL, SOLAR, OIL, WIND, GAS). Additionally, stacked bar plots in figures 5, 6, and 7  visualize the total annual generation by fuel type and county, and for better clarity, separate plots are created for the top 10 and bottom 10 counties based on median household income. These visualizations help explore and understand the relationships between fuel types, income levels, and electricity generation in different counties of North Carolina.
+This analysis initiates data exploration and visualization for the processed_data dataframe, focusing on fuel types, income, and electricity generation in North Carolina. Figure 1 generates a pie chart to illustrate the percentage makeup of primary fuel types in North Carolina based on total annual generation. Subsequently, the scatter plot in Figure 2 depicts the relationship between median household income and total plant annual generation, with points colored by fuel type. The exploratory analysis further drills down to scatter plots excluding nuclear data and for a selected set of fuel types (COAL, SOLAR, OIL, WIND, GAS). Additionally, stacked bar plots in Figures 5 and 6  visualize the total annual generation by fuel type and county, and for better clarity, separate plots are created for the top 10 and bottom 10 counties based on median household income. These visualizations help explore and understand the relationships between fuel types, income levels, and electricity generation in different counties of North Carolina.
 
 ##### Figure 1: Pie chart illustrating the percentage distribution of primary fuel types in North Carolina based on total annual generation.
 
@@ -241,7 +273,7 @@ print(scatter_income_generation_selected)
 
 ```
 
-##### Figure 5: Stacked bar plot illustrating the total annual generation by fuel type in the top 10 counties (by median income) in North Carolina by income.
+##### Figure 5: Stacked bar plot illustrating the total annual generation by fuel type in the top 10 counties (by median income) in North Carolina.
 
 ```{r, top10, echo=FALSE, warning=FALSE, error=FALSE}
 #Top 10 counties based on median household income
@@ -348,6 +380,7 @@ income_heat_map <-ggplot(data=income_NC_sf_join)+
   geom_sf(aes(fill=PCTPOV017_2021))+labs(title= "% of County in Poverty - 2021", fill="%")
 print (income_heat_map)
 ```
+
 #### Figure 10: Percent of total county population living in poverty in 2021, as defined by the USDA Economic Research Service.
 
 Our final stage of exploratory analysis was to visualize the power plant emissions geographically. Figures 11-15 demonstrate the aggregated power plant emissions per county in 2021 for CO2, NOx, SO2, N20, and CH4 respectively. Unfortunately eGrid did not provide data for Mercury (Hg) in 2021 so that was not analyzed. N20 and CH4 are provided in lbs while CO2, NOx, and SO2 are in short tons. For CO2 emissions, Richmond county stood out. For NOx emissions, Catawba county stood out. For SO2 emissions, Catawba, Haywood, and Person counties stood out.For N20 and CH4 emissions, Catawba and Person counties stood out.
@@ -471,7 +504,7 @@ print(CH4_map)
 # Question 1: How does income impact power plant characteristics at the county level?
 This analysis begins by examining the impact that income has on various power plant characteristics. This first analysis uses income as the highest-level socioeconomic indicator, as income often dictates an array of follow-on indicators. Several regressions are conducted including the impact of income on the fuel type (differentiating between clean and dirty sources), number of plants, and nameplate capacity. 
 
-Examining only the impact of income on coal plants, the estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. However, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income. Figure 16 below visualizes this relationship.
+Examining only the impact of income on coal plants, the estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. Furthermore, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income. Figure 16 below visualizes this relationship.
 
 ```{r, Income_and_Fuel, echo=FALSE, warning=FALSE, error=FALSE}
 
@@ -498,7 +531,7 @@ scatter_coal <- ggplot(coal_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
 print(scatter_coal)
 ```
 
-The linear regression shown in figure 17 below suggests that there might be a relationship between income and solar generation. The statistically significant p-value (0.04707) indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is relatively low (about 0.56%), and so other factors not included in the model may contribute to the variability in generation for solar.
+The linear regression shown in Figure 17 below suggests that there might be a relationship between income and solar generation. The statistically significant p-value (0.04707) indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is quite low (about 0.56%), and so other factors not included in the model likely contribute to the variability in generation for solar.
 
 ```{r, solar, echo=FALSE, warning=FALSE, error=FALSE}
 
@@ -760,7 +793,7 @@ is.Date(robeson_online_plants$GENYRONL)
 ```
 
 ## Summary
-This study's initial inquiry sought to uncover how income, a significant socioeconomic indicator, relates to power plant characteristics. The investigation focused on the fuel type, the number, and the total nameplate capacity of power plants, each representing distinct dimensions of interest. Although the study did not produce definitive and statistically significant results regarding the influence of income on the number of power plants or nameplate capacity, it is suggested that this may be due to the complexity of the energy landscape. While one might expect lower generation capacity and fewer power plants in wealthier areas due to potential opposition, it is crucial to consider that energy consumption is often linked to a higher standard of living. Consequently, having generation capacity in higher-income areas may be necessary to meet the increased demand. Although this aspect of the exploration did not yield statistically significant results, it is noteworthy that the type of fuel generation, specifically solar, displayed some significance. The analysis indicated that an increase in median household income is associated with a decrease in solar generation. However, it is important to recognize that, despite being statistically significant, the coefficient of determination (r2) suggests that the explained variance is relatively modest, standing at only 0.56%.
+This study's initial inquiry sought to uncover how income, a significant socioeconomic indicator, relates to power plant characteristics. The investigation focused on the fuel type, the number, and the total nameplate capacity of power plants, each representing distinct dimensions of interest. Although the study did not produce definitive and statistically significant results regarding the influence of income on the number of power plants or nameplate capacity, it is suggested that this may be due to the complexity of the energy landscape. While one might expect lower generation capacity and fewer power plants in wealthier areas due to potential opposition, it is crucial to consider that energy consumption is often linked to a higher standard of living. Consequently, having generation capacity in higher-income areas may be necessary to meet the increased demand. Although this aspect of the exploration did not yield statistically significant results, it is noteworthy that the type of fuel generation, specifically solar, displayed some significance. The analysis indicated that an increase in median household income is associated with a decrease in solar generation. However, it is important to recognize that, despite being statistically significant, the coefficient of determination (r2) suggests that the explained variance is quite modest, standing at only 0.56%.
 
 # Question 2: Do power plant retirements have a significant impact on unemployment?
 The primary motivation behind this analysis is to delve into the nuanced equilibrium inherent in a just energy transition. The imperative of shifting energy fuel sources from carbon-intensive to fossil fuel-free must be achieved without detriment to communities. In this examination, we initially pinpoint counties in North Carolina with the highest and lowest numbers of retirements, comparing them to their respective unemployment rates over time. To conduct a more pointed analysis, a statistical examination is performed on a specific county of interest.
@@ -829,7 +862,7 @@ fips_counts <- table(generator_retirement_data$FIPS_Code)#identifies 2 counties 
 
 Based on the data set above, FIPS Code 37159 (Rowan) and 37191 (Wayne) each have the highest number of retirements at 7 rows.FIPS Code 37023  (Burke) 37041 (Chowan) 37049  (Craven) 37063 (Durham) 37067 (Forsyth) 37069 (Franklin) 37125 (Moore) each have 1 row.
 
-In this analysis, counties experiencing both high (blue) and low (green) numbers of generator retirements, such as Rowan and Wayne (high retirements) and Burke and Craven (low retirements), are singled out. The objective is to investigate whether fluctuations in unemployment rates are influenced by generator retirements or if the rates exhibit similar trends irrespective of such retirements. Through this exploratory analysis, the goal is to discern any distinctive patterns in unemployment dynamics. As the plot in figure 22 below shows instances in which the unemployment rates do not follow the hypothesized pattern, another variable was chosen for statistical analysis.
+In this analysis, counties experiencing both high (blue) and low (green) numbers of generator retirements, such as Rowan and Wayne (high retirements) and Burke and Craven (low retirements), are singled out. The objective is to investigate whether fluctuations in unemployment rates are influenced by generator retirements or if the rates exhibit similar trends irrespective of such retirements. Through this exploratory analysis, the goal is to discern any distinctive patterns in unemployment dynamics. As the plot in Figure 22 below shows instances in which the unemployment rates do not follow the hypothesized pattern, another variable was chosen for statistical analysis.
 
 ##### Figure 22: Historical unemployment rates in Wayne, Rowan, Durham, and Chowan Counties
 ```{r, cols_interest, echo=FALSE, warning=FALSE, error=FALSE}
@@ -869,7 +902,7 @@ combined_plot <- ggplot() +
 print(combined_plot)
 ```
 
-Contrary to the initial hypothesis, this regression indicates that for each MW increase in retired nameplate capacity, the unemployment rate unemployment rate in Rowan is expected to decrease by approximately 0.02428 percentage points. The p-value is greater than 0.05,but given that it is only marginally higher (at 0.0619) we can theoretically interpret there to be a weak relationship. However, it must be understood that the sample size is small and therefore we would need much more data for any reliable conclusions.
+Contrary to the initial hypothesis, this regression indicates that for each MW increase in retired nameplate capacity, the unemployment rate unemployment rate in Rowan is expected to decrease by approximately 0.02428 percentage points. The p-value is greater than 0.05, but given that it is only marginally higher (at 0.0619) we can theoretically interpret there to be a weak relationship. It must also be understood that the sample size is small and therefore we would need much more data for any reliable conclusions.
 
 The Multiple R-squared value of 0.5346 represents the proportion of the variance in the response variable (Rowan UE (%)) that can be explained by the predictor variable retired nameplate capacity (MW).
 
@@ -1186,6 +1219,8 @@ While the Clean Air Act and its various amendments have been in effect for decad
 
 
 # References
+*Supporting the nation’s coal workers and communities in a changing energy landscape. Union of Concerned Scientists. (2021).https://www.ucsusa.org/resources/support-coal-workers#read-online-content 
+
 *United States Environmental Protection Agency (EPA). 2023. “Emissions & Generation Resource Integrated Database (eGRID), 2021” Washington, DC: Office of Atmospheric Protection, Clean Air Markets Division. Available from EPA’s eGRID web site: https://www.epa.gov/egrid. Accessed on 11/1/2023.
 
 *United States Census Bureau. Cartographic Boundary Files - Shapefile. 2018 County. https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html. Accessed on 11/15/2023.
