@@ -28,6 +28,7 @@ Sources for data used in this analysis are outlined below:
 
 *Centers for Disease Control and Prevention/ Agency for Toxic Substances and Disease Registry/ Geospatial Research, Analysis, and Services Program. CDC/ATSDR Social Vulnerability Index 2020. Database North Carolina. https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html. Accessed on 12/6/2023.  
 
+*Centers for Disease Control and Prevention and Agency for Toxic Substances Disease Registry. 2022 Environmental Justice Index. https://www.atsdr.cdc.gov/placeandhealth/eji/index.html. Accessed on 12/5/2023.
 
 ## Folder structure and file formats
 
@@ -47,6 +48,9 @@ Metadata for each of the data sets can be found linked below. In the case of eGR
 *Unemployment Data - U.S. Bureau of Labor Statistics. "Handbook of Methods." January 09, 2018. https://www.bls.gov/opub/hom/lau/home.htm 
 
 *Social Vulnerability Index (SVI) - https://www.atsdr.cdc.gov/placeandhealth/svi/documentation/SVI_documentation_2020.html  
+
+*Environmental Justice Index (EJI) - 
+https://www.atsdr.cdc.gov/placeandhealth/eji/docs/EJI-2022-Documentation-508.pdf 
 
 ## Scripts and code
 
