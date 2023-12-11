@@ -10,7 +10,7 @@ output:
 # Research Rationale
 The impetus behind this research lies in the imperative to address the intricate interplay between socioeconomic factors and power plants. As the global energy landscape undergoes a transformative shift toward sustainability, it becomes paramount to understand how these changes might impact communities, particularly those situated in lower-income communities. The socio-spatial lens through which this study is conducted aims to unearth patterns of power plant distribution across North Carolina. North Carolina is home to 100 counties and 843 power plants made up of 1190 generators (US EPA, 2021). The overarching question is whether certain communities bear a disproportionate burden of environmentally impactful energy sources, framing the discourse within the realms of environmental justice and equity.
 
-As a key aspect of this exploration, the research considers the connection between power plant location and emissions and various socioeconomic indicators, including but not limited to unemployment rates. This exploration is motivated by a concern and eye for environmental justice, as power plants have often served as major employers in low-income areas (Union of Concerned Scientists, 2021). This research extends its focus beyond energy sources to examine the broader impacts of power plants on health, and social vulnerability, and scrutinizes disparities in pollution exposure and associated health risks at a high level, using publicly available data. Through an exploration that encompasses various socioeconomic indicators, this research contributes to a more nuanced understanding of the multifaceted impacts of power plants.
+As a key aspect of this exploration, the research considers the connection between power plant location and emissions and various socioeconomic indicators, including but not limited to unemployment rates. This exploration is motivated by the awareness that power plants have often served as major employers in low-income areas (Union of Concerned Scientists, 2021). This research extends its focus beyond energy sources to examine the broader impacts of power plants on health and social vulnerability, and scrutinizes disparities in pollution exposure and associated health risks at a high level, using publicly available data. Through an exploration that encompasses various socioeconomic indicators, this research contributes to a more nuanced understanding of the multifaceted impacts of power plants.
 
 
 ```{r setup, include=FALSE}
@@ -55,6 +55,10 @@ The subsequent phase of data wrangling introduces additional steps specifically 
 
 ### Social Vulnerability Index – 
 2020 data from the US CDC on key vulnerability criteria including socioeconomic status, household characteristics, racial & ethnic minority status, and house type & transportation.
+
+### Environmental Justice Index - 
+2022 report on environmental burden, social vulnerability, and health vulnerability indicators. The Environmental Protection Agency (EPA) Environmental Justice Index (EJI) team selected the indicators based on a literature review conducted between December 2020 and December 2021.
+
 Table: Table 1: Dataset Information
 
 
@@ -75,17 +79,13 @@ Unemployment    |Data Hierarchy | Unemployment rates are associated with FIPS co
 Unemployment    |Data Range | 2000 to 2021
 Unemployment  |Data Source | The Economic Research Service of the United States Department of Agriculture
 Social Vulnerability Index  |  Key Variables | Socioeconomic status, household characteristics, racial & ethnic minority status, and house type & transportation
-Social Vulnerability Index  |Data Hierarchy | **********Indicators are associated with tract-level locations*************
+Social Vulnerability Index  |Data Hierarchy | Indicator data is available at the tract level
 Social Vulnerability Index  |Data Range | 2020
 Social Vulnerability Index  |Data Source | The United States Centers for Disease Control and Prevention/Agency for Toxic Substances and Disease Registry Social Vulnerability Index (CDC/ATSDR SVI)
 Environmental Justice Index  |  Key Variables | Environmental burden, social vulnerability, and health vulnerability
-Environmental Justice Index  |Data Hierarchy | *********Indicators are associated with tract-level locations**************
-Environmental Justice Index  |Data Range | 2020
+Environmental Justice Index  |Data Hierarchy | Indicator data is available at the tract level
+Environmental Justice Index  |Data Range | 2020 to 2021
 Environmental Justice Index  |Data Source | The United States Agency for Toxic Substances and Disease
-
-*Social Vulnerability Index - 2020 data from the US CDC on key vulnerability criteria including socioeconomic status, household characteristics, racial & ethnic minority status, and house type & transportation.
-
-*Environmental Justice Index - 2022 report including "indicators representing environmental burden, social vulnerability, and health vulnerability were selected based on a thorough literature review conducted by the EJI research team between December 2020 and December 2021." 
 
 
 ```{r, Data_Load, echo=FALSE, warning=FALSE, error= FALSE}
@@ -690,7 +690,7 @@ tract_generation_SVI_plot <- ggplot(Generation_SVI,
                                     aes(x = Total_Generation, 
                                         y = RPL_THEMES)) +
   geom_point()+ylim(0,1)+
-  stat_smooth(method = "lm", col = "red")+labs(Y='Overall SVI Value', X='Total Generation in 2021 (MWh)',title= 
+  stat_smooth(method = "lm", col = "red")+labs(y='Overall SVI Value', x='Total Generation in 2021 (MWh)',title= 
 "Total Power Plant Generation and SVI by county")
 print(tract_generation_SVI_plot) 
 
@@ -947,6 +947,9 @@ summary(lm_result)
 The examination of the impact resulting from the retirement of power plant generators failed to produce definitive results; nevertheless, it contributes to the expanding field of advocating for an environmental justice perspective. This research goes beyond the reliance on the reduction of tons of carbon dioxide equivalents in emissions as a measure of the energy transition's success. It underscores the importance of adopting a holistic approach to key performance indicators, particularly given that large power plants are often situated in rural areas where communities heavily depend on utilities for employment. The analytical methodology adheres to best practices, incorporating counties with varying numbers of retirements to control for factors external to the retirements themselves. Additionally, the analysis delves into the actual nameplate capacity of retired assets, recognizing the plausible implication that a smaller capacity may employ fewer individuals compared to a larger plant. Contrary to the initial hypothesis, the findings reveal a statistically significant relationship, wherein each megawatt increase in retired nameplate capacity is associated with a marginal decrease in the unemployment rate. However, the inherent data limitations within this relatively small sample size necessitate cautious interpretation. It is crucial to acknowledge that while this analysis falls short of providing conclusive results, it serves as a foundation for further exploration in subsequent analyses and environmental justice research.
 
 # Question 3: Is there a relationship between power plant distribution and impacts to human health?
+
+Null hypothesis: there is no relationship between power plant distribution and impacts to human health.
+
 Among the emissions types tracked as part of the eGRID data set used in Questions 1 and 2, nitrogen oxides (NOx) and sulfur dioxide merit further exploration, as they form part of criteria air pollutants regulated by EPA. Under the Clean Air Act, US EPA has set National Ambient Air Quality Standards on six criteria air pollutants: particulate matter (PM2.5 and PM10), atmospheric ozone, carbon monoxide, lead, nitrogen dioxide, and sulfur dioxide. These pollutants reach widespread exposure--millions of people--due to their numerous and diverse sources. Causal or likely causal evidence pointing to a variety of negative health endpoints exists for each one of them. 
 
 Power plants have historically made up a major stationary point source of air pollution, including SO2 and NO2, in particular. For nitrogen dioxide (NO2) and sulfur dioxide (SO2), the regulatory emissions standard-setting has been most heavily informed by research on respiratory effects. It should be noted that nitrogen oxides (NOx) also contribute to the formation of atmospheric ozone, which causes respiratory problems. 
@@ -986,6 +989,7 @@ tracts_EJI_sf_join <-  merge(x = spatial_tracts,
                            y = EJI_countytract, 
                            by.x = 'GEOID', 
                            by.y = 'GEOID' )
+#Some EJI tracts did not GEOIDs that matched the spatial tracts
 
 #Select variables of interest
 tracts_EJI_sf_select <- tracts_EJI_sf_join %>%
@@ -1012,13 +1016,18 @@ print(tracts_map)
 st_crs(plant_gen_sf$geometry) # NAD1983, EPSG 4269
 
 #Match coordinates of plants_NC to tract geometry
-plants_within_tracts <- plant_gen_sf[tracts_EJI_sf_select,]
+#plants_within_tracts <- plant_gen_sf[tracts_EJI_sf_select,]
+tracts_containing_plants <- tracts_EJI_sf_select[plant_gen_sf,]
 
-#Map of two layers: one is tract boundaries, the other is plants across tracts
+#Map of plants across NC tracts, shown over NC tract boundaries 
 mapview(spatial_tracts, col.regions='pink', layer.name = 'North Carolina Tracts') + 
  mapview(plants_within_tracts,
           layer.name = 'Plants Within Each Tract',
           alpha=.5)
+
+#Map of just NC tracts that contain power plants
+mapview(spatial_tracts, col.regions='grey', layer.name = 'North Carolina Tracts') + 
+  mapview(tracts_containing_plants, col.regions=, layer.name = 'NC Tracts Containing Power Plants')
 
 #Zoom in on tracts within one county: Robeson, the county with highest total number of existing plants in 2021
 #Filter for Robeson tracts
@@ -1028,16 +1037,60 @@ Robeson_tracts <- tracts_EJI_sf_select %>%
 tract_plants_Robeson <- filter(plants_within_tracts, CNTYNAME == "Robeson")
 
 #Show plants within Robeson tracts, specifically
-mapview(Robeson_tracts, col.regions='pink', layer.name = 'Robeson County Tracts, NC') + 
+mapview(Robeson_tracts, col.regions='pink', 
+        layer.name = 'Robeson County Tracts, NC') +
  mapview(tract_plants_Robeson,
           layer.name = 'Plants Within Each Tract',
           alpha=.5)
 
+#Convert NC eGrid tabular county data to spatial data
+plants_NC_sf <- Plant_NC %>% st_as_sf(coords = c('LON','LAT'), crs=4269)
+
 #Table of plant data with the tract that corresponds to each plant
-intersect_plants_tracts <- st_intersection(plant_gen_sf, tracts_EJI_sf_select)
+intersection_plants_EJI <- st_intersection(plants_NC_sf, tracts_EJI_sf_select)
 
 #Exporting to CSV:
-#write.csv(intersect_plants_tracts,'Data/Processed/EBM_Processed.csv', row.names=FALSE)
+#write.csv(intersect_plants_EJI,'Data/Processed/EBM_Processed.csv', row.names=FALSE)
+```
+
+
+```{r Relationship between Asthma Prevalence and Power Plant Count}
+##Visualize the relationship between asthma prevalence and number of power plants per tract ##
+
+#Power plant count
+plantcount_per_tract <- intersection_plants_EJI %>%
+  group_by(GEOID) %>%
+  summarise(plantcount = n())
+
+#Asthma prevalence by tract
+HealthImpacts_by_tract <- intersection_plants_EJI %>% 
+  select(GEOID, EP_ASTHMA, EP_BPHIGH) %>%
+  st_drop_geometry()
+class(HealthImpacts_by_tract)
+
+#Join plant count and 
+join_HealthImpacts_plantcount <- merge(HealthImpacts_by_tract, plantcount_per_tract, 
+                                    by = "GEOID")
+#Remove duplicates
+join_HealthImpacts_plantcount <- distinct(join_HealthImpacts_plantcount, GEOID, .keep_all = TRUE)
+
+#Check normal distributions of continuous variables
+qqnorm(join_HealthImpacts_plantcount$EP_ASTHMA); qqline(join_HealthImpacts_plantcount$EP_ASTHMA)
+qqnorm(join_HealthImpacts_plantcount$EP_BPHIGH); qqline(join_HealthImpacts_plantcount$EP_BPHIGH)
+#The data does not follow a normal distribution
+
+#Bartlett's test checks null hyp that the variance in each of the groups are the same. We want to run this because ANOVA is robust against departures from equal variance, however, if the test result is false, we can still run ANOVA. Can't use bc each group must have at least two observations.
+
+Asthma_plantcount_lm <- lm(data = join_HealthImpacts_plantcount, EP_ASTHMA ~ plantcount)
+summary(Asthma_plantcount_lm)
+
+Asthma_plantcount_plot <- ggplot(join_HealthImpacts_plantcount, 
+                          aes(x = plantcount, y = EP_ASTHMA)) +
+      geom_point() +
+      ggtitle("Test") + 
+      labs(x="Number of Plants in Tract",
+           y="Percentage of Tract with Asthma (%)")
+print(Asthma_plantcount_plot)
 ```
 
 
