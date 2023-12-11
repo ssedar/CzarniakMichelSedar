@@ -75,11 +75,11 @@ Unemployment    |Data Hierarchy | Unemployment rates are associated with FIPS co
 Unemployment    |Data Range | 2000 to 2021
 Unemployment  |Data Source | The Economic Research Service of the United States Department of Agriculture
 Social Vulnerability Index  |  Key Variables | Socioeconomic status, household characteristics, racial & ethnic minority status, and house type & transportation
-Social Vulnerability Index  |Data Hierarchy | ***********************
+Social Vulnerability Index  |Data Hierarchy | **********Indicators are associated with tract-level locations*************
 Social Vulnerability Index  |Data Range | 2020
 Social Vulnerability Index  |Data Source | The United States Centers for Disease Control and Prevention/Agency for Toxic Substances and Disease Registry Social Vulnerability Index (CDC/ATSDR SVI)
 Environmental Justice Index  |  Key Variables | Environmental burden, social vulnerability, and health vulnerability
-Environmental Justice Index  |Data Hierarchy | *********************************
+Environmental Justice Index  |Data Hierarchy | *********Indicators are associated with tract-level locations**************
 Environmental Justice Index  |Data Range | 2020
 Environmental Justice Index  |Data Source | The United States Agency for Toxic Substances and Disease
 
