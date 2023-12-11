@@ -1044,7 +1044,7 @@ cor.test(intersect_plants_tracts$PLSO2AN, intersect_plants_tracts$PLNOXAN)
 # The correlation test returns a correlation strength of 0.9096, which signifies a strong correlation between NOx emissions and SO2 emissions. In summary, there is a strong positive correlation.  
 ```
 
-```{r Relationship between NOx Emissions and SO2 Emissions}
+```{r Other Exploratory Regression Analyses}
 
 ## Visualize the relationship between NOx and Asthma ##
 NOx_asthma_plot <- ggplot(intersect_plants_tracts, 
