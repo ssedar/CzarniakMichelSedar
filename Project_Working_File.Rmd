@@ -8,7 +8,7 @@ output:
   
 ---
 # Research Rationale
-The impetus behind this research lies in the imperative to address the intricate interplay between socioeconomic factors and power plants. As the global energy landscape undergoes a transformative shift toward sustainability, it becomes paramount to understand how these changes might impact communities, particularly those situated in lower-income communities. The socio-spatial lens through which this study is conducted aims to unearth patterns of power plant distribution across North Carolina. North Carolina is home to 100 counties and 843 power plants made up of 1190 generators (US EPA, 2021). The overarching question is whether certain communities bear a disproportionate burden of environmentally impactful energy sources, framing the discourse within the realms of environmental justice and equity.
+The impetus behind this research lies in the imperative to address the intricate interplay between socioeconomic factors and power plants. As the global energy landscape undergoes a transformative shift toward sustainability, it becomes paramount to understand how these changes might impact communities, particularly those situated in lower-income communities. The socio-spatial lens through which this study is conducted aims to unearth patterns of power plant distribution across North Carolina. With 100 counties and a total of 843 power plants consisting of 1190 generators (US EPA, 2021), the state's unique landscape offers a rich context for investigation. The overarching question is whether certain communities bear a disproportionate burden of environmentally impactful energy sources, framing the discourse within the realms of environmental justice and equity.
 
 As a key aspect of this exploration, the research considers the connection between power plant location and emissions and various socioeconomic indicators, including but not limited to unemployment rates. This exploration is motivated by the awareness that power plants have often served as major employers in low-income areas (Union of Concerned Scientists, 2021). This research extends its focus beyond energy sources to examine the broader impacts of power plants on health and social vulnerability, and scrutinizes disparities in pollution exposure and associated health risks at a high level, using publicly available data. Through an exploration that encompasses various socioeconomic indicators, this research contributes to a more nuanced understanding of the multifaceted impacts of power plants.
 
@@ -56,7 +56,7 @@ The subsequent phase of data wrangling introduces additional steps specifically 
 ### Social Vulnerability Index – 
 2020 data from the US CDC on key vulnerability criteria including socioeconomic status, household characteristics, racial & ethnic minority status, and house type & transportation.
 
-### Environmental Justice Index - 
+### Environmental Justice Index –  
 2022 report on environmental burden, social vulnerability, and health vulnerability indicators. The Environmental Protection Agency (EPA) Environmental Justice Index (EJI) team selected the indicators based on a literature review conducted between December 2020 and December 2021.
 
 
@@ -121,7 +121,7 @@ SVI_2018_tract <-read.csv(here('Data/Raw/SVI2018_NorthCarolina.csv'),
 ```
 
 # Data Wrangling
-The intial step in our research, once loaded, was data wrangling on the eGRID, unemployment, and income datasets. For the eGRID dataset, the code selects specific columns related to power plant information in North Carolina, converts certain columns to numeric format, and then combines the generator and plant data based on a common identifier. Duplicate columns are removed, resulting in the plant_gen_data dataframe. The code then proceeds to handle the unemployment dataset, selecting relevant columns covering the years 2002-2022 and merging it with the plant_gen_data dataframe using the FIPS code as a key. Similarly, the income dataset is processed by selecting specific columns, and the final step involves merging this income data with the previously created dataframe. The resulting dataset, named processed_data, contains information on power plants, unemployment rates, and income data, and the column names are displayed at the end of the code.
+The initial step in our research, once loaded, was data wrangling on the eGRID, unemployment, and income datasets. Data wrangling, or the process of transforming raw data, was a crucial step in this research, particularly due to the diverse nature of the datasets. For the eGRID dataset, the code selects specific columns related to power plant information in North Carolina, converts certain columns to numeric format, and then combines the generator and plant data based on a common identifier. Duplicate columns are removed, resulting in the plant_gen_data dataframe. The code then proceeds to handle the unemployment dataset, selecting relevant columns covering the years 2002-2022 and merging it with the plant_gen_data dataframe using the FIPS code as a key. Similarly, the income dataset is processed by selecting specific columns, and the final step involves merging this income data with the previously created dataframe. The resulting dataset, named processed_data, contains information on power plants, unemployment rates, and income data, and the column names are displayed at the end of the code. The social vulnerability index and environmental justice datasets are wrangled within the context of Question 3.
 
 
 ```{r, echo=FALSE, warning=FALSE, error=FALSE}
@@ -376,7 +376,7 @@ income_heat_map <-ggplot(data=income_NC_sf_join)+
 print (income_heat_map)
 ```
 
-Our final stage of exploratory analysis was to visualize the power plant emissions geographically. Figures 10-14 demonstrate the aggregated power plant emissions per county in 2021 for CO2, NOx, SO2, N20, and CH4 respectively. Unfortunately eGrid did not provide data for Mercury (Hg) in 2021 so that was not analyzed. N20 and CH4 are provided in lbs while CO2, NOx, and SO2 are in short tons. For CO2 emissions, Richmond county stood out. For NOx emissions, Catawba county stood out. For SO2 emissions, Catawba, Haywood, and Person counties stood out.For N20 and CH4 emissions, Catawba and Person counties stood out.
+Additionally, we explored power plant emissions geographically as a final stage of our exploratory analysis. Figures 10-14 demonstrate the aggregated power plant emissions per county in 2021 for CO2, NOx, SO2, N20, and CH4 respectively. Unfortunately eGrid did not provide data for Mercury (Hg) in 2021 so that was not analyzed. N20 and CH4 are provided in lbs while CO2, NOx, and SO2 are in short tons. For CO2 emissions, Richmond county stood out. For NOx emissions, Catawba county stood out. For SO2 emissions, Catawba, Haywood, and Person counties stood out.For N20 and CH4 emissions, Catawba and Person counties stood out.
 
 ##### Figure 10: Total CO2 Emissions in 2021 across North Carolina Power Plants.
 ```{r Power Plant Emissions Heat Maps}
@@ -494,6 +494,9 @@ print(CH4_map)
 
 
 # Question 1: How does income impact power plant characteristics at the county level?
+
+Null Hypothesis: The economic status of a community does not bear a statistically significant impact on the features of its power infrastructure.
+
 This analysis begins by examining the impact that income has on various power plant characteristics. This first analysis uses income as the highest-level socioeconomic indicator, as income often dictates an array of follow-on indicators. Several regressions are conducted including the impact of income on the fuel type (differentiating between clean and dirty sources), number of plants, and nameplate capacity. 
 
 Examining only the impact of income on coal plants, the estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. Furthermore, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income. Figure 15 below visualizes this relationship.
@@ -782,6 +785,9 @@ robeson_FIPS_code <- robeson_online_plants$FIPS_Code
 This study's initial inquiry sought to uncover how income, a significant socioeconomic indicator, relates to power plant characteristics. The investigation focused on the fuel type, the number, and the total nameplate capacity of power plants, each representing distinct dimensions of interest. Although the study did not produce definitive and statistically significant results regarding the influence of income on the number of power plants or nameplate capacity, it is suggested that this may be due to the complexity of the energy landscape. While one might expect lower generation capacity and fewer power plants in wealthier areas due to potential opposition, it is crucial to consider that energy consumption is often linked to a higher standard of living. Consequently, having generation capacity in higher-income areas may be necessary to meet the increased demand. Although this aspect of the exploration did not yield statistically significant results, it is noteworthy that the type of fuel generation, specifically solar, displayed some significance. The analysis indicated that an increase in median household income is associated with a decrease in solar generation. However, it is important to recognize that, despite being statistically significant, the coefficient of determination (r2) suggests that the explained variance is quite modest, standing at only 0.56%.
 
 # Question 2: Do power plant retirements have a significant impact on unemployment?
+
+Null Hypothesis: The retirement of power plant generators does not have an impact on unemployment rates in the counties in which they are located.
+
 The primary motivation behind this analysis is to delve into the nuanced equilibrium inherent in a just energy transition. The imperative of shifting energy fuel sources from carbon-intensive to fossil fuel-free must be achieved without detriment to communities. In this examination, we initially pinpoint counties in North Carolina with the highest and lowest numbers of retirements, comparing them to their respective unemployment rates over time. To conduct a more pointed analysis, a statistical examination is performed on a specific county of interest.
 
 Power plant retirements were analyzed (using data contained in the 2020 eGRID dataset) to identify which counties had the most number of retired power plants.Counties with no retirements were also selected to provide a comparison. 
