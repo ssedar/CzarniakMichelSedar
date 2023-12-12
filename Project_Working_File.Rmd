@@ -322,9 +322,9 @@ print(stacked_barplot_bottom_income_counties)
 
 
 
-We then created initial maps to better understand the landscape of North Carolina in terms of socioeconomic status and geographic distribution of power plants. Figure 8 below shows the mapping of power plants across the state and helped us to visualize the concentration of power plants across the state. Figure 9 maps the nameplate capacity of those power plants by county. We noticed that multiple counties, especially Richmond county, stood out as having a high concentration of capacity. Figure 10 demonstrates a heat map of the percentage of each county's population living in poverty as of 2021. Richmond county is once again a clear visual outlier on this map.
+We then created initial maps to better understand the landscape of North Carolina in terms of socioeconomic status and geographic distribution of power plants. Figure 7 below shows the mapping of power plants across the state and helped us to visualize the concentration of power plants across the state. Figure 8 maps the nameplate capacity of those power plants by county. We noticed that multiple counties, especially Richmond county, stood out as having a high concentration of capacity. Figure 9 demonstrates a heat map of the percentage of each county's population living in poverty as of 2021. Richmond county is once again a clear visual outlier on this map.
 
-##### Figure 8: Active power plants across North Carolina as of 2021. Each black dot is a power plant.
+##### Figure 7: Active power plants across North Carolina as of 2021. Each black dot is a power plant.
 
 ```{r Initial Maps - Power plant locations}
 #Load in counties spatial data
@@ -341,7 +341,7 @@ gens_counties_map <-ggplot()+
 print(gens_counties_map)
 ```
 
-##### Figure 9: This map shows the total nameplate capacity in Megawatts of each county in North Carolina. Multiple counties have no power plants and are blank. Richmond County is an interesting outlier which the highest capacity of all the counties.
+##### Figure 8: This map shows the total nameplate capacity in Megawatts of each county in North Carolina. Multiple counties have no power plants and are blank. Richmond County is an interesting outlier which the highest capacity of all the counties.
 ```{r Initial Maps - Nameplate capacity}
 
 #Compute sum of nameplate capacity by county
@@ -359,7 +359,7 @@ gen_cap_map <-ggplot(data=counties_sf_join)+
 print(gen_cap_map)
 ```
 
-##### Figure 10: Percent of total county population living in poverty in 2021, as defined by the USDA Economic Research Service.
+##### Figure 9: Percent of total county population living in poverty in 2021, as defined by the USDA Economic Research Service.
 ```{r Initial Maps - Income by county}
 ## Heat map of Income Data by County ##
 #Create data frame of NC income data
@@ -376,9 +376,9 @@ income_heat_map <-ggplot(data=income_NC_sf_join)+
 print (income_heat_map)
 ```
 
-Our final stage of exploratory analysis was to visualize the power plant emissions geographically. Figures 11-15 demonstrate the aggregated power plant emissions per county in 2021 for CO2, NOx, SO2, N20, and CH4 respectively. Unfortunately eGrid did not provide data for Mercury (Hg) in 2021 so that was not analyzed. N20 and CH4 are provided in lbs while CO2, NOx, and SO2 are in short tons. For CO2 emissions, Richmond county stood out. For NOx emissions, Catawba county stood out. For SO2 emissions, Catawba, Haywood, and Person counties stood out.For N20 and CH4 emissions, Catawba and Person counties stood out.
+Our final stage of exploratory analysis was to visualize the power plant emissions geographically. Figures 10-14 demonstrate the aggregated power plant emissions per county in 2021 for CO2, NOx, SO2, N20, and CH4 respectively. Unfortunately eGrid did not provide data for Mercury (Hg) in 2021 so that was not analyzed. N20 and CH4 are provided in lbs while CO2, NOx, and SO2 are in short tons. For CO2 emissions, Richmond county stood out. For NOx emissions, Catawba county stood out. For SO2 emissions, Catawba, Haywood, and Person counties stood out.For N20 and CH4 emissions, Catawba and Person counties stood out.
 
-##### Figure 11: Total CO2 Emissions in 2021 across North Carolina Power Plants.
+##### Figure 10: Total CO2 Emissions in 2021 across North Carolina Power Plants.
 ```{r Power Plant Emissions Heat Maps}
 #Heat map of CO2 emissions by county
 #Compute sum of CO2 Emissions by county
@@ -399,7 +399,7 @@ CO2_map <-ggplot(data=CO2_counties_sf_join)+geom_sf(data=counties_sf)+
 print(CO2_map)
 ```
 
-##### Figure 12: Total NOx Emissions in 2021 across North Carolina Power Plants.
+##### Figure 11: Total NOx Emissions in 2021 across North Carolina Power Plants.
 
 ```{r, NOX Emissions}
 #Heat map of NOx emissions by county
@@ -423,7 +423,7 @@ NOx_map <-ggplot(data= NOx_counties_sf_join)+
 print(NOx_map)
 ```
 
-##### Figure 13: Total SO2 Emissions in 2021 across North Carolina Power Plants.
+##### Figure 12: Total SO2 Emissions in 2021 across North Carolina Power Plants.
 
 ```{r, SO2 Emissions}
 #Heat map of SO2 emissions by county
@@ -446,7 +446,7 @@ SO2_map <-ggplot(data=SO2_counties_sf_join)+
 print(SO2_map)
 ```
 
-##### Figure 14: Total N20 Emissions in 2021 across North Carolina Power Plants.
+##### Figure 13: Total N20 Emissions in 2021 across North Carolina Power Plants.
 
 ```{r, N20 Emissions}
 #Heat map of N2O emissions by county
@@ -469,7 +469,7 @@ N2O_map <-ggplot(data= N2O_counties_sf_join)+
 print(N2O_map)
 ```
 
-##### Figure 15: Total CH4 Emissions in 2021 across North Carolina Power Plants.
+##### Figure 14: Total CH4 Emissions in 2021 across North Carolina Power Plants.
 
 ```{r, CH4 Emissions}
 #Heat map of CH4 emissions by county
@@ -496,7 +496,7 @@ print(CH4_map)
 # Question 1: How does income impact power plant characteristics at the county level?
 This analysis begins by examining the impact that income has on various power plant characteristics. This first analysis uses income as the highest-level socioeconomic indicator, as income often dictates an array of follow-on indicators. Several regressions are conducted including the impact of income on the fuel type (differentiating between clean and dirty sources), number of plants, and nameplate capacity. 
 
-Examining only the impact of income on coal plants, the estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. Furthermore, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income. Figure 16 below visualizes this relationship.
+Examining only the impact of income on coal plants, the estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. Furthermore, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income. Figure 15 below visualizes this relationship.
 
 ```{r, Income_and_Fuel, echo=FALSE, warning=FALSE, error=FALSE}
 
@@ -511,7 +511,7 @@ knitr::kable(summary(linear_model_coal)$coef, format = "html", caption = "Linear
 
 ```
 
-##### Figure 16: Relationship of median household income ($) on coal generation (MWh) in 2021 by county.
+##### Figure 15: Relationship of median household income ($) on coal generation (MWh) in 2021 by county.
 
 ```{r warning=TRUE}
 #Visualize relationship
@@ -524,7 +524,7 @@ scatter_coal <- ggplot(coal_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
 print(scatter_coal)
 ```
 
-The linear regression shown in Figure 17 below suggests that there might be a relationship between income and solar generation. The statistically significant p-value (0.04707) indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is quite low (about 0.56%), and so other factors not included in the model likely contribute to the variability in generation for solar.
+The linear regression shown in Figure 16 below suggests that there might be a relationship between income and solar generation. The statistically significant p-value (0.04707) indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is quite low (about 0.56%), and so other factors not included in the model likely contribute to the variability in generation for solar.
 
 ```{r echo=FALSE, error=FALSE, warning=FALSE, solar}
 
@@ -535,7 +535,7 @@ linear_model_solar <- lm(PLNGENAN ~ MEDHHINC_2021, data = solar_data)
 knitr::kable(summary(linear_model_solar)$coef, format = "html", caption = "Linear Regression Results - Solar")
 ```
 
-##### Figure 17: Relationship of median household income ($) on solar generation (MWh) in 2021 by county.
+##### Figure 16: Relationship of median household income ($) on solar generation (MWh) in 2021 by county.
 
 ```{r, solar plot, echo = FALSE}
 #Visualize relationship
@@ -548,7 +548,7 @@ scatter_solar <- ggplot(solar_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
 print(scatter_solar)
 ```
 
-The next stage of analysis examined if there was a relationship between the quantity of generators and median household income. The linear regression results indicate that median household income does not show a statistically significant association with the number of plants. The coefficient is estimated to be -0.0000786, with a standard error of 0.0000922, a t-value of -0.85, and a p-value of 0.3962. This suggests that, based on the available data, changes in median household income do not appear to be statistically linked to variations in the number of plants. Figure 18 below illustrates this relationship.
+The next stage of analysis examined if there was a relationship between the quantity of generators and median household income. The linear regression results indicate that median household income does not show a statistically significant association with the number of plants. The coefficient is estimated to be -0.0000786, with a standard error of 0.0000922, a t-value of -0.85, and a p-value of 0.3962. This suggests that, based on the available data, changes in median household income do not appear to be statistically linked to variations in the number of plants. Figure 17 below illustrates this relationship.
 
 ```{r, viz_solar, echo=FALSE, warning=FALSE, error=FALSE}
 
@@ -596,7 +596,7 @@ inc_plants_model <- lm(Num_Plants ~ MEDHHINC_2021, data = county_plants_df)
 knitr::kable(summary(inc_plants_model)$coef, format = "html", caption = "Linear Regression Results - Number of Plants")
 ```
 
-##### Figure 18: Relationship of Median Household Income and Number of Power Plants in NC in 2021 by county.
+##### Figure 17: Relationship of Median Household Income and Number of Power Plants in NC in 2021 by county.
 
 ```{r,power plants number}
 #Plot relationship
@@ -610,7 +610,7 @@ ggplot(county_plants_df, aes(x = MEDHHINC_2021, y = Num_Plants)) +
 
 
 
-As different power plants are different sizes, especially across different fuel types, we analyzed if the average nameplate capacity of plants in a county was related to median household income.The linear regression on this relationship yields a coefficient of 0.0019239, accompanied by a standard error of 0.0023465. This implies that, theoretically, an increase in median household income is associated with a slight corresponding increase in Nameplate Capacity. However, the non-significant p-value of 0.4145 means we do not have sufficient evidence to reject the null hypothesis and the observed association between median household income and Nameplate Capacity may be coincidental. Figure 19 below demonstrates this relationship.
+As different power plants are different sizes, especially across different fuel types, we analyzed if the average nameplate capacity of plants in a county was related to median household income.The linear regression on this relationship yields a coefficient of 0.0019239, accompanied by a standard error of 0.0023465. This implies that, theoretically, an increase in median household income is associated with a slight corresponding increase in Nameplate Capacity. However, the non-significant p-value of 0.4145 means we do not have sufficient evidence to reject the null hypothesis and the observed association between median household income and Nameplate Capacity may be coincidental. Figure 18 below demonstrates this relationship.
 
 ```{r, npcap, echo=FALSE, warning=FALSE, error=FALSE}
 #Regression on Income and Nameplate Capacity
@@ -629,7 +629,7 @@ capacity_income_model <- lm(NAMEPCAP_plant ~ MEDHHINC_2021, data = merged_data_c
 knitr::kable(summary(capacity_income_model)$coef, format = "html", caption = "Linear Regression Results - Nameplate Capacity")
 ```
 
-##### Figure 19: Relationship of Median Household Income on Average Nameplate Capacity (MW) by county in 2021.
+##### Figure 18: Relationship of Median Household Income on Average Nameplate Capacity (MW) by county in 2021.
 
 ```{r,nameplate capacity}
 
@@ -643,7 +643,7 @@ ggplot(merged_data_capacity, aes(x = MEDHHINC_2021, y = NAMEPCAP_plant)) +
 
 ```
 
-Finally, we briefly explored if we could find a statistical relationship between power plants and the social vulnerability index (SVI) instead of income. A linear regression of SVI themes on total annual generation by county was conducted. The coefficient is 3643958 and is positive, suggesting that an increase in the SVI leads to an increase in generation. However, the multiple R-squared value is very small (0.005408), signaling that this model does not fit the data well; with an R-squared so low, RPL Themes could only explain .5% of total generation by county across North Carolina in 2021. Ultimately, the p-value is not statistically significant (0.5278 > .05). The null hypothesis that there is no relationship between generation by county and RPL Themes in North Carolina in 2021 therefore cannot be rejected.
+Finally, we briefly explored if we could find a statistical relationship between power plants and the social vulnerability index (SVI) instead of income. A linear regression of SVI themes on total annual generation by county was conducted. The coefficient is 3643958 and is positive, suggesting that an increase in the SVI leads to an increase in generation. However, the multiple R-squared value is very small (0.005408), signaling that this model does not fit the data well; with an R-squared so low, RPL Themes could only explain .5% of total generation by county across North Carolina in 2021. Ultimately, the p-value is not statistically significant (0.5278 > .05). The null hypothesis that there is no relationship between generation by county and RPL Themes in North Carolina in 2021 therefore cannot be rejected. The relationship is plotted in Figure 19.
 
 ```{r Generation and SVI Relationship Analysis LM}
 #Wrangle SVI DATA
@@ -679,7 +679,7 @@ knitr::kable(summary(Generation_County_lm)$coef, format = "html", caption = "Lin
 # The regression run on generation by county and RPL_THEMES, the aggregate of Socioeconomic Status (RPL_THEME1), Household Characteristics (RPL_THEME2), Racial & Ethnic Minority Status (RPL_THEME3), and Housing Type & Transportation (RPL_THEME4) as defined by EPA in the Social Vulnerability Index, returned an overall p-value of 0.53. 
 ```
 
-##### Figure 20: The relationship between the Social Vulnerability Index (SVI) and 2021 annual generation in MWh across all power plants in a county.
+##### Figure 19: The relationship between the Social Vulnerability Index (SVI) and 2021 annual generation in MWh across all power plants in a county.
 ```{r Generation and SVI Relationship Analysis Plot}
 #Visualize the linear regression
 tract_generation_SVI_plot <- ggplot(Generation_SVI, 
@@ -786,7 +786,7 @@ The primary motivation behind this analysis is to delve into the nuanced equilib
 
 Power plant retirements were analyzed (using data contained in the 2020 eGRID dataset) to identify which counties had the most number of retired power plants.Counties with no retirements were also selected to provide a comparison. 
 
-##### Figure 21: Number of historical power plant retirements per county based on 2020 eGRID data set
+##### Figure 20: Number of historical power plant retirements per county based on 2020 eGRID data set
 ```{r, Unemployment_Retirements, echo=FALSE, warning=FALSE, error=FALSE}
 
 ################ DATA ANALYSIS: UNEMPLOYMENT AND GENERATOR RETIREMENTS ################ 
@@ -848,9 +848,9 @@ fips_counts <- table(generator_retirement_data$FIPS_Code)#identifies 2 counties 
 
 Based on the data set above, FIPS Code 37159 (Rowan) and 37191 (Wayne) each have the highest number of retirements at 7 rows.FIPS Code 37023  (Burke) 37041 (Chowan) 37049  (Craven) 37063 (Durham) 37067 (Forsyth) 37069 (Franklin) 37125 (Moore) each have 1 row.
 
-In this analysis, counties experiencing both high (blue) and low (green) numbers of generator retirements, such as Rowan and Wayne (high retirements) and Burke and Craven (low retirements), are singled out. The objective is to investigate whether fluctuations in unemployment rates are influenced by generator retirements or if the rates exhibit similar trends irrespective of such retirements. Through this exploratory analysis, the goal is to discern any distinctive patterns in unemployment dynamics. As the plot in Figure 22 below shows instances in which the unemployment rates do not follow the hypothesized pattern, another variable was chosen for statistical analysis.
+In this analysis, counties experiencing both high (blue) and low (green) numbers of generator retirements, such as Rowan and Wayne (high retirements) and Burke and Craven (low retirements), are singled out. The objective is to investigate whether fluctuations in unemployment rates are influenced by generator retirements or if the rates exhibit similar trends irrespective of such retirements. Through this exploratory analysis, the goal is to discern any distinctive patterns in unemployment dynamics. As the plot in Figure 21 below shows instances in which the unemployment rates do not follow the hypothesized pattern, another variable was chosen for statistical analysis.
 
-##### Figure 22: Historical unemployment rates in Wayne, Rowan, Durham, and Chowan Counties
+##### Figure 21: Historical unemployment rates in Wayne, Rowan, Durham, and Chowan Counties
 ```{r, cols_interest, echo=FALSE, warning=FALSE, error=FALSE}
 
 #Creating df for only columns.counties of interest
@@ -936,11 +936,11 @@ The examination of the impact resulting from the retirement of power plant gener
 
 Null hypothesis: There is no relationship between power plant distribution and social vulnerability, health vulnerability, or environmental burden.
 
+********May insert an SVI piece from Q1 here*******
+
 Among the emissions types tracked as part of the eGRID data set used in Questions 1 and 2, nitrogen oxides (NOx) and sulfur dioxide merit further exploration, as they form part of criteria air pollutants regulated by EPA. Under the Clean Air Act, US EPA has set National Ambient Air Quality Standards on six criteria air pollutants: particulate matter (PM2.5 and PM10), atmospheric ozone, carbon monoxide, lead, nitrogen dioxide, and sulfur dioxide. These pollutants reach widespread exposure--millions of people--due to their numerous and diverse sources. Causal or likely causal evidence pointing to a variety of negative health endpoints exists for each one of them. 
 
 Power plants have historically made up a major stationary point source of air pollution, including SO2 and NO2, in particular. For nitrogen dioxide (NO2) and sulfur dioxide (SO2), the regulatory emissions standard-setting has been most heavily informed by research on respiratory effects. It should be noted that nitrogen oxides (NOx) also contribute to the formation of atmospheric ozone, which causes respiratory problems. 
-
-The following section of analyses explore relationships between emissions of SO2 and NOx and respiratory effects using eGRID data as well as data from the Environmental Burden and Health Vulnerability modules in the Environmental Justice Index (EJI). The development of the EJI is relatively new and the index has limitations. In accordance with its limitations, which can be found in detail within the technical documentation linked in the Metadata folder, this high-level exploration is not intended to define individuals at risk, represent risk or exposure for a community, or suggest that the markers explored form a full or near-full representation of environmental or health characteristics. This brief exploration merely examines whether a statistically significant relationship can be detected among select local factors such as power plant emissions and human health effects at a point in time across North Carolina. Based on established knowledge regarding air pollution and its impacts to human health, the expectation would be that higher emissions of NOx and SO2 are associated with higher rates of respiratory disease. 
 
 ```{r Q3 Data Wrangling}
 
@@ -1003,20 +1003,20 @@ EB_totalgen_lm <- lm(data = intersection_plants_EJI, RPL_EBM ~ NAMEPCAP)
 # Residual standard error: 0.2394 on 536 degrees of freedom. Multiple R-squared:  5.337e-06,	Adjusted R-squared:  -0.00186. F-statistic: 0.002861 on 1 and 536 DF,  p-value: 0.9574
 
 ozone_namep_lm <- lm(data = intersection_plants_EJI, E_OZONE ~ NAMEPCAP)
-summary(ozone_namep_lm)
+# summary(ozone_namep_lm)
 # Residual standard error: 0.3245 on 538 degrees of freedom
 # Multiple R-squared:  0.005192,	Adjusted R-squared:  0.003342 
 # F-statistic: 2.808 on 1 and 538 DF,  p-value: 0.0944
 
 DSLPM_namep_lm <- lm(data = intersection_plants_EJI, E_DSLPM ~ NAMEPCAP)
-summary(DSLPM_namep_lm)
+# summary(DSLPM_namep_lm)
 # Residual standard error: 0.08264 on 537 degrees of freedom
 #   (1 observation deleted due to missingness)
 # Multiple R-squared:  0.0002972,	Adjusted R-squared:  -0.001564 
 # F-statistic: 0.1597 on 1 and 537 DF,  p-value: 0.6896
 
 PM_namep_lm <- lm(data = intersection_plants_EJI, E_PM ~ NAMEPCAP)
-summary(PM_namep_lm)
+# summary(PM_namep_lm)
 # Residual standard error: 0.7128 on 538 degrees of freedom
 # Multiple R-squared:  0.0002181,	Adjusted R-squared:  -0.00164 
 # F-statistic: 0.1173 on 1 and 538 DF,  p-value: 0.7321
@@ -1029,13 +1029,13 @@ Running a single linear regression on nameplate capacity from eGRID and overall 
 ```{r Tract Health Vulnerability and Total Power Generation}
 
 HV_totalgen_lm <- lm(data = intersection_plants_EJI, RPL_HVM ~ NAMEPCAP)
-summary(HV_totalgen_lm)
+# summary(HV_totalgen_lm)
 # Residual standard error: 0.3108 on 536 degrees of freedom. Multiple R-squared:  0.0006052,	Adjusted R-squared:  -0.001259. F-statistic: 0.3246 on 1 and 536 DF,  p-value: 0.5691
 
 multivarHV_totalgen_lm <- lm(data = intersection_plants_EJI, 
                              NAMEPCAP ~ EP_ASTHMA + EP_BPHIGH + 
                                         EP_CANCER + EP_MHLTH)
-step(multivarHV_totalgen_lm)
+# step(multivarHV_totalgen_lm)
 # Start:  AIC=5931.83
 # NAMEPCAP ~ EP_ASTHMA + EP_BPHIGH + EP_CANCER + EP_MHLTH
 # 
@@ -1071,18 +1071,21 @@ step(multivarHV_totalgen_lm)
 #       3.876       -3.268       24.099  
 
 cancer_namep_lm <- lm(data = intersection_plants_EJI, EP_CANCER ~ NAMEPCAP)
-summary(cancer_namep_lm)
+# summary(cancer_namep_lm)
 # Residual standard error: 1.005 on 536 degrees of freedom
 #   (2 observations deleted due to missingness)
 # Multiple R-squared:  0.005194,	Adjusted R-squared:  0.003338 
 # F-statistic: 2.799 on 1 and 536 DF,  p-value: 0.09493
 
 BP_namep_lm <- lm(data = intersection_plants_EJI, EP_BPHIGH ~ NAMEPCAP)
-summary(BP_namep_lm)
+# summary(BP_namep_lm)
 # Residual standard error: 5.459 on 536 degrees of freedom
 #   (2 observations deleted due to missingness)
 # Multiple R-squared:  0.001341,	Adjusted R-squared:  -0.0005225 
 # F-statistic: 0.7196 on 1 and 536 DF,  p-value: 0.3967
+
+test <- lm(data = intersection_plants_EJI, UNNOX ~ UNSO2)
+#summary(test)
 
 ```
 At the tract level across North Carolina in 2021, percentile rank for Health Vulnerability ________ as total power generation _______.
@@ -1092,7 +1095,7 @@ At the tract level across North Carolina in 2021, percentile rank for Health Vul
 multivar_EBHV_totalgen_lm <- lm(data = intersection_plants_EJI, 
                              NAMEPCAP ~ E_PM + E_OZONE + E_DSLPM +
                              EP_ASTHMA + EP_BPHIGH + EP_CANCER + EP_MHLTH)
-step(multivar_EBHV_totalgen_lm)
+# step(multivar_EBHV_totalgen_lm)
 # Start:  AIC=5934.51
 # NAMEPCAP ~ E_PM + E_OZONE + E_DSLPM + EP_ASTHMA + EP_BPHIGH + 
 #     EP_CANCER + EP_MHLTH
@@ -1178,7 +1181,80 @@ opt_HV_emissions_multivar <- lm(RPL_HVM ~ PLSO2AN + PLCH4AN, data = intersection
 summary(opt_HV_emissions_multivar)
 ```
 
-Knowing that NOx contribute to atmospheric ozone formation, we were curious whether a multiple regression of annual mean days above O3 regulatory standard (E_OZONE) against emissions of NOx, SO2, CO2, and CH4 might elevate NOx emissions from power plants as the variable that might most explain E_OZONE. While it performed as the strongest amongst the multiple regression variables, it ultimately did not return a significant relationship when run as a single linear regression against E_OZONE (the p-value of the single linear regression was 0.985). While a relationship between the two variables could not be concluded and a lack of relationship could not be rejected, it is worth noting that E_OZONE is is annual mean days above O3 regulatory standard calculated using a 3-year average--it is not the atmospheric concentration level measured at each tract.
+The following section of analyses explore relationships between emissions of SO2 and NOx and respiratory effects using eGRID data as well as data from the Environmental Burden and Health Vulnerability modules in the Environmental Justice Index (EJI). The development of the EJI is relatively new and the index has limitations. In accordance with its limitations, which can be found in detail within the technical documentation linked in the Metadata folder, this high-level exploration is not intended to define individuals at risk, represent risk or exposure for a community, or suggest that the markers explored form a full or near-full representation of environmental or health characteristics. This brief exploration merely examines whether a statistically significant relationship can be detected among select local factors such as power plant emissions and human health effects at a point in time across North Carolina. Based on established knowledge regarding air pollution and its impacts to human health, the expectation would be that higher emissions of NOx and SO2 are associated with higher rates of respiratory disease. 
+
+```{r Relationship between Asthma and NOx and SO2}
+
+Asthma_emissions_multivar <- lm(data = intersection_plants_EJI,
+                            EP_ASTHMA ~ PLNOXAN + PLSO2AN + PLCO2AN + PLCH4AN)
+step(Asthma_emissions_multivar)
+# Start:  AIC=16.84
+# EP_ASTHMA ~ PLNOXAN + PLSO2AN + PLCO2AN + PLCH4AN
+# 
+#           Df Sum of Sq    RSS    AIC
+# - PLNOXAN  1   0.52828 79.699 15.315
+# - PLSO2AN  1   0.63075 79.802 15.407
+# - PLCH4AN  1   1.24704 80.418 15.961
+# - PLCO2AN  1   1.56534 80.736 16.245
+# <none>                 79.171 16.836
+# 
+# Step:  AIC=15.31
+# EP_ASTHMA ~ PLSO2AN + PLCO2AN + PLCH4AN
+# 
+#           Df Sum of Sq    RSS    AIC
+# - PLSO2AN  1    0.3739 80.073 13.652
+# - PLCO2AN  1    1.0956 80.795 14.298
+# - PLCH4AN  1    1.5535 81.253 14.705
+# <none>                 79.699 15.315
+# 
+# Step:  AIC=13.65
+# EP_ASTHMA ~ PLCO2AN + PLCH4AN
+# 
+#           Df Sum of Sq    RSS    AIC
+# - PLCO2AN  1   0.83999 80.913 12.403
+# <none>                 80.073 13.652
+# - PLCH4AN  1   2.42157 82.495 13.797
+# 
+# Step:  AIC=12.4
+# EP_ASTHMA ~ PLCH4AN
+# 
+#           Df Sum of Sq    RSS    AIC
+# <none>                 80.913 12.403
+# - PLCH4AN  1    2.3735 83.287 12.485
+# 
+# Call:
+# lm(formula = EP_ASTHMA ~ PLCH4AN, data = intersection_plants_EJI)
+# 
+# Coefficients:
+# (Intercept)      PLCH4AN  
+#   1.056e+01   -7.383e-07 
+
+summary(Asthma_emissions_multivar)
+# Residuals:
+#     Min      1Q  Median      3Q     Max 
+# -1.8219 -0.7684 -0.1119  0.3883  3.0864 
+# 
+# Coefficients:
+#               Estimate Std. Error t value Pr(>|t|)    
+# (Intercept)  1.051e+01  1.376e-01  76.379   <2e-16 ***
+# PLNOXAN     -2.522e-04  3.772e-04  -0.669    0.506    
+# PLSO2AN      7.181e-04  9.829e-04   0.731    0.468    
+# PLCO2AN      2.776e-07  2.412e-07   1.151    0.254    
+# PLCH4AN     -2.446e-06  2.381e-06  -1.027    0.308    
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Residual standard error: 1.087 on 67 degrees of freedom
+#   (468 observations deleted due to missingness)
+# Multiple R-squared:  0.04942,	Adjusted R-squared:  -0.007336 
+# F-statistic: 0.8707 on 4 and 67 DF,  p-value: 0.4862
+
+Asthma_NOxSO2_multivar <- lm(data = intersection_plants_EJI,
+                            EP_ASTHMA ~ PLNOXAN + PLSO2AN)
+#step(Asthma_NOxSO2_multivar)
+```
+
+Knowing that NOx contribute to atmospheric ozone formation in addition to having direct human health effects, we were curious whether a multiple regression of annual mean days above O3 regulatory standard (E_OZONE) against emissions of NOx, SO2, CO2, and CH4 might elevate NOx emissions from power plants as the variable that might most explain E_OZONE. While it performed as the strongest amongst the multiple regression variables, it ultimately did not return a significant relationship when run as a single linear regression against E_OZONE (the p-value of the single linear regression was 0.985). While a relationship between the two variables could not be concluded and a lack of relationship could not be rejected, it is worth noting that E_OZONE is is annual mean days above O3 regulatory standard calculated using a 3-year average--it is not the atmospheric concentration level measured at each tract.
 
 ```{r Relationship between atmospheric ozone levels and emissions}
 
@@ -1190,36 +1266,66 @@ opt_Ozone_emissions_multivar <- lm(E_OZONE ~ PLNOXAN + PLSO2AN + PLCO2AN, data =
 summary(opt_Ozone_emissions_multivar)
 ```
 
-Knowing that NOx (including NO2) and SO2 both have negative human health impacts and especially respiratory impacts, we were curious to explore whether those plants that emit high levels of NOx might overlap with those that emit high levels of SO2. If power plants that are emitting high levels of NOx are also emitting high levels of SO2, this could be impactful information for air quality management professionals looking to make decisions on how to reduce emissions from power plant sources and which plants to prioritize. 
+##### Figure 22: The relationship between adjusted NOx emissions and SO2 emissions from North Carolina power plants in 2021. As noted in the eGRID metadata file, certain plants' emissions may be adjusted if the plant is a CHP (combined heat and power) facility or if one or more of its units burns biomass. 
 
-```{r Relationship between NOx Emissions and SO2 Emissions}
+```{r Plotting relationship between adjusted NOx emissions and SO2 emissions}
 
 ## Might plants those plants that emit high levels of NOx overlap with those that emit high levels of SO2? ## 
-NOx_SO2_plot <- ggplot(intersect_plants_tracts, 
+NOx_SO2_plot <- ggplot(intersection_plants_EJI, 
                           aes(x=PLNOXAN, y=PLSO2AN)) +
   geom_point() +
   # adjusting axes to hide extreme values
-  xlim(0, 800) +
-  ylim(0,600) +
+  xlim(0, 550) +
+  ylim(0,700) +
   # finding a line of best fit
   geom_smooth(method = lm, color = "black") +
-  ggtitle("Relationship between NOx and SO2 Emissions") + 
-  labs(x="Plant Annual NOx Emissions (tn)", y="SO2")
+  ggtitle("Relationship between Adjusted NOx and SO2 Emissions") + 
+  labs(x="Plant Annual NOx Emissions \n (short tons)", y="Plant Annual SO2 Emissions \n (short tons)")
 print(NOx_SO2_plot)
+```
 
+##### Figure 23: The relationship between unadjusted NOx emissions and SO2 emissions from North Carolina power plants in 2021. 
+
+```{r Plotting relationship between unadjusted NOx SO2 emissions}
+
+## Might plants those plants that emit high levels of NOx overlap with those that emit high levels of SO2? ## 
+UNNOx_UNSO2_plot <- ggplot(intersection_plants_EJI, 
+                          aes(x=UNNOX, y=UNSO2)) +
+  geom_point() +
+  # adjusting axes to hide extreme values
+  xlim(0, 4000) +
+  ylim(0, 5000) +
+  # finding a line of best fit
+  geom_smooth(method = lm, color = "black") +
+  ggtitle("Relationship between Unadjusted NOx and SO2 Emissions") + 
+  labs(x="Plant Annual NOx Emissions \n (short tons)", y="Plant Annual SO2 Emissions \n (short tons)")
+print(UNNOx_UNSO2_plot)
+```
+
+Given that NOx (including NO2) and SO2 both have negative human health impacts and especially respiratory impacts, we were curious to explore whether those plants that emit high levels of NOx might overlap with those that emit high levels of SO2. Plotting the relationship as in Figures 22 and 23 above appears to show a relationship between emitted NOx and SO2 from power plants in 2021, however, the relationship merits further exploration through linear regression and correlation testing. If power plants that are emitting high levels of NOx are also emitting high levels of SO2, this could be impactful information for air quality management professionals looking to make decisions on how to reduce emissions from power plant sources and which plants to prioritize. 
+
+``` {r Regression on NOx Emissions and SO2 Emissions}
 SO2_NOx_lm <- lm(data = intersect_plants_tracts, PLSO2AN ~ PLNOXAN)
-summary(SO2_NOx_lm)
+# summary(SO2_NOx_lm)
 # Residuals range from -491.27 to 1260.12
 # Intercept is 0.46503 so there is a positive relationship which means when NOx increase, SO2 tend to increase as well. p-value: < 2.2e-16 which is <.05, therefore it is worthwhile to try to estimate SO2 based on depth information. Although the residual standard error is 238.7 on 199 degrees of freedom, the R-squared value of 0.8274 shows that NOx emissions explain around 82.74% of the variability of SO2 emissions. 
-plot(SO2_NOx_lm)
+# plot(SO2_NOx_lm)
 # Pearson's
 cor.test(intersection_plants_EJI$PLSO2AN, intersection_plants_EJI$PLNOXAN)
 # Kendall tau
 cor.test(intersection_plants_EJI$PLSO2AN, intersection_plants_EJI$PLNOXAN, method="kendall")
 # Spearman
 cor.test(intersection_plants_EJI$PLSO2AN, intersection_plants_EJI$PLNOXAN, method="spearman")
-# The correlation test returns a correlation strength of 0.9096, which signifies a strong correlation between NOx emissions and SO2 emissions. In summary, there is a strong positive correlation.  
+# The correlation test returns a correlation strength of 0.9096, which signifies a strong correlation between NOx emissions and SO2 emissions. In summary, there is a strong positive correlation.
+
+####### TO BE EDITED 12/12 #######
+# <- lm(data = intersection_plants_EJI, UNNOX ~ UNSO2)
+#summary()
+
+cor.test(intersection_plants_EJI$UNSO2, intersection_plants_EJI$UNNOX)
 ```
+
+******* Write up the results from cor.test and lm *******
 
 ## Summary
 This study used data from CDC's Environmental Burden piece of its Environmental Justice Index to test the hypothesis that greater presence of power plants in a county is correlated with elevated NOx and SOx levels in that county, and consequently more respiratory and cardiovascular problems in comparison to those counties with fewer power plants.
