@@ -59,8 +59,6 @@ The subsequent phase of data wrangling introduces additional steps specifically 
 ### Environmental Justice Index - 
 2022 report on environmental burden, social vulnerability, and health vulnerability indicators. The Environmental Protection Agency (EPA) Environmental Justice Index (EJI) team selected the indicators based on a literature review conducted between December 2020 and December 2021.
 
-Table: Table 1: Dataset Information
-
 
 Table: Table 1: Dataset Information
 
@@ -289,7 +287,7 @@ filtered_data_income <- processed_data %>%
 #Stacked bar plot
 stacked_barplot_top_income_counties <- ggplot(filtered_data_income, aes(x = CNTYNAME, y = PLNGENAN, fill = PLFUELCT)) +
   geom_bar(stat = "sum", position = "stack") +
-  labs(title = "Total Annual Generation by Fuel Type and County (Top 10 by Median Income)",
+  labs(title = "Total Annual Generation by Fuel Type and County \n (Top 10 by Median Income)",
        x = "County",
        y = "Total Plant Annual Generation (MWh)",
        fill = "Fuel Type") +
@@ -314,7 +312,7 @@ filtered_data_bottom_income <- processed_data %>%
 #Stacked bar plot
 stacked_barplot_bottom_income_counties <- ggplot(filtered_data_bottom_income, aes(x = CNTYNAME, y = PLNGENAN, fill = PLFUELCT)) +
   geom_bar(stat = "sum", position = "stack") +
-  labs(title = "Total Annual Generation by Fuel Type and County (Bottom 10 by Median Income)",
+  labs(title = "Total Annual Generation by Fuel Type and County \n (Bottom 10 by Median Income)",
        x = "County",
        y = "Total Plant Annual Generation (MWh)",
        fill = "Fuel Type") +
@@ -341,11 +339,9 @@ gens_counties_map <-ggplot()+
   geom_sf(data=plant_gen_sf,size=0.8)+
   labs(title = "Locations of NC Power Plants")
 print(gens_counties_map)
-
 ```
 
 ##### Figure 9: This map shows the total nameplate capacity in Megawatts of each county in North Carolina. Multiple counties have no power plants and are blank. Richmond County is an interesting outlier which the highest capacity of all the counties.
-
 ```{r Initial Maps - Nameplate capacity}
 
 #Compute sum of nameplate capacity by county
@@ -363,9 +359,8 @@ gen_cap_map <-ggplot(data=counties_sf_join)+
 print(gen_cap_map)
 ```
 
-
+##### Figure 10: Percent of total county population living in poverty in 2021, as defined by the USDA Economic Research Service.
 ```{r Initial Maps - Income by county}
-gen_cap_map
 ## Heat map of Income Data by County ##
 #Create data frame of NC income data
 income_NC <-income %>% 
@@ -381,12 +376,9 @@ income_heat_map <-ggplot(data=income_NC_sf_join)+
 print (income_heat_map)
 ```
 
-#### Figure 10: Percent of total county population living in poverty in 2021, as defined by the USDA Economic Research Service.
-
 Our final stage of exploratory analysis was to visualize the power plant emissions geographically. Figures 11-15 demonstrate the aggregated power plant emissions per county in 2021 for CO2, NOx, SO2, N20, and CH4 respectively. Unfortunately eGrid did not provide data for Mercury (Hg) in 2021 so that was not analyzed. N20 and CH4 are provided in lbs while CO2, NOx, and SO2 are in short tons. For CO2 emissions, Richmond county stood out. For NOx emissions, Catawba county stood out. For SO2 emissions, Catawba, Haywood, and Person counties stood out.For N20 and CH4 emissions, Catawba and Person counties stood out.
 
 ##### Figure 11: Total CO2 Emissions in 2021 across North Carolina Power Plants.
-
 ```{r Power Plant Emissions Heat Maps}
 #Heat map of CO2 emissions by county
 #Compute sum of CO2 Emissions by county
@@ -516,11 +508,12 @@ linear_model_coal <- lm(PLNGENAN ~ MEDHHINC_2021, data = coal_data)
 summary_table <- summary(linear_model_coal)$coef
 
 knitr::kable(summary(linear_model_coal)$coef, format = "html", caption = "Linear Regression Results - Coal")
+
 ```
 
 ##### Figure 16: Relationship of median household income ($) on coal generation (MWh) in 2021 by county.
 
-```{r, Coal}
+```{r warning=TRUE}
 #Visualize relationship
 scatter_coal <- ggplot(coal_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
   geom_point() +
@@ -533,19 +526,18 @@ print(scatter_coal)
 
 The linear regression shown in Figure 17 below suggests that there might be a relationship between income and solar generation. The statistically significant p-value (0.04707) indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is quite low (about 0.56%), and so other factors not included in the model likely contribute to the variability in generation for solar.
 
-```{r, solar, echo=FALSE, warning=FALSE, error=FALSE}
+```{r echo=FALSE, error=FALSE, warning=FALSE, solar}
 
 #Solar linear regression
 solar_data <- subset(processed_data, PLFUELCT == "SOLAR")
 linear_model_solar <- lm(PLNGENAN ~ MEDHHINC_2021, data = solar_data)
-summary(linear_model_solar) 
 
 knitr::kable(summary(linear_model_solar)$coef, format = "html", caption = "Linear Regression Results - Solar")
 ```
 
 ##### Figure 17: Relationship of median household income ($) on solar generation (MWh) in 2021 by county.
 
-```{r, solar plot}
+```{r, solar plot, echo = FALSE}
 #Visualize relationship
 scatter_solar <- ggplot(solar_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
   geom_point() +
@@ -600,7 +592,6 @@ county_plants_df <- merged_data
 
 #Run simple regression
 inc_plants_model <- lm(Num_Plants ~ MEDHHINC_2021, data = county_plants_df)
-summary(inc_plants_model)
 
 knitr::kable(summary(inc_plants_model)$coef, format = "html", caption = "Linear Regression Results - Number of Plants")
 ```
@@ -707,12 +698,11 @@ gen_NC <-gen %>% filter(PSTATABB=='NC')
 PowerPlants_DF <-merge(x=gen_NC,y=Plant_NC, by='ORISPL',all.x=TRUE)
 ```
 
-```{r Creating income groupings}
+```{r Creating income groupings, echo=FALSE}
 
 # GENYRRET = Generator planned or actual retirement year (four-digit)
 # GENYRONL - year the generator came online (four-digit)
 
-summary(processed_data$GENYRRET) # 1161 NA's
 retired_year <- processed_data$GENYRRET %>%
   na.omit()
 # earliest year of plant retirement was 2021
@@ -720,9 +710,7 @@ retired_year <- processed_data$GENYRRET %>%
 # but could run regression analysis to understand relationship between
 # planned retirement and 2021 avg household income or
 # 2021 retirement and 2021 unemployment
-summary(retired_year)
 
-summary(processed_data$GENYRONL) # no NA's
 online_plants <- processed_data %>%
   # drop observations with NAs in GENYRONL
   # which means we don't know what year they came online
@@ -743,10 +731,8 @@ online_plants <- processed_data %>%
          Unemployment_rate_2018,	Unemployment_rate_2019,	
          Unemployment_rate_2020,	Unemployment_rate_2021,	
          Unemployment_rate_2022)
-summary(online_plants)
 
 online_year <- online_plants$GENYRONL
-summary(online_year)
 
 online_month_day_ <- rep(c("01-01-"), length(online_year))
 
@@ -754,30 +740,25 @@ online_month_day_ <- rep(c("01-01-"), length(online_year))
 # for as many year entries as are found in 
 # dropping NAs but may need to keep them in; decide as group
 Date_Online <- paste0(online_month_day_,online_year)
-summary(Date_Online)
-head(Date_Online)
 # 1175 observations in Date_Online
 
 # change years to date formats
-is.Date(Date_Online) # not a date
 Date_Online <- as.Date(Date_Online, format = "%m-%d-%Y")
-is.Date(Date_Online) # true
 
 # ensure date column is in date format
 online_plants <- online_plants %>%
   mutate(GENYRONL = Date_Online)
-is.Date(online_plants$GENYRONL) # true
 
 # identifying the county with the most power plants
 county_freq_table <- table(online_plants$CNTYNAME)
-view(county_freq_table)
+# view(county_freq_table)
 max(county_freq_table) # 48, Robeson County
 county_freq_table <- sort(county_freq_table, decreasing = TRUE)
-view(county_freq_table)
+# view(county_freq_table)
 robeson_online_plants <- online_plants %>%
   filter(CNTYNAME == "Robeson")
-unique(robeson_online_plants$PNAME) # 44 unique power plant names
-unique(robeson_online_plants$GENID) # 32 unique GENIDs
+# unique(robeson_online_plants$PNAME) # 44 unique power plant names
+# unique(robeson_online_plants$GENID) # 32 unique GENIDs
 
 # multiple regression for just one county, Robeson 
 # the one with highest total number of existing plants in 2021
@@ -788,7 +769,7 @@ robeson_year <- year(robeson_online_plants$GENYRONL)
 robeson_FIPS_code <- robeson_online_plants$FIPS_Code
 ## MARKING WHERE GC LEFT OFF
 #robeson_plant_count <- tally(robeson_online_plants$PNAME, wt = NULL, sort = FALSE, name = NULL)
-is.Date(robeson_online_plants$GENYRONL)
+#is.Date(robeson_online_plants$GENYRONL)
 
 ```
 
@@ -939,7 +920,7 @@ rowan_merged_data_NPCAP <- merge(rowan_generator_retirement_NPACP, rowan_ue, by 
 
 #Linear regression
 lm_result <- lm(`Rowan UE (%)` ~ NAMEPCAP_gen, data = rowan_merged_data_NPCAP)
-summary(lm_result) 
+# summary(lm_result) 
 ```
 
 
