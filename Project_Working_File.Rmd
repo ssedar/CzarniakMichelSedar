@@ -59,6 +59,9 @@ The subsequent phase of data wrangling introduces additional steps specifically 
 ### Environmental Justice Index –  
 2022 report on environmental burden, social vulnerability, and health vulnerability indicators. The Environmental Protection Agency (EPA) Environmental Justice Index (EJI) team selected the indicators based on a literature review conducted between December 2020 and December 2021.
 
+## Spatial Data –
+2020 data from Centers for Disease Control and Prevention/ Agency for Toxic Substances and Disease Registry/ Geospatial Research, Analysis, and Services Program. 
+
 
 Table: Table 1: Dataset Information
 
