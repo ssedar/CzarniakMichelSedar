@@ -12,6 +12,11 @@ The impetus behind this research lies in the imperative to address the intricate
 
 As a key aspect of this exploration, the research considers the connection between power plant location and emissions and various socioeconomic indicators, including but not limited to unemployment rates. This exploration is motivated by the awareness that power plants have often served as major employers in low-income areas (Union of Concerned Scientists, 2021). This research extends its focus beyond energy sources to examine the broader impacts of power plants on health and social vulnerability, and scrutinizes disparities in pollution exposure and associated health risks at a high level, using publicly available data. Through an exploration that encompasses various socioeconomic indicators, this research contributes to a more nuanced understanding of the multifaceted impacts of power plants.
 
+The following research questions are addressed:  
+1. How does income impact power plant characteristics at the county level?  
+2.Do power plant retirements have a significant impact on unemployment?  
+3.Does publicly available data show a relationship between power generation and social vulnerability, health vulnerability, or environmental burden?  
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,warning = FALSE,message=FALSE)
@@ -35,7 +40,7 @@ library(knitr)
 library(mapview); mapviewOptions(fgb = FALSE)
 getwd()
 ```
-# Data Set Information
+# Dataset Information
 Data used in this analysis comes from a variety of sources. A brief overview of each source is outlined below and full citations can be found at the end of this report. More information on the metadata for each source can be found in the 'Metadata' folder.
 
 
@@ -45,31 +50,31 @@ To process this dataset, the plant and generator sheets undergo individual modif
 
 It is important to highlight that although the most recent eGRID database available was from 2021, this version lacked historical generator retirement data. Consequently, the 2020 eGRID database is incorporated to facilitate the analysis of unemployment trends related to generator retirements.
 
-### Economic Research Service Data Sets: Median Household Income
+### Economic Research Service Datasets: Median Household Income
 To establish a nexus between power plants and socioeconomic factors, household income data is derived from data compiled by the Economic Research Service of the United States Department of Agriculture. This data includes metrics such as household income and poverty rates at the county level, with identification facilitated by the Federal Information Processing Standards (FIPS) Code. The preparation of this dataset involves the extraction of pertinent columns, specifically median household income, followed by integration with the initial eGRID dataframe. The unifying factor for this integration is the FIPS Code, which served as the common column linking the two datasets.
 
-### Economic Research Service Data Sets: Unemployment
+### Economic Research Service Datasets: Unemployment
 As an additional facet of investigation, the analysis incorporates unemployment data obtained from the Economic Research Service of the United States Department of Agriculture. The dataset, spanning the years 2000 through 2021, comprises comprehensive information on the total labor force, the number of employed individuals, the number of unemployed individuals, and the unemployment rate. The data wrangling process for this dataset unfolds in two distinct stages. Initially, the columns of interest, specifically those pertaining to the unemployment rate, are  selected. Following this, the identified columns undergo appropriate conversions to their intended data types before being merged with the existing dataset, utilizing the county FIPS code as the linking identifier.
 
 The subsequent phase of data wrangling introduces additional steps specifically tailored for conducting regression analyses between generator retirements and unemployment rates. To facilitate this analysis, the code executes a transposition of the data. This transformation presents North Carolina county unemployment rates by year in a more streamlined format, allocating a dedicated column for each year. 
 
-### Social Vulnerability Index – 
+### Social Vulnerability Index 
 2020 data from the US CDC on key vulnerability criteria including socioeconomic status, household characteristics, racial & ethnic minority status, and house type & transportation.
 
-### Environmental Justice Index –  
+### Environmental Justice Index 
 2022 report on environmental burden, social vulnerability, and health vulnerability indicators. The Environmental Protection Agency (EPA) Environmental Justice Index (EJI) team selected the indicators based on a literature review conducted between December 2020 and December 2021.
 
-## Spatial Data –
-2020 data from Centers for Disease Control and Prevention/ Agency for Toxic Substances and Disease Registry/ Geospatial Research, Analysis, and Services Program. 
+### Spatial Data
+2020 data from Centers for Disease Control and Prevention/ Agency for Toxic Substances and Disease Registry/ Geospatial Research, Analysis, and Services Program is utilized for visualizations of data at the county level.
 
 
 Table: Table 1: Dataset Information
 
 Dataset |  Attribute    | Description
 ----------- |---------------| -------------
-eGRID  |  Key Variables | Plant locations, production, capacity, retirements, and emissions.
+eGRID  |  Key Variables | Plant locations, production, capacity, retirements, and emissions
 eGRID  |Data Hierarchy | Generators are associated to plants, plants are associated to counties and FIPS codes
-eGRID  |Data Range | 2020 (data set used only to reference historical retirement data) and 2021 (all other data)
+eGRID  |Data Range | 2020 (dataset used only to reference historical retirement data) and 2021 (all other data)
 eGRID  |Data Source |The United States Environmental Protection Agency
 Income  |  Key Variables | Median Household Income, FIPS codes
 Income |Data Hierarchy | Income data is associated with FIPS county code
@@ -323,13 +328,11 @@ stacked_barplot_bottom_income_counties <- ggplot(filtered_data_bottom_income, ae
 print(stacked_barplot_bottom_income_counties)
 ```
 
-
-
 We then created initial maps to better understand the landscape of North Carolina in terms of socioeconomic status and geographic distribution of power plants. Figure 7 below shows the mapping of power plants across the state and helped us to visualize the concentration of power plants across the state. Figure 8 maps the nameplate capacity of those power plants by county. We noticed that multiple counties, especially Richmond county, stood out as having a high concentration of capacity. Figure 9 demonstrates a heat map of the percentage of each county's population living in poverty as of 2021. Richmond county is once again a clear visual outlier on this map.
 
-##### Figure 7: Active power plants across North Carolina as of 2021. Each black dot is a power plant.
+##### Figure 7: Locations of active power plants across North Carolina as of 2021. Each black dot represents a power plant.
 
-```{r Initial Maps - Power plant locations}
+```{r Initial Maps - Power plant locations,echo=FALSE, message=FALSE,warning=FALSE}
 #Load in counties spatial data
 counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>%
   filter(STATEFP==37)
@@ -795,7 +798,7 @@ The primary motivation behind this analysis is to delve into the nuanced equilib
 
 Power plant retirements were analyzed (using data contained in the 2020 eGRID dataset) to identify which counties had the most number of retired power plants.Counties with no retirements were also selected to provide a comparison. 
 
-##### Figure 20: Number of historical power plant retirements per county based on 2020 eGRID data set
+##### Figure 20: Number of historical power plant retirements per county based on 2020 eGRID dataset
 ```{r, Unemployment_Retirements, echo=FALSE, warning=FALSE, error=FALSE}
 
 ################ DATA ANALYSIS: UNEMPLOYMENT AND GENERATOR RETIREMENTS ################ 
@@ -855,7 +858,7 @@ fips_counts <- table(generator_retirement_data$FIPS_Code)#identifies 2 counties 
 
 ```
 
-Based on the data set above, FIPS Code 37159 (Rowan) and 37191 (Wayne) each have the highest number of retirements at 7 rows.FIPS Code 37023  (Burke) 37041 (Chowan) 37049  (Craven) 37063 (Durham) 37067 (Forsyth) 37069 (Franklin) 37125 (Moore) each have 1 row.
+Based on the dataset above, FIPS Code 37159 (Rowan) and 37191 (Wayne) each have the highest number of retirements at 7 rows. FIPS Code 37023  (Burke) 37041 (Chowan) 37049  (Craven) 37063 (Durham) 37067 (Forsyth) 37069 (Franklin) 37125 (Moore) each have 1 row.
 
 In this analysis, counties experiencing both high (blue) and low (green) numbers of generator retirements, such as Rowan and Wayne (high retirements) and Burke and Craven (low retirements), are singled out. The objective is to investigate whether fluctuations in unemployment rates are influenced by generator retirements or if the rates exhibit similar trends irrespective of such retirements. Through this exploratory analysis, the goal is to discern any distinctive patterns in unemployment dynamics. As the plot in Figure 21 below shows instances in which the unemployment rates do not follow the hypothesized pattern, another variable was chosen for statistical analysis.
 
@@ -947,7 +950,7 @@ Null hypothesis: There is no relationship between power plant distribution and s
 
 ********May insert an SVI piece from Q1 here*******
 
-Among the emissions types tracked as part of the eGRID data set used in Questions 1 and 2, nitrogen oxides (NOx) and sulfur dioxide merit further exploration, as they form part of criteria air pollutants regulated by EPA. Under the Clean Air Act, US EPA has set National Ambient Air Quality Standards on six criteria air pollutants: particulate matter (PM2.5 and PM10), atmospheric ozone, carbon monoxide, lead, nitrogen dioxide, and sulfur dioxide. These pollutants reach widespread exposure--millions of people--due to their numerous and diverse sources. Causal or likely causal evidence pointing to a variety of negative health endpoints exists for each one of them. 
+Among the emissions types tracked as part of the eGRID dataset used in Questions 1 and 2, nitrogen oxides (NOx) and sulfur dioxide merit further exploration, as they form part of criteria air pollutants regulated by EPA. Under the Clean Air Act, US EPA has set National Ambient Air Quality Standards on six criteria air pollutants: particulate matter (PM2.5 and PM10), atmospheric ozone, carbon monoxide, lead, nitrogen dioxide, and sulfur dioxide. These pollutants reach widespread exposure--millions of people--due to their numerous and diverse sources. Causal or likely causal evidence pointing to a variety of negative health endpoints exists for each one of them. 
 
 Power plants have historically made up a major stationary point source of air pollution, including SO2 and NO2, in particular. For nitrogen dioxide (NO2) and sulfur dioxide (SO2), the regulatory emissions standard-setting has been most heavily informed by research on respiratory effects. It should be noted that nitrogen oxides (NOx) also contribute to the formation of atmospheric ozone, which causes respiratory problems. 
 
@@ -1314,7 +1317,7 @@ print(UNNOx_UNSO2_plot)
 Given that NOx (including NO2) and SO2 both have negative human health impacts and especially respiratory impacts, we were curious to explore whether those plants that emit high levels of NOx might overlap with those that emit high levels of SO2. Plotting the relationship as in Figures 22 and 23 above appears to show a relationship between emitted NOx and SO2 from power plants in 2021, however, the relationship merits further exploration through linear regression and correlation testing. If power plants that are emitting high levels of NOx are also emitting high levels of SO2, this could be impactful information for air quality management professionals looking to make decisions on how to reduce emissions from power plant sources and which plants to prioritize. 
 
 ``` {r Regression on NOx Emissions and SO2 Emissions}
-SO2_NOx_lm <- lm(data = intersect_plants_tracts, PLSO2AN ~ PLNOXAN)
+SO2_NOx_lm <- lm(data = intersection_plants_EJI, PLSO2AN ~ PLNOXAN)
 # summary(SO2_NOx_lm)
 # Residuals range from -491.27 to 1260.12
 # Intercept is 0.46503 so there is a positive relationship which means when NOx increase, SO2 tend to increase as well. p-value: < 2.2e-16 which is <.05, therefore it is worthwhile to try to estimate SO2 based on depth information. Although the residual standard error is 238.7 on 199 degrees of freedom, the R-squared value of 0.8274 shows that NOx emissions explain around 82.74% of the variability of SO2 emissions. 
@@ -1348,7 +1351,7 @@ While the Clean Air Act and its various amendments have been in effect for decad
 
 
 # References
-*Supporting the nation’s coal workers and communities in a changing energy landscape. Union of Concerned Scientists. (2021).https://www.ucsusa.org/resources/support-coal-workers#read-online-content 
+*Supporting the nation’s coal workers and communities in a changing energy landscape. Union of Concerned Scientists. (2021).https://www.ucsusa.org/resources/support-coal-workers#read-online-content.   
 
 *United States Environmental Protection Agency (EPA). 2023. “Emissions & Generation Resource Integrated Database (eGRID), 2021” Washington, DC: Office of Atmospheric Protection, Clean Air Markets Division. Available from EPA’s eGRID web site: https://www.epa.gov/egrid. Accessed on 11/1/2023.
 
