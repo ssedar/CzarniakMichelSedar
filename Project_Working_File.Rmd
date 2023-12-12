@@ -328,7 +328,7 @@ We then created initial maps to better understand the landscape of North Carolin
 
 ```{r Initial Maps - Power plant locations}
 #Load in counties spatial data
-counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>% 
+counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>%
   filter(STATEFP==37)
 
 #Convert eGrid tabular data to spatial data
@@ -752,7 +752,7 @@ online_plants <- online_plants %>%
 # identifying the county with the most power plants
 county_freq_table <- table(online_plants$CNTYNAME)
 # view(county_freq_table)
-max(county_freq_table) # 48, Robeson County
+#max(county_freq_table) # 48, Robeson County
 county_freq_table <- sort(county_freq_table, decreasing = TRUE)
 # view(county_freq_table)
 robeson_online_plants <- online_plants %>%
