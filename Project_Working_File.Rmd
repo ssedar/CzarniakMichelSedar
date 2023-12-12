@@ -332,13 +332,16 @@ We then created initial maps to better understand the landscape of North Carolin
 
 ##### Figure 7: Locations of active power plants across North Carolina as of 2021. Each black dot represents a power plant.
 
-```{r Initial Maps - Power plant locations,echo=FALSE, message=FALSE,warning=FALSE}
+```{r Initial Maps - county and eGRID location data,echo=FALSE, message=FALSE,warning=FALSE, include=FALSE}
 #Load in counties spatial data
 counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>%
   filter(STATEFP==37)
 
 #Convert eGrid tabular data to spatial data
 plant_gen_sf <-plant_gen_data %>% st_as_sf(coords = c('LON','LAT'), crs=4269)
+```
+
+```{r Initial Maps - Power plant locations}
 #Create initial map of power plants
 gens_counties_map <-ggplot()+
   geom_sf(data=counties_sf)+
