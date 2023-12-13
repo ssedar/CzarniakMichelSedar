@@ -12,7 +12,7 @@ Mara Michel, Duke University - Nicholas School of the Environment, margaret.mich
 Sam Sedar, Duke University - Nicholas School of the Environment, sam.sedar@duke.edu
 
 ## Keywords
-eGrid, Emissions, Capacity, Generation, Income, Power Plant, Social Vulnerability Index (SVI), Unemployment
+eGrid, Emissions, Capacity, Generation, Income, Power Plant, Social Vulnerability Index (SVI), Unemployment, Environmental Justice Index (EJI), Environmental Burden, Health Vulnerability
 
 ## Database Information
 

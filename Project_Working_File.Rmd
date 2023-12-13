@@ -41,6 +41,7 @@ library(leaflet)
 library(tseries)
 library(knitr)
 library(mapview); mapviewOptions(fgb = FALSE)
+library(kableExtra) # See References section for source
 getwd()
 ```
 # Dataset Information
@@ -1125,12 +1126,17 @@ Generation_County_lm <- lm(Total_Generation ~ RPL_THEMES, data=Generation_SVI)
 
 ---
 
+###### Table 7.1: Linear Regression Results - SVI and Total Generation
 ```{r SummaryTableofSVITotalGenlm,echo=FALSE}
 
 summary_table_SVI <- summary(Generation_County_lm)$coef
 
-knitr::kable(summary(Generation_County_lm)$coef, format = "html", 
-             caption = "Linear Regression Results - SVI and Total Generation")
+# knitr::kable(summary(Generation_County_lm)$coef, format = "html", 
+#              caption = "Linear Regression Results - SVI and Total Generation")
+
+summary(Generation_County_lm)$coef %>%
+  kbl() %>%
+  kable_classic(html_font = "Helvetica")
 
 ```
 
@@ -1213,10 +1219,14 @@ summary(opt_multivarEB_totalgen_lm)
 
 summary_table_EB_totalgen_lm <- summary(EB_totalgen_lm)$coef
 
-knitr::kable(summary(EB_totalgen_lm)$coef, format = "html", 
-             caption = "Linear Regression Results - Environmental Burden and Total Generation",
-             align = "lrrrr",
-             full_width = F)
+# knitr::kable(summary(EB_totalgen_lm)$coef, format = "html", 
+#              caption = "Linear Regression Results - Environmental Burden and Total Generation",
+#              align = "lrrrr",
+#              full_width = F)
+
+summary(EB_totalgen_lm)$coef %>%
+  kbl() %>%
+  kable_classic(html_font = "Helvetica")
 
 ```
 
@@ -1382,3 +1392,5 @@ https://www.ucsusa.org/resources/support-coal-workers#read-online-content.
 *Centers for Disease Control and Prevention and Agency for Toxic Substances Disease Registry/ Geospatial Research, Analysis, and Services Program. CDC/ATSDR Social Vulnerability Index 2020. Database North Carolina. https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html. Accessed on 12/6/2023.
 
 *Centers for Disease Control and Prevention and Agency for Toxic Substances Disease Registry. 2022 Environmental Justice Index. https://www.atsdr.cdc.gov/placeandhealth/eji/index.html. Accessed on 12/5/2023.
+
+*Zhu, Hao. "knitr::kable and kableExtra". 19 Feb. 2021. https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html. Accessed on 12/13/2023.
