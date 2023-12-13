@@ -16,8 +16,8 @@ The impetus behind this research lies in the intricate interplay between socioec
 As a key aspect of this exploration, the research considers the connection between power plant location and emissions and various socioeconomic indicators, including but not limited to unemployment rates. This exploration is motivated by the awareness that power plants have often served as major employers in low-income areas (Union of Concerned Scientists, 2021). This research extends its focus beyond energy sources to examine the broader impacts of power plants on health and social vulnerability, and scrutinizes disparities in pollution exposure and associated health risks at a high level, using publicly available data. Through an exploration that encompasses various socioeconomic indicators, this research contributes to a more nuanced understanding of the multifaceted impacts of power plants.
 
 The following research questions are addressed:  
-1. How does income impact power plant characteristics at the county level? 
-2. Do power plant retirements have a significant impact on unemployment?
+1. How does income impact power plant characteristics at the county level? \
+2. Do power plant retirements have a significant impact on unemployment? \
 3. Does publicly available data show a relationship between power generation and social vulnerability, health vulnerability, or environmental burden?  
 
 
@@ -432,7 +432,7 @@ gens_counties_map <-ggplot()+
   geom_sf(data=counties_sf)+
   geom_sf(data=plant_gen_sf,size=0.8)+
   labs(title = "Locations of NC Power Plants")+
-  theme(plot.margin=unit(c(-0.40,0,-0.40,0), "null"))
+  theme(plot.margin=unit(c(-0.50,0,0,0), "null"))
 print(gens_counties_map)
 ```
 
@@ -452,7 +452,7 @@ counties_sf_join <-  merge(x = counties_sf,
 gen_cap_map <-ggplot(data=counties_sf_join)+
   geom_sf(aes(fill=NAMEPCAP_plant))+
   labs(title="Capacity by County",fill="Capacity (MW)")+
-  theme(plot.margin=unit(c(-0.40,0,-0.40,0), "null"))
+  theme(plot.margin=unit(c(-0.50,0,0,0), "null"))
 print(gen_cap_map)
 ```
 
@@ -471,11 +471,11 @@ income_NC_sf_join <-  merge(x = counties_sf,
 income_heat_map <-ggplot(data=income_NC_sf_join)+
   geom_sf(aes(fill=PCTPOV017_2021))+
   labs(title= "% of County in Poverty - 2021", fill="%")+
-  theme(plot.margin=unit(c(-0.40,0,-0.40,0), "null"))
+  theme(plot.margin=unit(c(-0.50,0,0,0), "null"))
 print (income_heat_map)
 ```
 
-Additionally, we explored power plant emissions geographically as a final stage of our exploratory analysis. Figures 10-13 demonstrate the aggregated power plant emissions per county in 2021 for CO2, NOx, SO2, and CH4 respectively. Unfortunately eGrid did not provide data for Mercury (Hg) in 2021 so that was not analyzed. CH4 is provided in lbs while CO2, NOx, and SO2 are in short tons. For CO2 emissions, Richmond county stood out. For NOx emissions, Catawba county stood out. For SO2 emissions, Catawba, Haywood, and Person counties stood out.For CH4 emissions, Catawba and Person counties stood out.
+Additionally, we explored power plant emissions geographically as a final stage of our exploratory analysis. Figures 10-13 demonstrate the aggregated power plant emissions per county in 2021 for CO2, NOx, SO2, and CH4 respectively. Unfortunately eGrid did not provide data for Mercury (Hg) in 2021 so that was not analyzed. CH4 is provided in lbs while CO2, NOx, and SO2 are in short tons. For CO2 emissions, Richmond county stood out. For NOx emissions, Catawba county stood out. For SO2 emissions, Catawba, Haywood, and Person counties stood out. For CH4 emissions, Catawba and Person counties stood out.
 
 ##### Figure 10: Total CO2 Emissions in 2021 across North Carolina Power Plants.{-}
 ```{r Power Plant Emissions Heat Maps}
@@ -495,7 +495,7 @@ CO2_map <-ggplot(data=CO2_counties_sf_join)+geom_sf(data=counties_sf)+
   geom_sf(aes(fill=Sum_CO2))+
   labs(title="2021 CO2 Emissions",
        fill="CO2 Emissions (tn)")+
-  theme(plot.margin=unit(c(-0.40,0,-0.40,0), "null"))
+  theme(plot.margin=unit(c(-0.50,0,0,0), "null"))
 print(CO2_map)
 ```
 
@@ -520,7 +520,7 @@ NOx_map <-ggplot(data= NOx_counties_sf_join)+
   geom_sf(aes(fill=Sum_NOx))+
   labs(title="2021 NOx Emissions",
        fill=" NOx Emissions (tn)")+
-  theme(plot.margin=unit(c(-0.40,0,-0.40,0), "null"))
+  theme(plot.margin=unit(c(-0.50,0,0,0), "null"))
 print(NOx_map)
 ```
 
@@ -544,7 +544,7 @@ SO2_map <-ggplot(data=SO2_counties_sf_join)+
   geom_sf(aes(fill=Sum_SO2))+
   labs(title="2021 SO2 Emissions",
        fill="SO2 Emissions (tn)")+
-  theme(plot.margin=unit(c(-0.40,0,-0.40,0), "null"))
+  theme(plot.margin=unit(c(-0.50,0,0,0), "null"))
 print(SO2_map)
 ```
 
@@ -569,7 +569,7 @@ N2O_map <-ggplot(data= N2O_counties_sf_join)+
   geom_sf(aes(fill=Sum_N2O))+
   labs(title="2021 N2O Emissions",
        fill=" N2O Emissions (lbs)")+
-  theme(plot.margin=unit(c(-0.40,0,-0.40,0), "null"))
+  theme(plot.margin=unit(c(-0.50,0,0,0), "null"))
 print(N2O_map)
 ```
 
@@ -593,7 +593,7 @@ CH4_map <-ggplot(data= CH4_counties_sf_join)+
   geom_sf(aes(fill=Sum_CH4))+
   labs(title="2021 CH4 Emissions",
        fill="CH4 Emissions (lbs)")+
-  theme(plot.margin=unit(c(-0.40,0,-0.40,0), "null"))
+  theme(plot.margin=unit(c(-0.50,0,0,0), "null"))
 print(CH4_map)
 ```
 
@@ -1225,7 +1225,7 @@ knitr::kable(summary(EB_totalgen_lm)$coef, format = "html",
 Another linear regression run on nameplate capacity (maximum possible generation) returned an R-squared of .00027 and a p-value of 0.77, meaning nameplate capacity could not be considered a worthwhile explanatory variable to explore for the overall environmental burden module either. Ultimately, these analyses were insufficient to reject the null hypothesis that there is no relationship between environmental burden and nameplate capacity, or power generation by tract. An existing relationship cannot be concluded. The lack of clear relationship is demonstrated in Figure 27 below.
 
 
-##### Figure 27: The relationship between the overall Environmental Burden Module (EBM) percentile rank and total power generation by tract.
+##### Figure 27: The relationship between the overall Environmental Burden Module (EBM) percentile rank and total power generation by tract. {-}
 ```{r EB and Total Power Generation Plot}
 #Visualize the linear regression
 tract_generation_EB_plot <- ggplot(sums_intersection_tractlevel, 
@@ -1244,7 +1244,7 @@ print(tract_generation_EB_plot)
 
 As the last high-level, aggregated theme index value to test in order to answer Question 3, analyses were conducted to test whether a statistically significant relationship could be determined between the health vulnerability module (HVM) and total power generation (actual or maximum possible). As mentioned in the Exploratory Analysis section and illustrated in Figure 16, health vulnerability as a variable exists in this data set at values of 0.0, 0.2, 0.4, 0.6, 0.8, and 1.0 (percentile rank). The specific methodology for calculating Health Vulnerability can be found on page 16 of the EJI data documentation in the 'Metadata' folder. Treating the variable as continuous proved unhelpful toward rejecting a null hypothesis that there is no relationship between tract-level HVM and total generation per tract (see Figure 28 for a visual representation of the linear regression treating RPL_HVM as continuous), therefore a series of one-way ANOVA analyses followed in which the variable was treated as categorical. The objective was to see if total generation per tract (treated as the factor) is meaningfully different across percentile ranks of HVM (RPL_HVM, treated as the levels) by testing if the mean generation is equal across all percentile rank categories. It is important to note that the percentile ranks do not have equal sample sizes and so we cannot assume totally normal distribution (as seen in Figure 16). The mean RPL_HVN across tracts is 0.56 for the data relevant to this project.
 
-##### Figure 28: The relationship between the overall Health Vulnerability Module (HVM) percentile rank and total power generation by tract. As evidenced visually, total generation does not explain variability in HVM.
+##### Figure 28: The relationship between the overall Health Vulnerability Module (HVM) percentile rank and total power generation by tract. As evidenced visually, total generation does not explain variability in HVM.{-}
 ```{r HV and Total Power Generation Plot}
 #Visualize the linear regression
 tract_generation_HV_plot <- ggplot(sums_intersection_tractlevel, 
@@ -1288,7 +1288,7 @@ summary(Gen_HVM_anova)
 
 Bartlett's test was run to check the null hypothesis that the variance at each of the percentile ranks is the same, and yielded a K-squared of 237.49 with 5 degrees of freedom and a p-value < 2.2e-16. ANOVA (function 'aov') was then run on tract generation and RPL_HVM (see Figure 29 below), yielding a p-value well above 0.05 (0.385). The null hypothesis that the mean of generation is the same across percentile ranks therefore could not be rejected. Lastly, a Tukey HSD test was conducted to examine the differences between pairs of percentile ranks, but every p-value generated was above 0.05. 
 
-##### Figure 29: Analysis of Variance performed on Generation and Health Vulnerability by Tract.
+##### Figure 29: Analysis of Variance performed on Generation and Health Vulnerability by Tract. {-}
 ```{r HVM ANOVA Plots, echo=FALSE}
 par(mfrow = c(2,2), mar=c(4,4,4,4))
 plot(Gen_HVM_anova)
@@ -1368,7 +1368,8 @@ Across regression tests run on the health vulnerability index value percentile r
 This study used data from CDC's Social Vulnerability (county resolution) and Environmental Justice (tract resolution) Indices to test hypotheses that greater generation by power plants is correlated with elevated percentile ranks on social vulnerability, environmental burden, and health vulnerability modules as defined by the CDC. The CDC documentation reminds us that "a percentile ranking represents the proportion of tracts (or counties) that are equal to or lower than a tract of interest in environmental burden. For example, a EJI ranking of 0.85 signifies that 85% of tracts in the nation likely experience less severe cumulative impacts from environmental burden than the tract of interest, and that 15% of tracts in the nation likely experience more severe cumulative impacts from environmental burden" (https://www.atsdr.cdc.gov/placeandhealth/eji/faq_eji.html). Analyses did not yield results that allow us to reject the null hypothesis that there is no relationship between power plant distribution and social vulnerability, health vulnerability, or environmental burden.
 
 # References
-*Supporting the nation’s coal workers and communities in a changing energy landscape. Union of Concerned Scientists. (2021).https://www.ucsusa.org/resources/support-coal-workers#read-online-content.   
+*Supporting the nation’s coal workers and communities in a changing energy landscape. Union of Concerned Scientists. (2021).
+https://www.ucsusa.org/resources/support-coal-workers#read-online-content.  
 
 *United States Environmental Protection Agency (EPA). 2023. “Emissions & Generation Resource Integrated Database (eGRID), 2021” Washington, DC: Office of Atmospheric Protection, Clean Air Markets Division. Available from EPA’s eGRID web site: https://www.epa.gov/egrid. Accessed on 11/1/2023.
 
