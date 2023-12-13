@@ -16,9 +16,9 @@ The impetus behind this research lies in the intricate interplay between socioec
 As a key aspect of this exploration, the research considers the connection between power plant location and emissions and various socioeconomic indicators, including but not limited to unemployment rates. This exploration is motivated by the awareness that power plants have often served as major employers in low-income areas (Union of Concerned Scientists, 2021). This research extends its focus beyond energy sources to examine the broader impacts of power plants on health and social vulnerability, and scrutinizes disparities in pollution exposure and associated health risks at a high level, using publicly available data. Through an exploration that encompasses various socioeconomic indicators, this research contributes to a more nuanced understanding of the multifaceted impacts of power plants.
 
 The following research questions are addressed:  
-1. How does income impact power plant characteristics at the county level?  
-2. Do power plant retirements have a significant impact on unemployment?  
-3. Does publicly available data show a relationship between power generation and social vulnerability, health vulnerability, or environmental burden?  
+### 1. How does income impact power plant characteristics at the county level? 
+### 2. Do power plant retirements have a significant impact on unemployment?
+### 3. Does publicly available data show a relationship between power generation and social vulnerability, health vulnerability, or environmental burden?  
 
 
 ```{r setup, include=FALSE}
@@ -518,7 +518,9 @@ This analysis begins by examining the impact that income has on various power pl
 
 Examining only the impact of income on coal plants, the estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. Furthermore, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income. Figure 15 below visualizes this relationship.
 
-```{r Income and Fuel, echo=FALSE, warning=FALSE, error=FALSE}
+---
+
+```{r IncomeAndFuel,echo=FALSE,warning=FALSE,error=FALSE}
 
 ########### DATA ANALYSIS - INCOME AND FUEL TYPE ###########
 
@@ -530,6 +532,8 @@ summary_table <- summary(linear_model_coal)$coef
 knitr::kable(summary(linear_model_coal)$coef, format = "html", caption = "Linear Regression Results - Coal")
 
 ```
+
+---
 
 ##### Figure 15: Relationship of median household income ($) on coal generation (MWh) in 2021 by county.{-}
 
@@ -546,7 +550,9 @@ print(scatter_coal)
 
 The linear regression shown in Figure 16 below suggests that there might be a relationship between income and solar generation. The statistically significant p-value (0.04707) indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is quite low (about 0.56%), and so other factors not included in the model likely contribute to the variability in generation for solar.
 
-```{r echo=FALSE, error=FALSE, warning=FALSE, solar}
+---
+
+```{r Solar,echo=FALSE,error=FALSE,warning=FALSE}
 
 #Solar linear regression
 solar_data <- subset(processed_data, PLFUELCT == "SOLAR")
@@ -554,6 +560,8 @@ linear_model_solar <- lm(PLNGENAN ~ MEDHHINC_2021, data = solar_data)
 
 knitr::kable(summary(linear_model_solar)$coef, format = "html", caption = "Linear Regression Results - Solar")
 ```
+
+---
 
 ##### Figure 16: Relationship of median household income ($) on solar generation (MWh) in 2021 by county.{-}
 
@@ -570,7 +578,9 @@ print(scatter_solar)
 
 The next stage of analysis examined if there was a relationship between the quantity of generators and median household income. The linear regression results indicate that median household income does not show a statistically significant association with the number of plants. The coefficient is estimated to be -0.0000786, with a standard error of 0.0000922, a t-value of -0.85, and a p-value of 0.3962. This suggests that, based on the available data, changes in median household income do not appear to be statistically linked to variations in the number of plants. Figure 17 below illustrates this relationship.
 
-```{r Visualization for Solar, echo=FALSE, warning=FALSE, error=FALSE}
+---
+
+```{r VisualizationforSolar,echo=FALSE,warning=FALSE,error=FALSE}
 
 ################ DATA ANALYSIS: INCOME AND POWER PLANTS ####################
 
@@ -616,6 +626,8 @@ inc_plants_model <- lm(Num_Plants ~ MEDHHINC_2021, data = county_plants_df)
 knitr::kable(summary(inc_plants_model)$coef, format = "html", caption = "Linear Regression Results - Number of Plants")
 ```
 
+---
+
 ##### Figure 17: Relationship of Median Household Income and Number of Power Plants in NC in 2021 by county.{-}
 
 ```{r, power plants number}
@@ -627,7 +639,6 @@ ggplot(county_plants_df, aes(x = MEDHHINC_2021, y = Num_Plants)) +
        x = "Median Household Income($)",
        y = "Number of Power Plants")
 ```
-
 
 
 As a last step toward answering Question 1, an analysis was conducted on whether the average nameplate capacity of plants in a county is related to median household income across the data set in use, given that power plants differ in size. The linear regression on this relationship yields a coefficient of 0.0019239, accompanied by a standard error of 0.0023465. This implies that, theoretically, an increase in median household income is associated with a slight corresponding increase in Nameplate Capacity. However, the non-significant p-value of 0.4145 means we do not have sufficient evidence to reject the null hypothesis and the observed association between median household income and Nameplate Capacity may be coincidental. Figure 18 below demonstrates this relationship.
@@ -955,9 +966,66 @@ intersection_plants_EJI <- st_intersection(plants_NC_sf, tracts_EJI_sf_select)
 #Exporting to CSV:
 #write.csv(intersection_plants_EJI,'Data/Processed/EBM_Processed.csv', row.names=FALSE)
 
+#Get tract-level values for generation and emissions
+sums_intersection_tractlevel <- intersection_plants_EJI %>%
+  group_by(GEOID)%>%
+  summarize(Tract_Generation = sum(PLNGENAN),
+            Tract_NAMEPCAP = sum(NAMEPCAP),
+            Tract_PLNOXAN = sum(PLNOXAN),
+            Tract_PLSO2AN = sum(PLSO2AN),
+            Tract_PLCH4AN = sum(PLCH4AN),
+            Tract_UNNOX = sum(UNNOX),
+            Tract_UNSO2 = sum(UNSO2),
+            Tract_UNCH4 = sum(UNCH4))
+
+#Add tract-level spatial EJI data back in
+sums_intersection_tractlevel <- merge(x = sums_intersection_tractlevel,
+                                y = EJI_countytract, 
+                                by.x = 'GEOID', 
+                                by.y = 'GEOID' ) %>%
+    select(GEOID, CountyFIPS, StateAbbr, COUNTY, E_TOTPOP, M_TOTPOP, 
+          Tract_Generation, Tract_NAMEPCAP, Tract_PLNOXAN, Tract_PLSO2AN,
+          Tract_PLCH4AN, Tract_UNNOX, Tract_UNSO2, Tract_UNCH4, RPL_EBM, 
+          RPL_HVM, RPL_SVM, E_PM, E_OZONE, E_DSLPM, E_COAL, EP_UNINSUR, 
+          EP_AGE65, EP_ASTHMA, EP_BPHIGH, EP_CANCER, EP_MHLTH, geometry)
+
+# eGRID emissions data had many NAs
+# Removing NAs for multivariate regression analyses
+nona_sums_intersection_tract <- drop_na(sums_intersection_tractlevel)
 ```
 
-As a final part of this project's high-level exploration of the socioeconomic dimension of power plant impacts, a set of analyses was conducted to explore social vulnerability, environmental burden, and health vulnerability in relation to generation and emissions across power plants in North Carolina. Having explored the relationship of income to total annual generation, the first of the following sections expanded on income to briefly explore whether there is a significant relationship between power plants and the social vulnerability index (SVI), more broadly. A linear regression of SVI themes on total annual generation by county was conducted. Examining the positive coefficient of 3643958 alone, suggested that an increase in the overall SVI aggregated theme (RPL_THEMES) leads to an increase in generation. However, the multiple R-squared value was very small (0.005408), signaling that this model does not fit the data well; with an R-squared so low, RPL Themes could only explain 0.5% of total generation by county across North Carolina in 2021. Ultimately, the p-value was not statistically significant (0.5278 > .05). The null hypothesis that there is no relationship between generation by county and RPL Themes in North Carolina in 2021 therefore could not be rejected. As apparent in Figure 21, at the county level across North Carolina in 2021, percentile rank for the Social Vulnerability Index across themes cannot be concluded to have a significant relationship to total power generation within this dataset.
+As a final part of this project's high-level exploration of the socioeconomic dimension of power plant impacts, a set of analyses was conducted to explore social vulnerability, environmental burden, and health vulnerability in relation to generation and emissions across power plants in North Carolina. The distribution of the variables corresponding to these three overall themes of interest can be seen in Figures 21-23.
+
+##### Figure 21: Test for normality in distribution of Social Vulnerability Module percentile ranks. Distribution is skewed such that most observations fall in the second half.
+
+```{r Distribution of SVM, echo=FALSE}
+#Check normal distributions of continuous variables
+qqnorm(nona_sums_intersection_tract$RPL_SVM); qqline(nona_sums_intersection_tract$RPL_SVM)
+# hist(nona_sums_intersection_tract$RPL_SVM)
+#The data for the percentile ranking on overall social vulnerability does not follow a normal distribution.
+```
+
+##### Figure 22: Test for normality in distribution of Environmental Burden Module percentile ranks. Distribution is skewed such that most observations fall in the second half.
+
+```{r Distribution of EBM, echo=FALSE}
+#Check normal distributions of continuous variables
+qqnorm(nona_sums_intersection_tract$RPL_EBM); qqline(nona_sums_intersection_tract$RPL_EBM)
+# hist(nona_sums_intersection_tract$RPL_EBM)
+#The data for the percentile ranking on environmental burden does not follow a normal distribution.
+```
+
+##### Figure 23: Test for normality in distribution of Environmental Burden Module percentile ranks. Distribution is shows that HVM (as Percentile Rank) is ordered but not continuous, the way EBM is. This makes sense because EJI obtains its data from a variety of sources and HVM can take a value of 0, 0.2, 0.4, 0.6, 0.8, or 1.0.
+
+```{r Distribution of HVM, echo=FALSE}
+#Check normal distributions of continuous variables
+qqnorm(nona_sums_intersection_tract$RPL_HVM); qqline(nona_sums_intersection_tract$RPL_HVM)
+# hist(nona_sums_intersection_tract$RPL_HVM)
+#The data for the percentile ranking on health vulnerability does not follow a normal distribution and it is clear that the variable is not continuous, so further tests must be run. 
+
+```
+
+
+Having explored the relationship of income to total annual generation, the first of the following sections expanded on income to briefly explore whether there is a significant relationship between power plants and the social vulnerability index (SVI), more broadly. A linear regression of SVI themes on total annual generation by county was conducted and results are summarized in Table 7.1. 
 
 ```{r County SVI and Total Power Generation lm}
 #Wrangle SVI DATA
@@ -983,11 +1051,6 @@ Generation_SVI <-merge(x = Total_Generation_County,
 
 #Run regression to determine if there is a relationship
 Generation_County_lm <- lm(Total_Generation ~ RPL_THEMES, data=Generation_SVI)
-
-summary_table_SVI <- summary(Generation_County_lm)$coef
-
-knitr::kable(summary(Generation_County_lm)$coef, format = "html", caption = "Linear Regression Results - SVI and Total Generation")
-
 #Residual standard error: 14690000 on 74 degrees of freedom
 # Multiple R-squared:  0.005408,	Adjusted R-squared:  -0.008033 
 # F-statistic: 0.4023 on 1 and 74 DF,  p-value: 0.5278
@@ -995,368 +1058,265 @@ knitr::kable(summary(Generation_County_lm)$coef, format = "html", caption = "Lin
 
 ```
 
-##### Figure 21: The relationship between the Social Vulnerability Index (SVI) and 2021 annual generation in MWh across all power plants in a county.{-}
+---
+
+```{r SummaryTableofSVITotalGenlm,echo=FALSE}
+
+summary_table_SVI <- summary(Generation_County_lm)$coef
+
+knitr::kable(summary(Generation_County_lm)$coef, format = "html", 
+             caption = "Linear Regression Results - SVI and Total Generation")
+
+```
+
+---
+
+Examining the positive coefficient of 3643958 alone suggested that an increase in the overall SVI aggregated theme (RPL_THEMES) leads to an increase in generation. However, the multiple R-squared value was very small (0.005408), signaling that this model does not fit the data well; with an R-squared so low, RPL Themes could only explain 0.5% of total generation by county across North Carolina in 2021. Ultimately, the p-value was not statistically significant (0.5278 > .05). The null hypothesis that there is no relationship between generation by county and RPL Themes in North Carolina in 2021 therefore could not be rejected. As apparent in Figure 24, at the county level across North Carolina in 2021, percentile rank for the Social Vulnerability Index across themes cannot be concluded to have a significant relationship to total power generation within this dataset.
+
+
+##### Figure 24: The relationship between the Social Vulnerability Index (SVI) and 2021 annual generation in MWh across all power plants in a county.{-}
 ```{r County SVI and Total Power Generation Plot}
 #Visualize the linear regression
 tract_generation_SVI_plot <- ggplot(Generation_SVI, 
-                                    aes(x = Total_Generation, 
+                                    aes(x = log(Total_Generation), 
                                         y = RPL_THEMES)) +
-  geom_point()+ylim(0,1)+
+  geom_point()+
+  #ylim(0,1)+
   stat_smooth(method = "lm", col = "red")+labs(y='Overall SVI Value', x='Total Generation in 2021 (MWh)',title= 
 "Total Power Plant Generation and SVI by county")
 print(tract_generation_SVI_plot) 
 
 ```
 
-<br>
 
-Given that power plants have historically made up a major stationary point source of air pollution, including SO2 and NO2, in particular, and that both SO2 and NOx can contribute to the formation of atmospheric ozone and particulate matter, the relationship between power plant generation and emissions and environmental burden was explored next through regression analyses. Selecting key environmental burden variables of interest--annual mean days above PM2.5 regulatory standard (E_PM), annual mean days above O3 regulatory standard (E_OZONE), and ambient concentrations of diesel PM/m3 (E_DSLPM)--for a multiple regression on nameplate capacity returned E_OZONE and E_DSLPM as variables to include, and E_PM as a variable to drop from the regression. The resulting, new multiple regression of nameplate capacity against E_OZONE and E_DSLPM still has a p-value of .08, however, so the null hypothesis that there is no relationship between the environmental burden variables examined in this analysis and nameplate capacity per tract cannot be rejected using this analysis; an existing relationship cannot be concluded.
+Given that power plants have historically made up a major stationary point source of air pollution including, for example, including SO2 and NO2, and given that both SO2 and NOx can contribute to the formation of atmospheric ozone and particulate matter, the relationship between power plant generation and emissions and environmental burden was explored next. First, a single linear regression was run to examine whether the overall environmental burden module, RPL_EBM (percentile rank), could be at all explained by plant nameplate capacity by tract. Nameplate capacity by tract did not ultimately perform as a significant explanatory variable of RPL_EBM; the p-value of 0.77 was well above the 0.05 threshold for significance, and the R-squared value was very low (R-squared was 0.00027). Another linear regression run on total annual generation instead of nameplate capacity (maximum possible generation) returned an R-squared of .000025 and a p-value of 0.93, meaning total annual generation could not be considered a worthwhile explanatory variable to explore for the overall environmental burden module. Ultimately, these analyses were insufficient to reject the null hypothesis that there is no relationship between environmental burden and nameplate capacity, or power generation by tract. An existing relationship cannot be concluded.
 
-In addition to a multivariate regression, single linear regressions were run to examine whether the overall RPL_EBM (percentile rank), as well as E_OZONE, E_DSLPM, and E_PM, could be at all explained by plant nameplate capacity by tract. While none of the four regression analyses returned a p-value under 0.05 and the R-squared values were low (with NAMEPCAP explaining significantly less than 0.1% of the variability in each of RPL_EBM, E_DSLPM, and E_PM), E_OZONE returned the highest R-squared (.005) and lowest p-value (.09) of the four. Ultimately, all of these analyses were insufficient to reject the null hypothesis that there is no relationship between environmental burden and nameplate capacity, or power generation by tract. 
+```{r Tract Environmental Burden and Total Power Generation, include=FALSE}
 
-```{r Tract Environmental Burden and Total Power Generation, echo=FALSE}
+EB_namepcap_lm <- lm(data = sums_intersection_tractlevel, RPL_EBM ~ Tract_NAMEPCAP)
+summary(EB_namepcap_lm)
+# Residual standard error: 0.2461 on 308 degrees of freedom
+#   (2 observations deleted due to missingness)
+# Multiple R-squared:  0.0002723,	Adjusted R-squared:  -0.002974 
+# F-statistic: 0.08388 on 1 and 308 DF,  p-value: 0.7723
 
-EB_totalgen_lm <- lm(data = intersection_plants_EJI, RPL_EBM ~ NAMEPCAP)
-# summary(EB_totalgen_lm)
-# Residual standard error: 0.2394 on 536 degrees of freedom. Multiple R-squared:  5.337e-06,	Adjusted R-squared:  -0.00186. F-statistic: 0.002861 on 1 and 536 DF,  p-value: 0.9574
+EB_totalgen_lm <- lm(data = sums_intersection_tractlevel, RPL_EBM ~ Tract_Generation)
+summary(EB_totalgen_lm)
+# Residual standard error: 0.2474 on 300 degrees of freedom
+#   (10 observations deleted due to missingness)
+# Multiple R-squared:  2.516e-05,	Adjusted R-squared:  -0.003308 
+# F-statistic: 0.007547 on 1 and 300 DF,  p-value: 0.9308
 
-ozone_namep_lm <- lm(data = intersection_plants_EJI, E_OZONE ~ NAMEPCAP)
-# summary(ozone_namep_lm)
-# Residual standard error: 0.3245 on 538 degrees of freedom
-# Multiple R-squared:  0.005192,	Adjusted R-squared:  0.003342 
-# F-statistic: 2.808 on 1 and 538 DF,  p-value: 0.0944
+####### ADDITIONAL EXPLORATIONS OF EB VARIABLES ########
+ozone_namep_lm <- lm(data = sums_intersection_tractlevel, E_OZONE ~ Tract_NAMEPCAP)
+summary(ozone_namep_lm)
+# Residual standard error: 0.3692 on 310 degrees of freedom
+# Multiple R-squared:  0.001639,	Adjusted R-squared:  -0.001581 
+# F-statistic: 0.509 on 1 and 310 DF,  p-value: 0.4761
 
-DSLPM_namep_lm <- lm(data = intersection_plants_EJI, E_DSLPM ~ NAMEPCAP)
+DSLPM_namep_lm <- lm(data = sums_intersection_tractlevel, E_DSLPM ~ Tract_NAMEPCAP)
 # summary(DSLPM_namep_lm)
-# Residual standard error: 0.08264 on 537 degrees of freedom
+# Residual standard error: 0.09596 on 309 degrees of freedom
 #   (1 observation deleted due to missingness)
-# Multiple R-squared:  0.0002972,	Adjusted R-squared:  -0.001564 
-# F-statistic: 0.1597 on 1 and 537 DF,  p-value: 0.6896
+# Multiple R-squared:  0.003594,	Adjusted R-squared:  0.0003698 
+# F-statistic: 1.115 on 1 and 309 DF,  p-value: 0.2919
 
-PM_namep_lm <- lm(data = intersection_plants_EJI, E_PM ~ NAMEPCAP)
+PM_namep_lm <- lm(data = sums_intersection_tractlevel, E_PM ~ Tract_NAMEPCAP)
 # summary(PM_namep_lm)
-# Residual standard error: 0.7128 on 538 degrees of freedom
-# Multiple R-squared:  0.0002181,	Adjusted R-squared:  -0.00164 
-# F-statistic: 0.1173 on 1 and 538 DF,  p-value: 0.7321
+# Residual standard error: 0.7152 on 310 degrees of freedom
+# Multiple R-squared:  0.0003096,	Adjusted R-squared:  -0.002915 
+# F-statistic: 0.09601 on 1 and 310 DF,  p-value: 0.7569
 
 #Full multiple regression to evaluate relationship between
 #plant nameplate capacity and PM, atmospheric ozone, and DSLPM levels by tract
-multivarEB_totalgen_lm <- lm(data = intersection_plants_EJI, 
-                             NAMEPCAP ~ E_PM + E_OZONE + E_DSLPM)
+multivarEB_totalgen_lm <- lm(data = sums_intersection_tractlevel, 
+                             Tract_NAMEPCAP ~ E_PM + E_OZONE + E_DSLPM)
 step(multivarEB_totalgen_lm)
 
 #The output of the full multiple regression was re-run with 
 #the optimized variable combination
-opt_multivarEB_totalgen_lm <- lm(data = intersection_plants_EJI, 
-                             NAMEPCAP ~ E_OZONE + E_DSLPM)
+opt_multivarEB_totalgen_lm <- lm(data = sums_intersection_tractlevel, 
+                             Tract_NAMEPCAP ~ E_OZONE + E_DSLPM)
 summary(opt_multivarEB_totalgen_lm)
 ```
+
+---
+
+```{r SummaryTableofEBTotalGenlm,echo=FALSE}
+
+summary_table_EB_totalgen_lm <- summary(EB_totalgen_lm)$coef
+
+knitr::kable(summary(EB_totalgen_lm)$coef, format = "html", 
+             caption = "Linear Regression Results - Environmental Burden and Total Generation",
+             align = "lrrrr",
+             full_width = F)
+
+```
+
+---
+
+##### Figure 25. The relationship between the overall Environmental Burden Module (EBM) percentile rank and total power generation by tract.
+```{r EB and Total Power Generation Plot}
+#Visualize the linear regression
+tract_generation_EB_plot <- ggplot(sums_intersection_tractlevel, 
+                                    aes(x = log(Tract_Generation), 
+                                        y = RPL_EBM)) +
+  geom_point()+
+  #ylim(0,1)+
+  stat_smooth(method = "lm", col = "red")+
+  labs(y = 'Overall EB Value (Percentile Rank)', 
+       x = 'Log of Total Generation in 2021 (MWh)',
+       title = "Total Power Plant Generation and Environmental Burden by Tract")
+print(tract_generation_EB_plot)
+```
+
+As the last high-level, aggregated theme index value to test in order to answer Question 3, an analyses was conducted to test whether a statistically significant relationship could be determined between health vulnerability and total power generation (actual or maximum possible). 
+##### Figure 26: Histogram of Health Vulnerability Module (Percentile Rank)
+```{r Histogram of HVM, echo=FALSE}
+
+hist(sums_intersection_tractlevel$RPL_HVM, 
+     main = "Histogram of Health Vulnerability variable RPL_HVM",
+     xlab = "Percentile Rank Value",
+     col = "lavender",
+     border = "navy")
+# 47 entries at 0.0
+# 30 entries at 0.2
+# 41 at 0.4
+# 45 at 0.6
+# 119 at 0.8
+# 28 at 1.0
+
+```
+
+
+
+```{r Test for Normality of HVM, echo=FALSE}
+
+# Shapiro-Wilk test of the null that data follows a normal distribution
+# shapiro.test(sums_intersection_tractlevel$Tract_Generation[sums_intersection_tractlevel$RPL_HVM == "0.2"])
+# shapiro.test(sums_intersection_tractlevel$Tract_Generation[sums_intersection_tractlevel$RPL_HVM == "0.4"])
+# shapiro.test(sums_intersection_tractlevel$Tract_Generation[sums_intersection_tractlevel$RPL_HVM == "0.6"])
+# shapiro.test(sums_intersection_tractlevel$Tract_Generation[sums_intersection_tractlevel$RPL_HVM == "0.8"])
+
+#Bartlett's test to check the null hypothesis that the variance at each of the percentile ranks is the same (because ANOVA is robust against departures from equal variance)
+bartlett.test(sums_intersection_tractlevel$Tract_Generation ~ sums_intersection_tractlevel$RPL_HVM)
+#Bartlett's K-squared = 237.49, df = 5, p-value < 2.2e-16
+
+#Change RPM_HVM to character to treat as ordered categorical
+sums_intersection_tractlevel <- sums_intersection_tractlevel %>%
+  mutate(RPL_HVM = as.character(RPL_HVM))
+
+#Run ANOVA
+Gen_HVM_anova <- aov(data=sums_intersection_tractlevel, Tract_Generation ~ RPL_HVM)
+summary(Gen_HVM_anova)
+#              Df    Sum Sq   Mean Sq F value Pr(>F)
+# RPL_HVM       5 8.505e+12 1.701e+12   1.056  0.385
+# Residuals   296 4.766e+14 1.610e+12               
+# 10 observations deleted due to missingness
+# Cannot reject the null hypothesis that the mean of generation is the same across percentile ranks. 
+```
+
+
+##### Figure 27. Analysis of Variance performed on Generation and Health Vulnerability by Tract.
+```{r HVM ANOVA Plots, echo=FALSE}
+par(mfrow = c(2,2), mar=c(4,4,4,4))
+plot(Gen_HVM_anova)
+par(mfrow = c(1,1))
+
+```
+
+```{r HVM PostHoc Tests, echo=FALSE}
+
+#Which differences between pairs of means are significant?
+#Tukey HSD
+TukeyHSD(Gen_HVM_anova)
+
+```
+
+
+A single linear regression run on the health vulnerability index value percentile rank (RPL_HVM) and total annual generation by tract, yielding an R-squared of .000042 and a p-value of 0.91. With such a low R-squared and such a high p-value, the analysis was insufficient to reject the null hypothesis that there is no relationship between health vulnerability and total generation by tract in our dataset. At the tract level across North Carolina in 2021, a relationship cannot be determined between percentile rank for Health Vulnerability and total power generation.
 
 
 ```{r Tract Health Vulnerability and Total Power Generation, include=FALSE}
 
-HV_totalgen_lm <- lm(data = intersection_plants_EJI, RPL_HVM ~ NAMEPCAP)
-summary(HV_totalgen_lm)
-# Residual standard error: 0.3108 on 536 degrees of freedom. Multiple R-squared:  0.0006052,	Adjusted R-squared:  -0.001259. F-statistic: 0.3246 on 1 and 536 DF,  p-value: 0.5691
 
-multivarHV_totalgen_lm <- lm(data = intersection_plants_EJI, 
-                             NAMEPCAP ~ EP_ASTHMA + EP_BPHIGH + 
+
+
+HV_totalgen_lm <- lm(data = sums_intersection_tractlevel, RPL_HVM ~ Tract_Generation)
+summary(HV_totalgen_lm)
+# Residual standard error: 0.3204 on 300 degrees of freedom
+#   (10 observations deleted due to missingness)
+# Multiple R-squared:  4.249e-05,	Adjusted R-squared:  -0.003291 
+# F-statistic: 0.01275 on 1 and 300 DF,  p-value: 0.9102
+
+multivarHV_totalgen_lm <- lm(data = sums_intersection_tractlevel, 
+                             Tract_NAMEPCAP ~ EP_ASTHMA + EP_BPHIGH + 
                                         EP_CANCER + EP_MHLTH)
 step(multivarHV_totalgen_lm)
-# Start:  AIC=5931.83
-# NAMEPCAP ~ EP_ASTHMA + EP_BPHIGH + EP_CANCER + EP_MHLTH
-# 
-#             Df Sum of Sq      RSS    AIC
-# - EP_ASTHMA  1      7887 32450152 5930.0
-# - EP_MHLTH   1     33192 32475457 5930.4
-# - EP_BPHIGH  1     38490 32480755 5930.5
-# <none>                   32442265 5931.8
-# - EP_CANCER  1    211498 32653763 5933.3
-# 
-# Step:  AIC=5929.96
-# NAMEPCAP ~ EP_BPHIGH + EP_CANCER + EP_MHLTH
-# 
-#             Df Sum of Sq      RSS    AIC
-# - EP_MHLTH   1     40092 32490244 5928.6
-# <none>                   32450152 5930.0
-# - EP_BPHIGH  1    175823 32625975 5930.9
-# - EP_CANCER  1    253198 32703350 5932.1
-# 
-# Step:  AIC=5928.62
-# NAMEPCAP ~ EP_BPHIGH + EP_CANCER
-# 
-#             Df Sum of Sq      RSS    AIC
-# <none>                   32490244 5928.6
-# - EP_BPHIGH  1    148442 32638686 5929.1
-# - EP_CANCER  1    274873 32765117 5931.2
-# 
-# Call:
-# lm(formula = NAMEPCAP ~ EP_BPHIGH + EP_CANCER, data = intersection_plants_EJI)
-# 
-# Coefficients:
-# (Intercept)    EP_BPHIGH    EP_CANCER  
-#       3.876       -3.268       24.099  
+multivarEB_totalgen_lm <- lm(Tract_NAMEPCAP ~ EP_CANCER, data = sums_intersection_tractlevel)
+summary(multivarEB_totalgen_lm)
+# Residual standard error: 334.4 on 308 degrees of freedom
+#   (2 observations deleted due to missingness)
+# Multiple R-squared:  0.007909,	Adjusted R-squared:  0.004688 
+# F-statistic: 2.455 on 1 and 308 DF,  p-value: 0.1181
 
-cancer_namep_lm <- lm(data = intersection_plants_EJI, EP_CANCER ~ NAMEPCAP)
+cancer_namep_lm <- lm(data = sums_intersection_tractlevel, EP_CANCER ~ Tract_NAMEPCAP)
 summary(cancer_namep_lm)
-# Residual standard error: 1.005 on 536 degrees of freedom
+# Residual standard error: 1.132 on 308 degrees of freedom
 #   (2 observations deleted due to missingness)
-# Multiple R-squared:  0.005194,	Adjusted R-squared:  0.003338 
-# F-statistic: 2.799 on 1 and 536 DF,  p-value: 0.09493
+# Multiple R-squared:  0.007909,	Adjusted R-squared:  0.004688 
+# F-statistic: 2.455 on 1 and 308 DF,  p-value: 0.1181
 
-BP_namep_lm <- lm(data = intersection_plants_EJI, EP_BPHIGH ~ NAMEPCAP)
+cnamep_plot <- ggplot(sums_intersection_tractlevel, 
+                          aes(x=log(Tract_NAMEPCAP), y=EP_CANCER)) +
+  geom_point() +
+  # adjusting axes to hide extreme values
+  # xlim(0, 550) +
+  # ylim(0,700) +
+  # finding a line of best fit
+  geom_smooth(method = lm, color = "black") +
+  ggtitle("Relationship between Estimated Cancer Prevalence and Log of Nameplate Capacity") + 
+  labs(x="Log of Nameplate Capacity (MWh)", y="Estimated Cancer Prevalence (%)")
+print(cnamep_plot)
+
+BP_namep_lm <- lm(data = sums_intersection_tractlevel, EP_BPHIGH ~ Tract_NAMEPCAP)
 summary(BP_namep_lm)
-# Residual standard error: 5.459 on 536 degrees of freedom
+# Residual standard error: 5.5 on 308 degrees of freedom
 #   (2 observations deleted due to missingness)
-# Multiple R-squared:  0.001341,	Adjusted R-squared:  -0.0005225 
-# F-statistic: 0.7196 on 1 and 536 DF,  p-value: 0.3967
-
-test <- lm(data = intersection_plants_EJI, UNNOX ~ UNSO2)
-#summary(test)
+# Multiple R-squared:  6.466e-06,	Adjusted R-squared:  -0.00324 
+# F-statistic: 0.001991 on 1 and 308 DF,  p-value: 0.9644
 
 ```
-At the tract level across North Carolina in 2021, percentile rank for Health Vulnerability ________ as total power generation _______.
 
-```{r Tract EB and HV and Total Power Generation, include=FALSE}
+---
 
-multivar_EBHV_totalgen_lm <- lm(data = intersection_plants_EJI, 
-                             NAMEPCAP ~ E_PM + E_OZONE + E_DSLPM +
-                             EP_ASTHMA + EP_BPHIGH + EP_CANCER + EP_MHLTH)
-# step(multivar_EBHV_totalgen_lm)
-# Start:  AIC=5934.51
-# NAMEPCAP ~ E_PM + E_OZONE + E_DSLPM + EP_ASTHMA + EP_BPHIGH + 
-#     EP_CANCER + EP_MHLTH
-# 
-#             Df Sum of Sq      RSS    AIC
-# - EP_ASTHMA  1       846 32243423 5932.5
-# - EP_MHLTH   1     13811 32256387 5932.7
-# - EP_BPHIGH  1     27395 32269971 5933.0
-# - E_PM       1     41508 32284084 5933.2
-# - E_DSLPM    1    102708 32345284 5934.2
-# <none>                   32242576 5934.5
-# - E_OZONE    1    143198 32385775 5934.9
-# - EP_CANCER  1    172718 32415295 5935.4
-# 
-# Step:  AIC=5932.52
-# NAMEPCAP ~ E_PM + E_OZONE + E_DSLPM + EP_BPHIGH + EP_CANCER + 
-#     EP_MHLTH
-# 
-#             Df Sum of Sq      RSS    AIC
-# - EP_MHLTH   1     30795 32274217 5931.0
-# - E_PM       1     42455 32285878 5931.2
-# - EP_BPHIGH  1     83068 32326490 5931.9
-# - E_DSLPM    1    107997 32351420 5932.3
-# <none>                   32243423 5932.5
-# - E_OZONE    1    146672 32390095 5933.0
-# - EP_CANCER  1    190359 32433782 5933.7
-# 
-# Step:  AIC=5931.03
-# NAMEPCAP ~ E_PM + E_OZONE + E_DSLPM + EP_BPHIGH + EP_CANCER
-# 
-#             Df Sum of Sq      RSS    AIC
-# - E_PM       1     46177 32320394 5929.8
-# - EP_BPHIGH  1     52510 32326728 5929.9
-# - E_DSLPM    1    117178 32391396 5931.0
-# <none>                   32274217 5931.0
-# - E_OZONE    1    149927 32424144 5931.5
-# - EP_CANCER  1    199982 32474200 5932.4
-# 
-# Step:  AIC=5929.8
-# NAMEPCAP ~ E_OZONE + E_DSLPM + EP_BPHIGH + EP_CANCER
-# 
-#             Df Sum of Sq      RSS    AIC
-# - EP_BPHIGH  1     63474 32383868 5928.9
-# - E_DSLPM    1     72705 32393099 5929.0
-# <none>                   32320394 5929.8
-# - E_OZONE    1    163998 32484392 5930.5
-# - EP_CANCER  1    175634 32496028 5930.7
-# 
-# Step:  AIC=5928.86
-# NAMEPCAP ~ E_OZONE + E_DSLPM + EP_CANCER
-# 
-#             Df Sum of Sq      RSS    AIC
-# - E_DSLPM    1     69162 32453030 5928.0
-# <none>                   32383868 5928.9
-# - EP_CANCER  1    124663 32508531 5928.9
-# - E_OZONE    1    254739 32638607 5931.1
-# 
-# Step:  AIC=5928.01
-# NAMEPCAP ~ E_OZONE + EP_CANCER
-# 
-#             Df Sum of Sq      RSS    AIC
-# <none>                   32453030 5928.0
-# - E_OZONE    1    185656 32638686 5929.1
-# - EP_CANCER  1    189601 32642631 5929.1
-# 
-# Call:
-# lm(formula = NAMEPCAP ~ E_OZONE + EP_CANCER, data = intersection_plants_EJI)
-# 
-# Coefficients:
-# (Intercept)      E_OZONE    EP_CANCER  
-#      -96.67        57.21        18.68 
+```{r SummaryTableofHVTotalGenlm,echo=FALSE}
+
+summary_table_HV_totalgen_lm <- summary(HV_totalgen_lm)$coef
+
+knitr::kable(summary(HV_totalgen_lm)$coef, format = "html", caption = "Linear Regression Results - Health Vulnerability and Total Generation")
+
 ```
 
-Among the emissions types tracked as part of the eGRID dataset used in Questions 1 and 2, nitrogen oxides (NOx) and sulfur dioxide merit further exploration, as they form part of criteria air pollutants regulated by EPA. Under the Clean Air Act, US EPA has set National Ambient Air Quality Standards on six criteria air pollutants: particulate matter (PM2.5 and PM10), atmospheric ozone, carbon monoxide, lead, nitrogen dioxide, and sulfur dioxide. These pollutants reach widespread exposure--millions of people--due to their numerous and diverse sources. Causal or likely causal evidence pointing to a variety of negative health endpoints exists for each one of them. 
+---
 
- For nitrogen dioxide (NO2) and sulfur dioxide (SO2), the regulatory emissions standard-setting has been most heavily informed by research on respiratory effects. It should be noted that nitrogen oxides (NOx) also contribute to the formation of atmospheric ozone, which causes respiratory problems.
-
-Is there a relationship between eGRID power plant data on emissions of known criteria air pollutants and health vulnerability data from EJI by tract across North Carolina?
-
-```{r Relationship between HV and emissions, include=FALSE}
-
-HV_emissions_multivar <- lm(data = intersection_plants_EJI,
-                            RPL_HVM ~ PLNOXAN + PLSO2AN + PLCO2AN + PLCH4AN)
-step(HV_emissions_multivar)
-
-opt_HV_emissions_multivar <- lm(RPL_HVM ~ PLSO2AN + PLCH4AN, data = intersection_plants_EJI)
-summary(opt_HV_emissions_multivar)
+##### Figure 28. The relationship between the overall Health Vulnerability Module (HVM) percentile rank and total power generation by tract.
+```{r HV and Total Power Generation Plot}
+#Visualize the linear regression
+tract_generation_HV_plot <- ggplot(sums_intersection_tractlevel, 
+                                    aes(x = log(Tract_Generation), 
+                                        y = RPL_HVM)) +
+  geom_point()+
+  #ylim(0,1)+
+  stat_smooth(method = "lm", col = "red")+
+  labs(y = 'Overall HV Value (Percentile Rank)', 
+       x = 'Log of Total Generation in 2021 (MWh)',
+       title = "Total Power Plant Generation and Health Vulnerability by Tract")
+print(tract_generation_HV_plot)
 ```
 
-The following section of analyses explore relationships between emissions of SO2 and NOx and respiratory effects using eGRID data as well as data from the Environmental Burden and Health Vulnerability modules in the Environmental Justice Index (EJI). The development of the EJI is relatively new and the index has limitations. In accordance with its limitations, which can be found in detail within the technical documentation linked in the Metadata folder, this high-level exploration is not intended to define individuals at risk, represent risk or exposure for a community, or suggest that the markers explored form a full or near-full representation of environmental or health characteristics. This brief exploration merely examines whether a statistically significant relationship can be detected among select local factors such as power plant emissions and human health effects at a point in time across North Carolina. Based on established knowledge regarding air pollution and its impacts to human health, the expectation would be that higher emissions of NOx and SO2 are associated with higher rates of respiratory disease. 
+After seeing high p-values and low R-squared values from regression analyses run on health vulnerability as an overall theme, one concluding set of analyses illustrates an example of how this project might set the stage for further explorations one or two levels deeper into the aggregated SV, EB, and HV themes. Among the emissions types tracked as part of the eGRID dataset, nitrogen oxides (NOx) and sulfur dioxide (SO2) merit further exploration, as they form part of criteria air pollutants regulated by EPA. Under the Clean Air Act, US EPA has set National Ambient Air Quality Standards on six criteria air pollutants: particulate matter (PM2.5 and PM10), atmospheric ozone, carbon monoxide, lead, nitrogen dioxide, and sulfur dioxide. These pollutants reach widespread exposure--millions of people--due to their numerous and diverse sources. Causal or likely causal evidence pointing to a variety of negative health endpoints exists for each one of them. For nitrogen dioxide (NO2) and sulfur dioxide (SO2), the regulatory emissions standard-setting has been most heavily informed by research on respiratory effects. It should be noted that nitrogen oxides (NOx) also contribute to the formation of atmospheric ozone, which causes respiratory problems at elevated exposures. In the absence of a strong relationship within this project's data sets of plant generation and emissions, might there be a relationship between eGRID power plant data on emissions of known criteria air pollutants and health vulnerability data from EJI by tract across North Carolina?
 
-```{r Relationship between Asthma and NOx and SO2, include=FALSE}
-
-Asthma_emissions_multivar <- lm(data = intersection_plants_EJI,
-                            EP_ASTHMA ~ PLNOXAN + PLSO2AN + PLCO2AN + PLCH4AN)
-step(Asthma_emissions_multivar)
-# Start:  AIC=16.84
-# EP_ASTHMA ~ PLNOXAN + PLSO2AN + PLCO2AN + PLCH4AN
-# 
-#           Df Sum of Sq    RSS    AIC
-# - PLNOXAN  1   0.52828 79.699 15.315
-# - PLSO2AN  1   0.63075 79.802 15.407
-# - PLCH4AN  1   1.24704 80.418 15.961
-# - PLCO2AN  1   1.56534 80.736 16.245
-# <none>                 79.171 16.836
-# 
-# Step:  AIC=15.31
-# EP_ASTHMA ~ PLSO2AN + PLCO2AN + PLCH4AN
-# 
-#           Df Sum of Sq    RSS    AIC
-# - PLSO2AN  1    0.3739 80.073 13.652
-# - PLCO2AN  1    1.0956 80.795 14.298
-# - PLCH4AN  1    1.5535 81.253 14.705
-# <none>                 79.699 15.315
-# 
-# Step:  AIC=13.65
-# EP_ASTHMA ~ PLCO2AN + PLCH4AN
-# 
-#           Df Sum of Sq    RSS    AIC
-# - PLCO2AN  1   0.83999 80.913 12.403
-# <none>                 80.073 13.652
-# - PLCH4AN  1   2.42157 82.495 13.797
-# 
-# Step:  AIC=12.4
-# EP_ASTHMA ~ PLCH4AN
-# 
-#           Df Sum of Sq    RSS    AIC
-# <none>                 80.913 12.403
-# - PLCH4AN  1    2.3735 83.287 12.485
-# 
-# Call:
-# lm(formula = EP_ASTHMA ~ PLCH4AN, data = intersection_plants_EJI)
-# 
-# Coefficients:
-# (Intercept)      PLCH4AN  
-#   1.056e+01   -7.383e-07 
-
-summary(Asthma_emissions_multivar)
-# Residuals:
-#     Min      1Q  Median      3Q     Max 
-# -1.8219 -0.7684 -0.1119  0.3883  3.0864 
-# 
-# Coefficients:
-#               Estimate Std. Error t value Pr(>|t|)    
-# (Intercept)  1.051e+01  1.376e-01  76.379   <2e-16 ***
-# PLNOXAN     -2.522e-04  3.772e-04  -0.669    0.506    
-# PLSO2AN      7.181e-04  9.829e-04   0.731    0.468    
-# PLCO2AN      2.776e-07  2.412e-07   1.151    0.254    
-# PLCH4AN     -2.446e-06  2.381e-06  -1.027    0.308    
-# ---
-# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-# 
-# Residual standard error: 1.087 on 67 degrees of freedom
-#   (468 observations deleted due to missingness)
-# Multiple R-squared:  0.04942,	Adjusted R-squared:  -0.007336 
-# F-statistic: 0.8707 on 4 and 67 DF,  p-value: 0.4862
-
-Asthma_NOxSO2_multivar <- lm(data = intersection_plants_EJI,
-                            EP_ASTHMA ~ PLNOXAN + PLSO2AN)
-#step(Asthma_NOxSO2_multivar)
-```
-
-Knowing that NOx contribute to atmospheric ozone formation in addition to having direct human health effects, we were curious whether a multiple regression of annual mean days above O3 regulatory standard (E_OZONE) against emissions of NOx, SO2, CO2, and CH4 might elevate NOx emissions from power plants as the variable that might most explain E_OZONE. While it performed as the strongest amongst the multiple regression variables, it ultimately did not return a significant relationship when run as a single linear regression against E_OZONE (the p-value of the single linear regression was 0.985). While a relationship between the two variables could not be concluded and a lack of relationship could not be rejected, it is worth noting that E_OZONE is is annual mean days above O3 regulatory standard calculated using a 3-year average--it is not the atmospheric concentration level measured at each tract.
-
-```{r Relationship between atmospheric ozone levels and emissions, include=FALSE}
-
-Ozone_emissions_multivar <- lm(data = intersection_plants_EJI,
-                            E_OZONE ~ PLNOXAN + PLSO2AN + PLCO2AN + PLCH4AN)
-#step(Ozone_emissions_multivar)
-
-opt_Ozone_emissions_multivar <- lm(E_OZONE ~ PLNOXAN + PLSO2AN + PLCO2AN, data = intersection_plants_EJI)
-#summary(opt_Ozone_emissions_multivar)
-```
-
-##### Figure 22: The relationship between adjusted NOx emissions and SO2 emissions from North Carolina power plants in 2021. As noted in the eGRID metadata file, certain plants' emissions may be adjusted if the plant is a CHP (combined heat and power) facility or if one or more of its units burns biomass. {-}
-
-```{r Plotting relationship between adjusted NOx emissions and SO2 emissions, echo=FALSE}
-
-## Might plants those plants that emit high levels of NOx overlap with those that emit high levels of SO2? ## 
-NOx_SO2_plot <- ggplot(intersection_plants_EJI, 
-                          aes(x=PLNOXAN, y=PLSO2AN)) +
-  geom_point() +
-  # adjusting axes to hide extreme values
-  xlim(0, 550) +
-  ylim(0,700) +
-  # finding a line of best fit
-  geom_smooth(method = lm, color = "black") +
-  ggtitle("Relationship between Adjusted NOx and SO2 Emissions") + 
-  labs(x="Plant Annual NOx Emissions \n (short tons)", y="Plant Annual SO2 Emissions \n (short tons)")
-print(NOx_SO2_plot)
-```
-
-##### Figure 23: The relationship between unadjusted NOx emissions and SO2 emissions from North Carolina power plants in 2021. {-}
-
-```{r Plotting relationship between unadjusted NOx SO2 emissions, echo=FALSE}
-
-## Might plants those plants that emit high levels of NOx overlap with those that emit high levels of SO2? ## 
-UNNOx_UNSO2_plot <- ggplot(intersection_plants_EJI, 
-                          aes(x=UNNOX, y=UNSO2)) +
-  geom_point() +
-  # adjusting axes to hide extreme values
-  xlim(0, 4000) +
-  ylim(0, 5000) +
-  # finding a line of best fit
-  geom_smooth(method = lm, color = "black") +
-  ggtitle("Relationship between Unadjusted NOx and SO2 Emissions") + 
-  labs(x="Plant Annual NOx Emissions \n (short tons)", y="Plant Annual SO2 Emissions \n (short tons)")
-print(UNNOx_UNSO2_plot)
-```
-
-Given that NOx (including NO2) and SO2 both have negative human health impacts and especially respiratory impacts, we were curious to explore whether those plants that emit high levels of NOx might overlap with those that emit high levels of SO2. Plotting the relationship as in Figures 22 and 23 above appears to show a relationship between emitted NOx and SO2 from power plants in 2021, however, the relationship merits further exploration through linear regression and correlation testing. If power plants that are emitting high levels of NOx are also emitting high levels of SO2, this could be impactful information for air quality management professionals looking to make decisions on how to reduce emissions from power plant sources and which plants to prioritize. 
-
-```{r Testing correlations between NOx and SO2, include=FALSE}
-SO2_NOx_lm <- lm(data = intersection_plants_EJI, PLSO2AN ~ PLNOXAN)
-# summary(SO2_NOx_lm)
-# Residuals range from -491.27 to 1260.12
-# Intercept is 0.46503 so there is a positive relationship which means when NOx increase, SO2 tend to increase as well. p-value: < 2.2e-16 which is <.05, therefore it is worthwhile to try to estimate SO2 based on depth information. Although the residual standard error is 238.7 on 199 degrees of freedom, the R-squared value of 0.8274 shows that NOx emissions explain around 82.74% of the variability of SO2 emissions. 
-# plot(SO2_NOx_lm)
-# Pearson's
-cor.test(intersection_plants_EJI$PLSO2AN, intersection_plants_EJI$PLNOXAN)
-# Kendall tau
-cor.test(intersection_plants_EJI$PLSO2AN, intersection_plants_EJI$PLNOXAN, method="kendall")
-# Spearman
-cor.test(intersection_plants_EJI$PLSO2AN, intersection_plants_EJI$PLNOXAN, method="spearman")
-# The correlation test returns a correlation strength of 0.9096, which signifies a strong correlation between NOx emissions and SO2 emissions. In summary, there is a strong positive correlation.
-
-####### TO BE EDITED 12/12 #######
-# <- lm(data = intersection_plants_EJI, UNNOX ~ UNSO2)
-#summary()
-
-cor.test(intersection_plants_EJI$UNSO2, intersection_plants_EJI$UNNOX)
-```
-
-******* Write up the results from cor.test and lm *******
 
 ## Summary
 This study used data from CDC's Environmental Burden piece of its Environmental Justice Index to test the hypothesis that greater presence of power plants in a county is correlated with elevated NOx and SOx levels in that county, and consequently more respiratory and cardiovascular problems in comparison to those counties with fewer power plants.
