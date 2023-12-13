@@ -691,9 +691,11 @@ Examining only the impact of income on coal plants, the estimated coefficient is
 #Coal linear regression
 coal_data <- subset(processed_data, PLFUELCT == "COAL")
 linear_model_coal <- lm(PLNGENAN ~ MEDHHINC_2021, data = coal_data)
-summary_table <- summary(linear_model_coal)$coef
 
-knitr::kable(summary(linear_model_coal)$coef, format = "html", caption = "Linear Regression Results - Coal")
+summary_table <- summary(linear_model_coal)$coef[-1, ]
+
+knitr::kable(summary_table, format = "html", caption = "Linear Regression Results - Median Income Impact on Coal Generation")
+
 
 ```
 
@@ -722,7 +724,10 @@ The linear regression shown in Figure 21 below suggests that there might be a re
 solar_data <- subset(processed_data, PLFUELCT == "SOLAR")
 linear_model_solar <- lm(PLNGENAN ~ MEDHHINC_2021, data = solar_data)
 
-knitr::kable(summary(linear_model_solar)$coef, format = "html", caption = "Linear Regression Results - Solar")
+summary_table_solar <- summary(linear_model_solar)$coef[-1, ]
+
+knitr::kable(summary_table_solar, format = "html", caption = "Linear Regression Results - Median Income Impact on Solar Generation")
+
 ```
 
 ---
@@ -787,7 +792,10 @@ county_plants_df <- merged_data
 #Run simple regression
 inc_plants_model <- lm(Num_Plants ~ MEDHHINC_2021, data = county_plants_df)
 
-knitr::kable(summary(inc_plants_model)$coef, format = "html", caption = "Linear Regression Results - Number of Plants")
+summary_table_plants <- summary(inc_plants_model)$coef[-1, ]
+
+knitr::kable(summary_table_plants, format = "html", caption = "Linear Regression Results - Median Income Impact on Number of plants")
+
 ```
 
 ---
@@ -823,7 +831,9 @@ merged_data_capacity <- merge(average_capacity, income, by = "FIPS_Code")
 #Run simple regression
 capacity_income_model <- lm(NAMEPCAP_plant ~ MEDHHINC_2021, data = merged_data_capacity)
 
-knitr::kable(summary(capacity_income_model)$coef, format = "html", caption = "Linear Regression Results - Nameplate Capacity")
+summary_table_cap <- summary(capacity_income_model)$coef[-1, ]
+
+knitr::kable(summary_table_cap, format = "html", caption = "Linear Regression Results - Median Income Impact on Nameplate Capacity")
 ```
 
 ---
@@ -1030,11 +1040,10 @@ combined_plot <- ggplot() +
 print(combined_plot)
 ```
 
-Contrary to the initial hypothesis, this regression indicates that for each MW increase in retired nameplate capacity, the unemployment rate unemployment rate in Rowan is expected to decrease by approximately 0.02428 percentage points. The p-value is greater than 0.05, but given that it is only marginally higher (at 0.0619) we can theoretically interpret there to be a weak relationship. It must also be understood that the sample size is small and therefore we would need much more data for any reliable conclusions.
-
-The Multiple R-squared value of 0.5346 represents the proportion of the variance in the response variable (Rowan UE (%)) that can be explained by the predictor variable retired nameplate capacity (MW).
-
 ```{r Rowan analysis, echo=FALSE, warning=FALSE, error=FALSE}
+#[REMOVIG NARRATIVE FOR THE SUMMARY SINCE COMMENTED OUT RESULTS] Contrary to the initial hypothesis, this regression indicates that for each MW increase in retired nameplate capacity, the unemployment rate unemployment rate in Rowan is expected to decrease by approximately 0.02428 percentage points. The p-value is greater than 0.05, but given that it is only marginally higher (at 0.0619) we can theoretically interpret there to be a weak relationship. It must also be understood that the sample size is small and therefore we would need much more data for any reliable conclusions. The Multiple R-squared value of 0.5346 represents the proportion of the variance in the response variable (Rowan UE (%)) that can be explained by the predictor variable retired nameplate capacity (MW).
+
+
 #Selecting Rowan only
 rowan_data <- generator_retirement_data[generator_retirement_data$FIPS_Code == 37159, ]
 
@@ -1067,7 +1076,7 @@ rowan_merged_data_NPCAP <- merge(rowan_generator_retirement_NPACP, rowan_ue, by 
 
 #Linear regression
 lm_result <- lm(`Rowan UE (%)` ~ NAMEPCAP_gen, data = rowan_merged_data_NPCAP)
-# summary(lm_result) 
+#summary(lm_result) 
 ```
 
 
