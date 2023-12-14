@@ -340,6 +340,226 @@ step(EBM_lead_wtr_lm)
 #Summarize the multiple regression
 summary(EBM_multivar_lm)
 ```
+NOxSO2 Analyses
+
+```{r Relationship between HV and emissions, include=FALSE}
+
+HV_emissions_multivar <- lm(data = nona_sums_intersection_tract, RPL_HVM ~ Tract_PLNOXAN + Tract_PLSO2AN + Tract_PLCH4AN + Tract_UNNOX + Tract_UNSO2 + Tract_UNCH4)
+step(HV_emissions_multivar)
+# Residual standard error: 0.298 on 38 degrees of freedom
+#   (269 observations deleted due to missingness)
+# Multiple R-squared:  0.04781,	Adjusted R-squared:  -0.05242 
+# F-statistic: 0.477 on 4 and 38 DF,  p-value: 0.7524
+# The AIC stepwise algorithm resulted in removal being recommended for all variables. None of the variables were found to have an explanatory relationship worth exploring for the overall health vulnerability module (starting AIC was -98.35 and removal of each variable lowered AIC).
+```
+
+The following section of analyses explore relationships between emissions of SO2 and NOx and respiratory effects using eGRID data as well as data from the Environmental Burden and Health Vulnerability modules in the Environmental Justice Index (EJI). The development of the EJI is relatively new and the index has limitations. In accordance with its limitations, which can be found in detail within the technical documentation linked in the Metadata folder, this high-level exploration is not intended to define individuals at risk, represent risk or exposure for a community, or suggest that the markers explored form a full or near-full representation of environmental or health characteristics. This brief exploration merely examines whether a statistically significant relationship can be detected among select local factors such as power plant emissions and human health effects at a point in time across North Carolina. Based on established knowledge regarding air pollution and its impacts to human health, the expectation would be that higher emissions of NOx and SO2 are associated with higher rates of respiratory disease. 
+
+
+```{r NOx SO2 Correlation Tests, include=FALSE}
+
+Tract_UNNOX_UNSO2_lm <- lm(data = sums_intersection_tractlevel, Tract_UNNOX ~ Tract_UNSO2)
+summary(Tract_UNNOX_UNSO2_lm)
+# Residual standard error: 905 on 41 degrees of freedom
+#   (269 observations deleted due to missingness)
+# Multiple R-squared:  0.324,	Adjusted R-squared:  0.3075 
+# F-statistic: 19.65 on 1 and 41 DF,  p-value: 6.809e-05
+
+# STRONGEST CORRELATION R-SQUARED AND LOWEST P-VALUE -- graph this one!
+Tract_PLNOXAN_PLSO2AN_lm <- lm(data = sums_intersection_tractlevel, Tract_PLNOXAN ~ Tract_PLSO2AN)
+summary(Tract_PLNOXAN_PLSO2AN_lm)
+# Residual standard error: 368.2 on 41 degrees of freedom
+#   (269 observations deleted due to missingness)
+# Multiple R-squared:  0.8889,	Adjusted R-squared:  0.8862 
+# F-statistic:   328 on 1 and 41 DF,  p-value: < 2.2e-16
+
+Plant_UNNOX_UNSO2_lm <- lm(data = intersection_plants_EJI, UNNOX ~ UNSO2)
+summary(Plant_UNNOX_UNSO2_lm)
+# Residual standard error: 779 on 70 degrees of freedom
+#   (468 observations deleted due to missingness)
+# Multiple R-squared:  0.3756,	Adjusted R-squared:  0.3667 
+# F-statistic: 42.11 on 1 and 70 DF,  p-value: 1.051e-08
+
+# STRONGEST CORRELATION R-SQUARED AND LOWEST P-VALUE -- graph this one!
+Plant_PLNOXAN_PLSO2AN_lm <- lm(data = intersection_plants_EJI, PLNOXAN ~ PLSO2AN)
+summary(Plant_PLNOXAN_PLSO2AN_lm)
+# Residual standard error: 421.2 on 70 degrees of freedom
+#   (468 observations deleted due to missingness)
+# Multiple R-squared:  0.8114,	Adjusted R-squared:  0.8087 
+# F-statistic: 301.2 on 1 and 70 DF,  p-value: < 2.2e-16
+
+```
+
+```{r Relationship between Asthma and NOx and SO2, include=FALSE}
+
+Asthma_emissions_multivar <- lm(data = nona_sums_intersection_tract,
+                            EP_ASTHMA ~ Tract_PLNOXAN + Tract_PLSO2AN + Tract_PLCH4AN)
+step(Asthma_emissions_multivar)
+# Optimized based on stepwise regression
+Asthma_emissions_opt <- lm(data = nona_sums_intersection_tract,
+                            EP_ASTHMA ~ Tract_PLCH4AN)
+summary(Asthma_emissions_opt)
+# Residual standard error: 1.045 on 41 degrees of freedom
+# Multiple R-squared:  0.0528,	Adjusted R-squared:  0.0297 
+# F-statistic: 2.286 on 1 and 41 DF,  p-value: 0.1382
+
+Asthma_NOxSO2_multivar <- lm(data = nona_sums_intersection_tract,
+                            EP_ASTHMA ~ Tract_PLNOXAN + Tract_PLSO2AN)
+step(Asthma_NOxSO2_multivar)
+summary(Asthma_NOxSO2_multivar)
+#Residual standard error: 1.065 on 40 degrees of freedom
+# Multiple R-squared:  0.03935,	Adjusted R-squared:  -0.008688 
+# F-statistic: 0.8191 on 2 and 40 DF,  p-value: 0.4481
+```
+
+Knowing that NOx contribute to atmospheric ozone formation in addition to having direct human health effects, we were curious whether a multiple regression of annual mean days above O3 regulatory standard (E_OZONE) against emissions of NOx, SO2, CO2, and CH4 might elevate NOx emissions from power plants as the variable that might most explain E_OZONE. While it performed as the strongest amongst the multiple regression variables, it ultimately did not return a significant relationship when run as a single linear regression against E_OZONE (the p-value of the single linear regression was 0.985). While a relationship between the two variables could not be concluded and a lack of relationship could not be rejected, it is worth noting that E_OZONE is is annual mean days above O3 regulatory standard calculated using a 3-year average--it is not the atmospheric concentration level measured at each tract.
+
+```{r Relationship between atmospheric ozone levels and emissions, include=FALSE}
+
+Ozone_emissions_multivar <- lm(data = nona_sums_intersection_tract,
+                            E_OZONE ~ Tract_PLNOXAN + Tract_PLSO2AN + Tract_PLCH4AN)
+step(Ozone_emissions_multivar)
+# Start:  AIC=-65.9
+# E_OZONE ~ Tract_PLNOXAN + Tract_PLSO2AN + Tract_PLCH4AN
+# 
+#                 Df Sum of Sq    RSS     AIC
+# - Tract_PLCH4AN  1   0.23392 7.9446 -66.615
+# - Tract_PLSO2AN  1   0.25122 7.9619 -66.521
+# <none>                       7.7107 -65.900
+# - Tract_PLNOXAN  1   1.13494 8.8456 -61.995
+# 
+# Step:  AIC=-66.61
+# E_OZONE ~ Tract_PLNOXAN + Tract_PLSO2AN
+# 
+#                 Df Sum of Sq    RSS     AIC
+# <none>                       7.9446 -66.615
+# - Tract_PLNOXAN  1    1.0030 8.9476 -63.502
+# - Tract_PLSO2AN  1    1.0338 8.9784 -63.354
+# 
+# Call:
+# lm(formula = E_OZONE ~ Tract_PLNOXAN + Tract_PLSO2AN, data = nona_sums_intersection_tract)
+# 
+# Coefficients:
+#   (Intercept)  Tract_PLNOXAN  Tract_PLSO2AN  
+#     0.7098862      0.0004248     -0.0010003  
+
+opt_Ozone_emissions_multivar <- lm(E_OZONE ~ Tract_PLNOXAN + Tract_PLSO2AN, data = nona_sums_intersection_tract)
+summary(opt_Ozone_emissions_multivar)
+# Residual standard error: 0.4457 on 40 degrees of freedom
+# Multiple R-squared:  0.1168,	Adjusted R-squared:  0.07261 
+# F-statistic: 2.644 on 2 and 40 DF,  p-value: 0.08345
+```
+
+##### Figure 25: The relationship between adjusted NOx emissions and SO2 emissions from North Carolina power plants in 2021. As noted in the eGRID metadata file, certain plants' emissions may be adjusted if the plant is a CHP (combined heat and power) facility or if one or more of its units burns biomass. {-}
+
+```{r Plotting relationship between adjusted NOx emissions and SO2 emissions, echo=FALSE}
+
+## Might plants those plants that emit high levels of NOx overlap with those that emit high levels of SO2? ## 
+NOx_SO2_plot <- ggplot(nona_sums_intersection_tract, 
+                          aes(x=Tract_PLNOXAN, y=Tract_PLSO2AN)) +
+  geom_point() +
+  # adjusting axes to hide extreme values
+  xlim(0, 500) +
+  ylim(0,500) +
+  # finding a line of best fit
+  geom_smooth(method = lm, color = "black") +
+  ggtitle("Relationship between Adjusted NOx and SO2 Emissions by Tract") + 
+  labs(x="Tract Annual NOx Emissions \n (short tons)", y="Tract Annual SO2 Emissions \n (short tons)")
+print(NOx_SO2_plot)
+```
+
+##### Figure 26: The relationship between unadjusted NOx emissions and SO2 emissions from North Carolina power plants in 2021. {-}
+
+```{r Plotting relationship between unadjusted NOx SO2 emissions, echo=FALSE}
+
+
+## Might plants those plants that emit high levels of NOx overlap with those that emit high levels of SO2? ## 
+UNNOx_UNSO2_plot <- ggplot(intersection_plants_EJI, 
+                          aes(x=PLNOXAN, y=PLSO2AN)) +
+  geom_point() +
+  # adjusting axes to hide extreme values
+  xlim(0, 1250) +
+  ylim(0, 2000) +
+  # finding a line of best fit
+  geom_smooth(method = lm, color = "black") +
+  ggtitle("Relationship between Adjusted NOx and SO2 Emissions by Plant") + 
+  labs(x="Plant Annual NOx Emissions \n (short tons)", y="Plant Annual SO2 Emissions \n (short tons)")
+print(UNNOx_UNSO2_plot)
+```
+
+Given that NOx (including NO2) and SO2 both have negative human health impacts and especially respiratory impacts, we were curious to explore whether those plants that emit high levels of NOx might overlap with those that emit high levels of SO2. Plotting the relationship as in Figures 25 and 26 above appears to show a relationship between emitted NOx and SO2 from power plants in 2021, however, the relationship merits further exploration through linear regression and correlation testing. If power plants that are emitting high levels of NOx are also emitting high levels of SO2, this could be impactful information for air quality management professionals looking to make decisions on how to reduce emissions from power plant sources and which plants to prioritize. 
+
+```{r Testing correlations between NOx and SO2, include=FALSE}
+
+# eGRID emissions data had many NAs
+# Removing NAs for multivariate regression analyses
+nona_intersection_plants_EJI <- intersection_plants_EJI %>%
+  select(GEOID, CountyFIPS, StateAbbr, COUNTY, E_TOTPOP, M_TOTPOP, 
+          PLNGENAN, NAMEPCAP, PLNOXAN, PLSO2AN,
+          PLCH4AN, UNNOX, UNSO2, UNCH4, RPL_EBM, 
+          RPL_HVM, RPL_SVM, E_PM, E_OZONE, E_DSLPM, E_COAL, EP_UNINSUR, 
+          EP_AGE65, EP_ASTHMA, EP_BPHIGH, EP_CANCER, EP_MHLTH, geometry) %>%
+  drop_na()
+
+SO2_NOx_lm <- lm(data = nona_intersection_plants_EJI, PLSO2AN ~ PLNOXAN)
+summary(SO2_NOx_lm)
+# Residual standard error: 221 on 70 degrees of freedom
+# Multiple R-squared:  0.8114,	Adjusted R-squared:  0.8087 
+# F-statistic: 301.2 on 1 and 70 DF,  p-value: < 2.2e-16
+##################### !!!!!!!!!!!!!!!!
+# Residuals range from -491.27 to 1260.12
+# Intercept is 0.46503 so there is a positive relationship which means when NOx increase, SO2 tend to increase as well. p-value: < 2.2e-16 which is <.05, therefore it is worthwhile to try to estimate SO2 based on depth information. Although the residual standard error is 238.7 on 199 degrees of freedom, the R-squared value of 0.8274 shows that NOx emissions explain around 82.74% of the variability of SO2 emissions. 
+# plot(SO2_NOx_lm)
+
+# Pearson's - cor .90
+cor.test(nona_intersection_plants_EJI$PLSO2AN, nona_intersection_plants_EJI$PLNOXAN)
+
+# Kendall tau - tau .45 and z = 5.5608, p-value = 2.685e-08
+#alternative hypothesis: true tau is not equal to 0
+cor.test(nona_intersection_plants_EJI$PLSO2AN, nona_intersection_plants_EJI$PLNOXAN, method="kendall")
+
+# Spearman
+# S = 30268, p-value = 4.003e-06
+# alternative hypothesis: true rho is not equal to 0
+# sample estimates:
+#       rho 
+# 0.5133525 
+cor.test(nona_intersection_plants_EJI$PLSO2AN, nona_intersection_plants_EJI$PLNOXAN, method="spearman")
+# The correlation test returns a correlation strength of 0.9096, which signifies a strong correlation between NOx emissions and SO2 emissions. In summary, there is a strong positive correlation.
+
+cor.test(nona_sums_intersection_tract$EP_ASTHMA, nona_sums_intersection_tract$Tract_Generation, method = "kendall")
+# z = -2.0226, p-value = 0.04312
+# alternative hypothesis: true tau is not equal to 0
+# sample estimates:
+#       tau 
+# -0.216139 
+
+
+cor.test(nona_sums_intersection_tract$EP_ASTHMA, nona_sums_intersection_tract$EP_UNINSUR, method = "kendall")
+# t = 3.4586, df = 41, p-value = 0.00128
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  0.2040226 0.6787116
+# sample estimates:
+#       cor 
+# 0.4752449 
+# Kendall: data:  nona_sums_intersection_tract$EP_ASTHMA and nona_sums_intersection_tract$EP_UNINSUR
+# z = 2.966, p-value = 0.003017
+# alternative hypothesis: true tau is not equal to 0
+# sample estimates:
+#       tau 
+# 0.3172807 
+
+cor.test(nona_sums_intersection_tract$EP_BPHIGH, nona_sums_intersection_tract$EP_UNINSUR)
+# t = 3.1927, df = 41, p-value = 0.002707
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  0.1684516 0.6583340
+# sample estimates:
+#       cor 
+# 0.4462197 
+
+```
 
 End
 \
