@@ -657,7 +657,7 @@ Plants_Tracts_Map <-mapview(tracts_containing_plants,
             alpha=.5,
             cex=3)
 
-print(Plants_Tracts_Map)
+Plants_Tracts_Map@map
 ```
 
 
@@ -930,7 +930,7 @@ The primary motivation behind this analysis is to delve into the nuanced equilib
 
 Power plant retirements were analyzed (using data contained in the 2020 eGRID dataset) to identify which counties had the most number of retired power plants. The full selection of power plants with historical retirements can be seen in Table \@ref(tab:Table9). Counties with no retirements were also subsequently selected to provide a comparison. 
 
-```{r Table9, caption="Number of historical power plant retirements per county based on 2020 eGRID dataset",echo=FALSE, warning=FALSE, error=FALSE}
+```{r Table9, tab.cap="Number of historical power plant retirements per county based on 2020 eGRID dataset",echo=FALSE, warning=FALSE, error=FALSE}
 
 ################ DATA ANALYSIS: UNEMPLOYMENT AND GENERATOR RETIREMENTS ################ 
 
@@ -1116,7 +1116,7 @@ Generation_County_lm <- lm(Total_Generation ~ RPL_THEMES, data=Generation_SVI)
 
 ---
 
-```{r Table6,caption="Linear Regression Results - SVI and Total Generation", echo=FALSE}
+```{r Table6, echo=FALSE}
 
 summary_table_SVI <- summary(Generation_County_lm)$coef
 
@@ -1124,7 +1124,7 @@ summary_table_SVI <- summary(Generation_County_lm)$coef
 #              caption = "Linear Regression Results - SVI and Total Generation")
 
 summary(Generation_County_lm)$coef %>%
-  kbl() %>%
+  kbl(caption="Linear Regression Results - SVI and Total Generation") %>%
   kable_classic(html_font = "Helvetica")
 
 ```
@@ -1212,7 +1212,7 @@ summary_table_EB_totalgen_lm <- summary(EB_totalgen_lm)$coef
 #              full_width = F)
 
 summary(EB_totalgen_lm)$coef %>%
-  kbl() %>%
+  kbl(caption = "Linear Regression Results - Environmental Burden and Total Generation") %>%
   kable_classic(html_font = "Helvetica")
 
 ```
