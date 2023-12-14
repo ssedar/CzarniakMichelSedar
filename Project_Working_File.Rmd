@@ -10,6 +10,7 @@ output:
     lot: yes
   
 ---
+[CzarniakMichelSedar Github Repository] (https://github.com/ssedar/CzarniakMichelSedar) \
 # Research Rationale
 The impetus behind this research lies in the intricate interplay between socioeconomic factors and power plants. As the global energy landscape undergoes a transformative shift toward sustainability, it becomes paramount to understand how these changes might impact communities, particularly those situated in lower-income communities. The socio-spatial lens through which this study is conducted aims to unearth patterns of power plant distribution across North Carolina. With 100 counties and a total of 843 power plants consisting of 1190 generators (US EPA, 2021), the state's unique landscape offers a rich context for investigation. The overarching question is whether certain communities bear a disproportionate burden of environmentally impactful energy sources, framing the discourse within the realms of environmental justice and equity.
 
@@ -74,7 +75,7 @@ Initially, this data set was chosen because it contains socioeconomic informatio
 After learning about the Social Vulnerability Index, we continued exploring information available on the CDC's Agency for Toxic Substances and Disease Registry site and, upon finding the EJI, were compelled to explore whether we might test hypotheses we had that generation and emissions from power plants would be correlated with increased environmental burden and health vulnerability within the year of 2021 in North Carolina, specifically. It is crucial to note that the EJI, like any tool produced for the national scale, has limitations baked into the resolution at which it provides information. We believe it is important to highlight from their data documentation, that "injustice occurs locally. High-level tools such as the EJI cannot capture all social, environmental, or health issues that a community may face." Detail on limitations and considerations can be found on page 7 of the EJI data documentation in the [Metadata folder](https://github.com/ssedar/CzarniakMichelSedar/tree/main/Data/Metadata) on github.
 
 ### Spatial Data
-2020 data from Centers for Disease Control and Prevention/ Agency for Toxic Substances and Disease Registry/ Geospatial Research, Analysis, and Services Program is utilized for visualizations of data at the county level.
+2020 data from Centers for Disease Control and Prevention/ Agency for Toxic Substances and Disease Registry/ Geospatial Research, Analysis, and Services Program is utilized for visualizations of data at the county level as well as the “cb_2018_us_county_20m” shapefile, which is a cartographic boundary file from the United States Census Bureau. 2018 was the most recent year available for Cartographic Boundary Files downloads.
 
 
 Table: Table 1: Dataset Information
@@ -183,7 +184,7 @@ plant_gen$GENNTAN <- as.numeric(plant_gen$GENNTAN)
 plant_gen_data <- plant_gen[, -which(names(plant_gen) == "PSTATABB_plant")]
 
 #Exporting to CSV:
-#write.csv(plant_gen_data,'Data/Processed/PLNT_GEN21.csv', row.names=FALSE)
+write.csv(plant_gen_data,'Data/Processed/PLNT_GEN21.csv', row.names=FALSE)
 
 #UNEMPLOYMENT DATA
 
@@ -193,13 +194,13 @@ ue <- unemployment %>%
   select(FIPS_Code,	Unemployment_rate_2000,	Unemployment_rate_2001,	Unemployment_rate_2002,	Unemployment_rate_2003,	Unemployment_rate_2004,	Unemployment_rate_2005,	Unemployment_rate_2006,	Unemployment_rate_2007,	Unemployment_rate_2008,	Unemployment_rate_2009,	Unemployment_rate_2010,	Unemployment_rate_2011,	Unemployment_rate_2012,	Unemployment_rate_2013,	Unemployment_rate_2014,	Unemployment_rate_2015,	Unemployment_rate_2016,	Unemployment_rate_2017,	Unemployment_rate_2018,	Unemployment_rate_2019,	Unemployment_rate_2020,	Unemployment_rate_2021,	Unemployment_rate_2022)
 
 #Exporting to CSV:
-#write.csv(ue,'Data/Processed/Unemployment2000_2022.csv', row.names=FALSE)
+write.csv(ue,'Data/Processed/Unemployment2000_2022.csv', row.names=FALSE)
 
 #Merging with eGrid
 ue_egrid <- merge(plant_gen_data, ue, by = "FIPS_Code")
 
 #Exporting to CSV:
-#write.csv(ue_egrid,'Data/Processed/Unemployment2000_2022_eGrid21.csv', row.names=FALSE)
+write.csv(ue_egrid,'Data/Processed/Unemployment2000_2022_eGrid21.csv', row.names=FALSE)
 
 #INCOME DATA
 
@@ -208,13 +209,13 @@ inc <- income %>%
   select(FIPS_Code, PCTPOVALL_2021, MEDHHINC_2021)
 
 #Exporting to CSV:
-#write.csv(inc,'Data/Processed/Income2021.csv', row.names=FALSE)
+write.csv(inc,'Data/Processed/Income2021.csv', row.names=FALSE)
 
 #Merging
 processed_data <- merge(ue_egrid, inc, by = "FIPS_Code")
 
 #Exporting to CSV:
-#write.csv(processed_data,'Data/Processed/Income_Unemployment_eGrid.csv', row.names=FALSE)
+write.csv(processed_data,'Data/Processed/Income_Unemployment_eGrid.csv', row.names=FALSE)
 
 #Filter by North Carolina
 Plant_NC <- plant %>% filter(PSTATABB=='NC')
@@ -273,7 +274,7 @@ plants_NC_sf <- Plant_NC %>%
 intersection_plants_EJI <- st_intersection(plants_NC_sf, tracts_EJI_sf_select)
 
 #Exporting to CSV:
-#write.csv(intersection_plants_EJI,'Data/Processed/EBM_Processed.csv', row.names=FALSE)
+write.csv(intersection_plants_EJI,'Data/Processed/EBM_Processed.csv', row.names=FALSE)
 
 #Get tract-level values for generation and emissions
 sums_intersection_tractlevel <- intersection_plants_EJI %>%
@@ -297,6 +298,11 @@ sums_intersection_tractlevel <- merge(x = sums_intersection_tractlevel,
           Tract_PLCH4AN, Tract_UNNOX, Tract_UNSO2, Tract_UNCH4, RPL_EBM, 
           RPL_HVM, RPL_SVM, E_PM, E_OZONE, E_DSLPM, E_COAL, EP_UNINSUR, 
           EP_AGE65, EP_ASTHMA, EP_BPHIGH, EP_CANCER, EP_MHLTH, geometry)
+
+#Exporting to CSV:
+write.csv(sums_intersection_tractlevel,
+          'Data/Processed/EJI_Plants_TractLevel.csv', 
+          row.names=FALSE)
 
 # eGRID emissions data had many NAs
 # Removing NAs for multivariate regression analyses
@@ -1093,7 +1099,7 @@ SVI_county <- SVI_county_raw %>% select(ST_ABBR, STCNTY, COUNTY, FIPS, LOCATION,
                                       RPL_THEME3, RPL_THEME4)
 
 #Exporting to CSV:
-#write.csv(SVI_county,'Data/Processed/SVI_County_Processed.csv', row.names=FALSE)
+write.csv(SVI_county,'Data/Processed/SVI_County_Processed.csv', row.names=FALSE)
 
 #Calculate sum of generation by county
 Total_Generation_County <-plant_gen_data %>%
@@ -1150,7 +1156,7 @@ print(tract_generation_SVI_plot)
 
 #### Sub-question: Does publicly available data show a relationship between power generation and environmental burden?
 
-Given that power plants have historically made up a major stationary point source of air pollution including, for example, including SO2 and NO2, and given that both SO2 and NOx can contribute to the formation of atmospheric ozone and particulate matter, the relationship between power plant generation and emissions and the environmental burden module (EBM) was explored next. First, a single linear regression was run to examine whether the overall environmental burden module, RPL_EBM (percentile rank), could be at all explained by total generation per tract. Generation did not ultimately perform as a significant explanatory variable of RPL_EBM; the p-value of 0.93 was well above the 0.05 threshold for significance, and the R-squared value was very low (R-squared was 0.000025) as seen in Table \@ref(tab:Table7).
+Given that power plants have historically made up a major stationary point source of air pollution including, for example, including SO2 and NO2, and given that both SO2 and NOx can contribute to the formation of atmospheric ozone and particulate matter (Source: “Human Health & Environmental Impacts of the Electric Power Sector”), the relationship between power plant generation and emissions and the environmental burden module (EBM) was explored next. First, a single linear regression was run to examine whether the overall environmental burden module, RPL_EBM (percentile rank), could be at all explained by total generation per tract. Generation did not ultimately perform as a significant explanatory variable of RPL_EBM; the p-value of 0.93 was well above the 0.05 threshold for significance, and the R-squared value was very low (R-squared was 0.000025) as seen in Table \@ref(tab:Table7).
 
 ```{r Tract Environmental Burden and Total Power Generation, include=FALSE}
 
@@ -1361,7 +1367,7 @@ Across regression tests run on the health vulnerability index value percentile r
 
 
 ## Summary
-This study used data from CDC's Social Vulnerability (county resolution) and Environmental Justice (tract resolution) Indices to test hypotheses that greater generation by power plants is correlated with elevated percentile ranks on social vulnerability, environmental burden, and health vulnerability modules as defined by the CDC. The CDC documentation reminds us that "a percentile ranking represents the proportion of tracts (or counties) that are equal to or lower than a tract of interest in environmental burden. For example, a EJI ranking of 0.85 signifies that 85% of tracts in the nation likely experience less severe cumulative impacts from environmental burden than the tract of interest, and that 15% of tracts in the nation likely experience more severe cumulative impacts from environmental burden" (https://www.atsdr.cdc.gov/placeandhealth/eji/faq_eji.html). Analyses did not yield results that allow us to reject the null hypothesis that there is no relationship between power plant distribution and social vulnerability, health vulnerability, or environmental burden.
+This study used data from CDC's Social Vulnerability (county resolution) and Environmental Justice (tract resolution) Indices to test hypotheses that greater generation by power plants is correlated with elevated percentile ranks on social vulnerability, environmental burden, and health vulnerability modules as defined by the CDC. The CDC documentation reminds us that "a percentile ranking represents the proportion of tracts (or counties) that are equal to or lower than a tract of interest in environmental burden. For example, a EJI ranking of 0.85 signifies that 85% of tracts in the nation likely experience less severe cumulative impacts from environmental burden than the tract of interest, and that 15% of tracts in the nation likely experience more severe cumulative impacts from environmental burden" (Source: “Human Health & Environmental Impacts of the Electric Power Sector”). Analyses did not yield results that allow us to reject the null hypothesis that there is no relationship between power plant distribution and social vulnerability, health vulnerability, or environmental burden.
 
 # References
 *Supporting the nation’s coal workers and communities in a changing energy landscape. Union of Concerned Scientists. (2021).
@@ -1378,5 +1384,9 @@ https://www.ucsusa.org/resources/support-coal-workers#read-online-content.
 *Centers for Disease Control and Prevention and Agency for Toxic Substances Disease Registry/ Geospatial Research, Analysis, and Services Program. CDC/ATSDR Social Vulnerability Index 2020. Database North Carolina. https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html. Accessed on 12/6/2023.
 
 *Centers for Disease Control and Prevention and Agency for Toxic Substances Disease Registry. 2022 Environmental Justice Index. https://www.atsdr.cdc.gov/placeandhealth/eji/index.html. Accessed on 12/5/2023.
+
+*“CDC/ATSDR Environmental Justice Index (EJI) FAQ.” Centers for Disease Control and Prevention: Agency for Toxic Substances and Disease Registry, U.S. Department of Health &amp; Human Services, 31 May 2023, www.atsdr.cdc.gov/placeandhealth/eji/faq_eji.html. Accessed on 12/11/2023.
+
+“Human Health &amp; Environmental Impacts of the Electric Power Sector.” Clean Air Power Sector Programs, United States Environmental Protection Agency (US EPA), 22 Feb. 2023, www.epa.gov/power-sector/human-health-environmental-impacts-electric-power-sector. 
 
 *Zhu, Hao. "knitr::kable and kableExtra". 19 Feb. 2021. https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html. Accessed on 12/13/2023.
