@@ -1,0 +1,345 @@
+----
+title: "EDE Group Project"
+author: "Gaby Czarniak, Mara Michel, Sam Sedar"
+date: "2023-11-14"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+library(here); here()
+library(rvest)
+library(cowplot)
+library(agricolae)
+library(dplyr)
+library(tidyverse)
+library(lubridate)
+library(trend)
+library(zoo) 
+library(Kendall)
+library(tseries)
+
+getwd()
+
+```
+
+
+# Question 3: Is there a relationship between power plant distribution and impacts to human health?
+
+Null hypothesis: there is no relationship between power plant distribution and impacts to human health.
+
+Among the emissions types tracked as part of the eGRID data set used in Questions 1 and 2, nitrogen oxides (NOx) and sulfur dioxide merit further exploration, as they form part of criteria air pollutants regulated by EPA. Under the Clean Air Act, US EPA has set National Ambient Air Quality Standards on six criteria air pollutants: particulate matter (PM2.5 and PM10), atmospheric ozone, carbon monoxide, lead, nitrogen dioxide, and sulfur dioxide. These pollutants reach widespread exposure--millions of people--due to their numerous and diverse sources. Causal or likely causal evidence pointing to a variety of negative health endpoints exists for each one of them. 
+
+Power plants have historically made up a major stationary point source of air pollution, including SO2 and NO2, in particular. For nitrogen dioxide (NO2) and sulfur dioxide (SO2), the regulatory emissions standard-setting has been most heavily informed by research on respiratory effects. It should be noted that nitrogen oxides (NOx) also contribute to the formation of atmospheric ozone, which causes respiratory problems. 
+
+The following section of analyses explore relationships between emissions of SO2 and NOx and respiratory effects using eGRID data as well as data from the Environmental Burden and Health Vulnerability modules in the Environmental Justice Index (EJI). The development of the EJI is relatively new and the index has limitations. In accordance with its limitations, which can be found in detail within the technical documentation linked in the Metadata folder, this high-level exploration is not intended to define individuals at risk, represent risk or exposure for a community, or suggest that the markers explored form a full or near-full representation of environmental or health characteristics. This brief exploration merely examines whether a statistically significant relationship can be detected among select local factors such as power plant emissions and human health effects at a point in time across North Carolina. Based on established knowledge regarding air pollution and its impacts to human health, the expectation would be that higher emissions of NOx and SO2 are associated with higher rates of respiratory disease.
+
+```{r Distribution of Respiratory Illness}
+
+### DEFINITIONS ###
+
+# E_PM = Annual mean days above PM2.5 regulatory standard - 3-year average
+# E_DSLPM = Ambient concentrations of diesel PM/m3
+# E_OZONE = Annual mean days above O3 regulatory standard - 3-year average
+# EP_BPHIGH = Percentage of individuals with Raw high blood pressures values
+# EP_ASTHMA = Percentage of individuals with asthma
+# PLNOXAN = Plant Annual NOx Emissions (PLNOXAN) – The total annual NOx emissions, in short tons, for the plant. Biogas components are adjusted. For CHP plants, the value is adjusted by the electric allocation factor. This adjusted emissions field is estimated by first making the biogas adjustment (if it exists) and then applying the electric allocation factor (if the plant is a CHP).
+# PLSO2AN = Plant Annual SO2 Emissions (PLSO2AN) – The total annual SO2 emissions, in short tons, for the plant. Landfill gas components are adjusted. For CHP plants, the value is adjusted by the electric allocation factor. This adjusted emissions field is estimated by first making the landfill gas adjustment (if it exists) and then applying the electric allocation factor (if the plant is a CHP).
+# NOx_emissions = sum of NOx emissions by county across plants
+# SO2_emissions = sum of SO2 emissions by county across plants
+# NOx_map = map of NOx emissions by county
+# NOx_counties_sf_join = attribute of total NOx emissions attached to spatial frame
+# SO2_counties_sf_join = attribute of total SO2 emissions attached to spatial frame
+
+#### DATA WRANGLING ####
+
+#Establish shared GEOID format
+EJI_countytract$CountyFIPS <- stringr::str_extract(EJI_countytract$GEOID, "^.{5}")
+
+#Get 2021 spatial census data to convert tract GEOID to mapped coordinates
+spatial_tracts <- tigris::tracts(state = 37) %>% 
+  st_as_sf()
+class(spatial_tracts)
+st_crs(spatial_tracts) # NAD1983, EPSG 4269
+
+#Join the eGrid attributes to the county spatial features
+tracts_EJI_sf_join <-  merge(x = spatial_tracts,
+                           y = EJI_countytract, 
+                           by.x = 'GEOID', 
+                           by.y = 'GEOID' )
+#Some EJI tracts did not GEOIDs that matched the spatial tracts
+
+#Select variables of interest
+tracts_EJI_sf_select <- tracts_EJI_sf_join %>%
+  select(GEOID, CountyFIPS, TRACTCE.x, StateAbbr, COUNTY, E_TOTPOP, M_TOTPOP, 
+         E_PM, E_OZONE, E_DSLPM, E_COAL, E_LEAD, EP_UNINSUR, EP_AGE65, 
+         EP_ASTHMA, EP_BPHIGH, EP_CANCER, EP_MHLTH, geometry) %>%
+  rename(TractCode = TRACTCE.x)
+
+#Map asthma prevalence by tract
+Asthma_by_tract_map <- ggplot(data = tracts_EJI_sf_select) +
+  geom_sf(data = tracts_EJI_sf_join)+
+  geom_sf(aes(fill = EP_ASTHMA)) +
+  labs(title = "Estimated Asthma Prevalence by NC Tract",
+       subtitle = "2021",
+       fill = "Percentage of Individuals with Asthma")
+print(tracts_map)
+```
+
+
+
+```{r Power Plant Data by Tract}
+
+#Check coordinates of plant geometry (point) data
+st_crs(plant_gen_sf$geometry) # NAD1983, EPSG 4269
+
+#Match coordinates of plants_NC to tract geometry
+plants_within_tracts <- plant_gen_sf[tracts_EJI_sf_select,]
+tracts_containing_plants <- tracts_EJI_sf_select[plant_gen_sf,]
+
+#Map of plants across NC tracts, shown over NC tract boundaries 
+mapview(spatial_tracts, col.regions='pink', layer.name = 'North Carolina Tracts') + 
+ mapview(plants_within_tracts,
+          layer.name = 'Plants Within Each Tract',
+          alpha=.5)
+
+#Map of just NC tracts that contain power plants
+mapview(spatial_tracts, col.regions='grey', layer.name = 'North Carolina Tracts') + 
+  mapview(tracts_containing_plants, col.regions=, layer.name = 'NC Tracts Containing Power Plants')
+
+#Zoom in on tracts within one county: Robeson, the county with highest total number of existing plants in 2021
+#Filter for Robeson tracts
+Robeson_tracts <- tracts_EJI_sf_select %>%
+  filter(COUNTY == "Robeson")
+#Filter for Robeson plants
+tract_plants_Robeson <- filter(plants_within_tracts, CNTYNAME == "Robeson")
+
+#Show plants within Robeson tracts, specifically
+mapview(Robeson_tracts, col.regions='pink', 
+        layer.name = 'Robeson County Tracts, NC') +
+ mapview(tract_plants_Robeson,
+          layer.name = 'Plants Within Each Tract',
+          alpha=.5)
+
+#Convert NC eGrid tabular county data to spatial data
+plants_NC_sf <- Plant_NC %>% st_as_sf(coords = c('LON','LAT'), crs=4269)
+
+#Table of plant data with the tract that corresponds to each plant
+intersection_plants_EJI <- st_intersection(plants_NC_sf, tracts_EJI_sf_select)
+
+#Exporting to CSV:
+#write.csv(intersect_plants_EJI,'Data/Processed/EBM_Processed.csv', row.names=FALSE)
+```
+
+
+```{r Relationship between Asthma Prevalence and Power Plant Count}
+##Visualize the relationship between asthma prevalence and number of power plants per tract ##
+
+#Power plant count
+plantcount_per_tract <- intersection_plants_EJI %>%
+  group_by(GEOID) %>%
+  summarise(plantcount = n())
+
+#Asthma prevalence by tract
+HealthImpacts_by_tract <- intersection_plants_EJI %>% 
+  select(GEOID, EP_ASTHMA, EP_BPHIGH) %>%
+  st_drop_geometry()
+class(HealthImpacts_by_tract)
+
+#Join plant count and 
+join_HealthImpacts_plantcount <- merge(HealthImpacts_by_tract, plantcount_per_tract, 
+                                    by = "GEOID")
+#Remove duplicates
+join_HealthImpacts_plantcount <- distinct(join_HealthImpacts_plantcount, GEOID, .keep_all = TRUE)
+
+#Check normal distributions of continuous variables
+qqnorm(join_HealthImpacts_plantcount$EP_ASTHMA); qqline(join_HealthImpacts_plantcount$EP_ASTHMA)
+qqnorm(join_HealthImpacts_plantcount$EP_BPHIGH); qqline(join_HealthImpacts_plantcount$EP_BPHIGH)
+#The data does not follow a normal distribution
+
+#Bartlett's test checks null hyp that the variance in each of the groups are the same. We want to run this because ANOVA is robust against departures from equal variance, however, if the test result is false, we can still run ANOVA. Can't use bc each group must have at least two observations.
+
+Asthma_plantcount_lm <- lm(data = join_HealthImpacts_plantcount, EP_ASTHMA ~ plantcount)
+summary(Asthma_plantcount_lm)
+
+Asthma_plantcount_plot <- ggplot(join_HealthImpacts_plantcount, 
+                          aes(x = plantcount, y = EP_ASTHMA)) +
+      geom_point() +
+      ggtitle("Test") + 
+      labs(x="Number of Plants in Tract",
+           y="Percentage of Tract with Asthma (%)")
+print(Asthma_plantcount_plot)
+```
+
+
+```{r Relationship between Asthma Prevalence and Health Insurance Status}
+##Visualize the relationship between asthma prevalence and health insurance status ##
+Asthma_uninsur_plot <- ggplot(intersect_plants_tracts, 
+                          aes(x=EP_ASTHMA, y=EP_UNINSUR)) +
+      geom_point() +
+      geom_smooth(method = lm, color = "black") +
+      ggtitle("Relationship between Percentage without Health Insurance and Asthma Prevalence") + 
+      labs(x="Percentage of Population with Asthma (%)",
+           y="Percentage of Population without Health Insurance (%)")
+print(Asthma_uninsur_plot)
+```
+
+```{r Relationship between NOx Emissions and SO2 Emissions}
+
+## Might plants those plants that emit high levels of NOx overlap with those that emit high levels of SO2? ## 
+NOx_SO2_plot <- ggplot(intersect_plants_tracts, 
+                          aes(x=PLNOXAN, y=PLSO2AN)) +
+  geom_point() +
+  # adjusting axes to hide extreme values
+  xlim(0, 800) +
+  ylim(0,600) +
+  # finding a line of best fit
+  geom_smooth(method = lm, color = "black") +
+  ggtitle("Relationship between NOx and SO2 Emissions") + 
+  labs(x="Plant Annual NOx Emissions (tn)", y="SO2")
+print(NOx_SO2_plot)
+
+SO2_NOx_lm <- lm(data = intersect_plants_tracts, PLSO2AN ~ PLNOXAN)
+summary(SO2_NOx_lm)
+# Residuals range from -491.27 to 1260.12
+# Intercept is 0.46503 so there is a positive relationship which means when NOx increase, SO2 tend to increase as well. p-value: < 2.2e-16 which is <.05, therefore it is worthwhile to try to estimate SO2 based on depth information. Although the residual standard error is 238.7 on 199 degrees of freedom, the R-squared value of 0.8274 shows that NOx emissions explain around 82.74% of the variability of SO2 emissions. 
+plot(SO2_NOx_lm)
+cor.test(intersect_plants_tracts$PLSO2AN, intersect_plants_tracts$PLNOXAN)
+# The correlation test returns a correlation strength of 0.9096, which signifies a strong correlation between NOx emissions and SO2 emissions. In summary, there is a strong positive correlation.  
+```
+
+```{r Other Exploratory Regression Analyses}
+
+## Visualize the relationship between NOx and Asthma ##
+NOx_asthma_plot <- ggplot(intersect_plants_tracts, 
+                          aes(x=PLNOXAN, y=EP_ASTHMA,
+                              color = PLFUELCT)) +
+  geom_point() +
+  # adjusting axes to hide extreme values
+  xlim(0, 4000) +
+  # ylim(0,35) +
+  # finding a line of best fit
+  geom_smooth(method = lm, color = "black") +
+  ggtitle("Prevalence of Asthma  by Depth (meters)") + 
+  labs(x="NOx Emissions from Power Plants in Tract (tn)", y="Percentage of Population with Asthma (%)")
+print(NOx_asthma_plot)
+# unclear relationship when all power plants are included
+
+#Filter for Gas, Biomass, Oil, Coal
+ff_intersect_plants_tracts <- intersect_plants_tracts %>%
+  filter(PLFUELCT %in% c("GAS", "OIL", "COAL", "BIOMASS"))
+
+## Visualize the relationship between NOx and Asthma  ##
+NOx_asthma_ff_plot <- ggplot(ff_intersect_plants_tracts, 
+                          aes(x=PLNOXAN, y=EP_ASTHMA,
+                              color = PLFUELCT)) +
+  geom_point() +
+  # adjusting axes to hide extreme values
+   xlim(0, 1000) +
+  # ylim(0,35) +
+  # finding a line of best fit
+  geom_smooth(method = lm, color = "black") +
+  ggtitle("Prevalence of Asthma in Relation to NOx Emissions") + 
+  labs(x="NOx Emissions from Power Plants in Tract (tn)", y="Percentage of Population with Asthma (%)")
+print(NOx_asthma_ff_plot)
+
+drop_intersect_plants_tracts <- intersect_plants_tracts %>%
+  drop_na(EP_ASTHMA, PLFUELCT, PLNOXAN, PLSO2AN, E_PM, E_DSLPM, E_OZONE)
+
+## Multiple Regression Analysis ##
+#Running Akaike's Information Criterion to determine what set of explanatory variables might be best suited to explain asthma prevalence.
+Asthma_AIC <- lm(data = drop_intersect_plants_tracts, EP_ASTHMA ~ 
+                           PLFUELCT + PLNOXAN + PLSO2AN + 
+                           E_PM + E_DSLPM + E_OZONE)
+# Choosing a model by AIC in a Stepwise Algorithm
+step(Asthma_AIC)
+# Starting AIC is -15.48
+# From the original, full regression, removing PLSO2AN reduces AIC to -17.4763--it is the most important variable to remove, since a lower AIC is desirable. After removing PLSO2AN to obtain an AIC of -17.48, the next best move would be to remove PLNOXAN, returning an AIC of -19.4554. From there, the last variable to remove would be E_DSLPM, which would further reduce AIC to -19.5518. Removal of each of these variables would make for a better regression than the full, starting regression. Removing E_PM, PLFUELCT, or E_OZONE would make the model worse, as the removal of each increases the AIC from its starting value (increasing AIC to -10.3231, -8.4663, and 7.1690, respectively). Given the 6 starting explanatory variables, the best regression available is to consider PLFUELTCT, E_PM, and E_OZONE. 
+
+#Run regression with the three optimal explanatory variables
+Asthma_AIC_opt <- lm(data = drop_intersect_plants_tracts, EP_ASTHMA ~ 
+                           PLFUELCT + E_PM + E_OZONE)
+summary(Asthma_AIC_opt)
+# Multiple R-squared 0.2169 so only 21.69% of the variability on asthma prevalence across tracsts is due to EPM, EOZONE, and PFUEL. Adjusted R-squared 0.1927. p-value is 1.235e-08 so < .05, therefore the relationship among the variable is significantly different than zero. 194 degrees of freedom with residual standard error of 0.9364. Increasing the number of variables in the model should reduce the degrees of freedom.
+
+#Plot relationship between ozone and asthma prevalence
+Ozone_asthma_plot <- ggplot(subset(drop_intersect_plants_tracts, COUNTY="Robeson"), 
+                          aes(x=E_OZONE, y=EP_ASTHMA)) +
+  geom_point() +
+  # adjusting axes to hide extreme values
+  # xlim(0, 1000) +
+  # ylim(0,35) +
+  # finding a line of best fit
+  geom_smooth(method = lm, color = "black") +
+  ggtitle("Prevalence of Asthma") + 
+  labs(x="Annual mean days above O3 regulatory standard", y="Percentage of Population with Asthma (%)")
+print(Ozone_asthma_plot)
+
+# PLNOXAN ~ Asthma
+NOx_asthma_lm <- lm(EP_ASTHMA ~ PLNOXAN, data = intersect_plants_tracts)
+summary(NOx_asthma_lm)
+# p-value < .05 (p-value = .004137) 
+# we can reject the null hypothesis that there is no statistically significant relationship between asthma prevalence and NOx emitted from power plants
+# 199 degrees of freedom
+# residual standard error of 1.023
+cor.test(intersect_plants_tracts$EP_ASTHMA, intersect_plants_tracts$PLNOXAN)
+# -0.20 signifies a negative correlation, but 
+# a weak correlation between the two variables
+plot(NOx_asthma_lm)
+
+namepcap_healtheff <- lm(Sum_NAMEPCAP ~ EP_BPHIGH + EP_ASTHMA + E_PM + E_DSLPM + E_OZONE, data = EBM_nameplate_merge)
+step(namepcap_healtheff)
+#Keep only EP_ASTHMA (AIC = 34593) because all other variables increase AIC
+knitr::kable(summary(namepcap_healtheff)$coef, format = "html", caption = "Linear Regression Results - Nameplate Capacity and Air Quality")
+
+namepcap_asthma <- lm(data = EBM_nameplate_merge, Sum_NAMEPCAP ~ EP_ASTHMA)
+summary(namepcap_asthma)
+plot(namepcap_asthma)
+
+#Run simple regression
+capacity_income_model <- lm(NAMEPCAP_plant ~ MEDHHINC_2021, data = merged_data_capacity)
+
+knitr::kable(summary(capacity_income_model)$coef, format = "html", caption = "Linear Regression Results - Namepate Capacity")
+
+#To what extent does high PM exposure explain asthma in NC 
+PM_asthma_lm<- lm(data = EBM_countytract, EP_ASTHMA ~ E_PM)
+summary(PM_asthma_lm)
+# p-value < 0.05
+# the R-squared value of .0097 signifies that elevated PM concentrations only explain less than 1% of the variability in asthma in NC tracts
+cor.test(EBM_countytract$EP_ASTHMA, EBM_countytract$E_PM)
+# -.098 signifies a negative and significant but not super strong correlation
+
+#To what extent does high PM exposure explain high blood pressure in NC 
+PM_bphigh_lm<- lm(data = EBM_countytract, EP_BPHIGH ~ E_PM)
+summary(PM_bphigh_lm)
+# p-value < 0.05
+# the R-squared value of .0927 signifies that elevated PM concentrations explain 9.27% of the variability in high blood pressure in NC tracts
+cor.test(EBM_countytract$EP_BPHIGH, EBM_countytract$E_PM)
+# -0.30 signifies a negative and significant but not super strong correlation
+
+#Multiple regression looking at whether coal proximity, PM, and ozone might explain high blood pressure
+EBM_highbp_lm <- lm(EP_BPHIGH ~ E_PM + E_DSLPM + E_OZONE, data=EBM_countytract)
+step(EBM_highbp_lm)
+
+#Multiple regression looking at whether coal proximity, PM, and ozone might explain asthma
+EBM_asthma_lm <- lm(EP_ASTHMA ~ E_PM + E_DSLPM + E_OZONE, data=EBM_countytract)
+step(EBM_asthma_lm)
+
+#Run the multiple regression to determine whether there is a relationship
+EBM_multivar_lm <- lm(EP_UNINSUR ~ EP_ASTHMA + EP_BPHIGH + E_IMPWTR + 
+                        E_COAL + E_PM + E_OZONE,
+                        data=EBM_countytract)
+step(EBM_multivar_lm)
+
+EBM_lead_wtr_lm <- lm(EP_UNINSUR ~ E_IMPWTR + 
+                        E_PM,
+                        data=EBM_countytract)
+step(EBM_lead_wtr_lm)
+#Summarize the multiple regression
+summary(EBM_multivar_lm)
+```
+
+End
+\
