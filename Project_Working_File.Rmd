@@ -10,7 +10,7 @@ output:
     lot: yes
   
 ---
-[CzarniakMichelSedar Github Repository] (https://github.com/ssedar/CzarniakMichelSedar) \
+[CzarniakMichelSedar Github Repository](https://github.com/ssedar/CzarniakMichelSedar) \
 # Research Rationale
 The impetus behind this research lies in the intricate interplay between socioeconomic factors and power plants. As the global energy landscape undergoes a transformative shift toward sustainability, it becomes paramount to understand how these changes might impact communities, particularly those situated in lower-income communities. The socio-spatial lens through which this study is conducted aims to unearth patterns of power plant distribution across North Carolina. With 100 counties and a total of 843 power plants consisting of 1190 generators (US EPA, 2021), the state's unique landscape offers a rich context for investigation. The overarching question is whether certain communities bear a disproportionate burden of environmentally impactful energy sources, framing the discourse within the realms of environmental justice and equity.
 
@@ -699,8 +699,11 @@ linear_model_coal <- lm(PLNGENAN ~ MEDHHINC_2021, data = coal_data)
 
 summary_table <- summary(linear_model_coal)$coef[-1, ]
 
-knitr::kable(summary_table, format = "html", caption = "Linear Regression Results - Median Income Impact on Coal Generation")
+# knitr::kable(summary_table, format = "html", caption = "Linear Regression Results - Median Income Impact on Coal Generation")
 
+summary(linear_model_coal)$coef %>%
+  kbl(caption = "Linear Regression Results - Median Income Impact on Coal Generation") %>%
+  kable_classic(html_font = "Helvetica")
 
 ```
 
@@ -729,8 +732,11 @@ linear_model_solar <- lm(PLNGENAN ~ MEDHHINC_2021, data = solar_data)
 
 summary_table_solar <- summary(linear_model_solar)$coef[-1, ]
 
-knitr::kable(summary_table_solar, format = "html", caption = "Linear Regression Results - Median Income Impact on Solar Generation")
+# knitr::kable(summary_table_solar, format = "html", caption = "Linear Regression Results - Median Income Impact on Solar Generation")
 
+summary(linear_model_solar)$coef %>%
+  kbl(caption = "Linear Regression Results - Median Income Impact on Solar Generation") %>%
+  kable_classic(html_font = "Helvetica")
 ```
 
 ---
@@ -796,8 +802,11 @@ inc_plants_model <- lm(Num_Plants ~ MEDHHINC_2021, data = county_plants_df)
 
 summary_table_plants <- summary(inc_plants_model)$coef[-1, ]
 
-knitr::kable(summary_table_plants, format = "html", caption = "Linear Regression Results - Median Income Impact on Number of plants")
+# knitr::kable(summary_table_plants, format = "html", caption = "Linear Regression Results - Median Income Impact on Number of plants")
 
+summary(inc_plants_model)$coef %>%
+  kbl(caption = "Linear Regression Results - Median Income Impact on Number of plants") %>%
+  kable_classic(html_font = "Helvetica")
 ```
 
 ---
@@ -833,7 +842,11 @@ capacity_income_model <- lm(NAMEPCAP_plant ~ MEDHHINC_2021, data = merged_data_c
 
 summary_table_cap <- summary(capacity_income_model)$coef[-1, ]
 
-knitr::kable(summary_table_cap, format = "html", caption = "Linear Regression Results - Median Income Impact on Nameplate Capacity")
+# knitr::kable(summary_table_cap, format = "html", caption = "Linear Regression Results - Median Income Impact on Nameplate Capacity")
+
+summary(capacity_income_model)$coef %>%
+  kbl(caption = "Linear Regression Results - Median Income Impact on Nameplate Capacity") %>%
+  kable_classic(html_font = "Helvetica")
 ```
 
 ---
@@ -907,22 +920,6 @@ county_freq_table <- table(online_plants$CNTYNAME)
 #max(county_freq_table) # 48, Robeson County
 county_freq_table <- sort(county_freq_table, decreasing = TRUE)
 # view(county_freq_table)
-robeson_online_plants <- online_plants %>%
-  filter(CNTYNAME == "Robeson")
-# unique(robeson_online_plants$PNAME) # 44 unique power plant names
-# unique(robeson_online_plants$GENID) # 32 unique GENIDs
-
-# multiple regression for just one county, Robeson 
-# the one with highest total number of existing plants in 2021
-# to understand relationship between year online for each power plant and unemployment 
-# need to make table by year
-# with 5 columns: Year, FIPS code, number of plants in existence that year, unemployment rate
-robeson_year <- year(robeson_online_plants$GENYRONL)
-robeson_FIPS_code <- robeson_online_plants$FIPS_Code
-## MARKING WHERE GC LEFT OFF
-#robeson_plant_count <- tally(robeson_online_plants$PNAME, wt = NULL, sort = FALSE, name = NULL)
-#is.Date(robeson_online_plants$GENYRONL)
-
 ```
 
 ## Summary
@@ -1357,7 +1354,11 @@ summary(BP_namep_lm)
 
 summary_table_HV_totalgen_lm <- summary(HV_totalgen_lm)$coef
 
-knitr::kable(summary(HV_totalgen_lm)$coef, format = "html", caption = "Linear Regression Results - Health Vulnerability and Total Generation")
+# knitr::kable(summary(HV_totalgen_lm)$coef, format = "html", caption = "Linear Regression Results - Health Vulnerability and Total Generation")
+
+summary(HV_totalgen_lm)$coef %>%
+  kbl(caption = "Linear Regression Results - Health Vulnerability and Total Generation") %>%
+  kable_classic(html_font = "Helvetica")
 
 ```
 
@@ -1368,6 +1369,8 @@ Across regression tests run on the health vulnerability index value percentile r
 
 ## Summary
 This study used data from CDC's Social Vulnerability (county resolution) and Environmental Justice (tract resolution) Indices to test hypotheses that greater generation by power plants is correlated with elevated percentile ranks on social vulnerability, environmental burden, and health vulnerability modules as defined by the CDC. The CDC documentation reminds us that "a percentile ranking represents the proportion of tracts (or counties) that are equal to or lower than a tract of interest in environmental burden. For example, a EJI ranking of 0.85 signifies that 85% of tracts in the nation likely experience less severe cumulative impacts from environmental burden than the tract of interest, and that 15% of tracts in the nation likely experience more severe cumulative impacts from environmental burden" (Source: “Human Health & Environmental Impacts of the Electric Power Sector”). Analyses did not yield results that allow us to reject the null hypothesis that there is no relationship between power plant distribution and social vulnerability, health vulnerability, or environmental burden.
+
+After seeing high p-values and low R-squared values from regression analyses run on health vulnerability as an overall theme, one example of a set of further analyses we might conduct in a follow-up study or in a project of larger scope would be to dig one or two levels deeper into the aggregated SV, EB, and HV themes. For example, among the emissions types tracked as part of the eGRID dataset, nitrogen oxides (NOx) and sulfur dioxide (SO2) merit further exploration, as they form part of criteria air pollutants regulated by EPA. Under the Clean Air Act, US EPA has set National Ambient Air Quality Standards on six criteria air pollutants: particulate matter (PM2.5 and PM10), atmospheric ozone, carbon monoxide, lead, nitrogen dioxide, and sulfur dioxide. These pollutants reach widespread exposure--millions of people--due to their numerous and diverse sources. Causal or likely causal evidence pointing to a variety of negative health endpoints exists for each one of them. For nitrogen dioxide (NO2) and sulfur dioxide (SO2), the regulatory emissions standard-setting has been most heavily informed by research on respiratory effects. It should be noted that nitrogen oxides (NOx) also contribute to the formation of atmospheric ozone, which causes respiratory problems at elevated exposures. Given these established connections and in the absence of a strong relationship within this project's data sets of plant generation and emissions, one might consider extending this project into an investigation of whether there is a relationship between eGRID power plant data on emissions of known criteria air pollutants, specifically SO2 and NOx, and health vulnerability data from EJI by tract across North Carolina.
 
 # References
 *Supporting the nation’s coal workers and communities in a changing energy landscape. Union of Concerned Scientists. (2021).
