@@ -474,9 +474,9 @@ income_heat_map <-ggplot(data=income_NC_sf_join)+
 print (income_heat_map)
 ```
 
-Additionally, we explored power plant emissions geographically as a final stage of our exploratory analysis. Figures \@ref(fig:Figure10),\@ref(fig:Figure11),\@ref(fig:Figure12), and \@ref(fig:Figure13) demonstrate the aggregated power plant emissions per county in 2021 for CO2, NOx, SO2, and CH4 respectively. Unfortunately eGrid did not provide data for Mercury (Hg) in 2021 so that was not analyzed. CH4 is provided in lbs while CO2, NOx, and SO2 are in short tons. For CO2 emissions, Richmond county stood out. For NOx emissions, Catawba county stood out. For SO2 emissions, Catawba, Haywood, and Person counties stood out. For CH4 emissions, Catawba and Person counties stood out.
+Additionally, we explored power plant emissions geographically as a final stage of our exploratory analysis. Figures \@ref(fig:Figure10), \@ref(fig:Figure11), \@ref(fig:Figure12), and \@ref(fig:Figure13) demonstrate the aggregated power plant emissions per county in 2021 for CO2, NOx, SO2, and CH4 respectively. Unfortunately eGrid did not provide data for Mercury (Hg) in 2021 so that was not analyzed. CH4 is provided in lbs while CO2, NOx, and SO2 are in short tons. For CO2 emissions, Richmond county stood out. For NOx emissions, Catawba county stood out. For SO2 emissions, Catawba, Haywood, and Person counties stood out. For CH4 emissions, Catawba and Person counties stood out.
 
-```{r Figure10,fig.cap="Figure 10: Total CO2 Emissions in 2021 across North Carolina Power Plants."}
+```{r Figure10,fig.cap="Total CO2 Emissions in 2021 across North Carolina Power Plants."}
 #Heat map of CO2 emissions by county
 #Compute sum of CO2 Emissions by county
 CO2_emissions <-plant_gen_data %>%
@@ -591,7 +591,7 @@ CH4_map <-ggplot(data= CH4_counties_sf_join)+
 print(CH4_map)
 ```
 
-As exploratory work into the dimensions of social vulnerability, environmental burden, and health vulnerability in relation to generation and emissions across power plants in North Carolina, tests for normality were conducted on the overall index value for each of the aggregated themes (SVI, EBM, HVM). The distribution of the variables corresponding to these three overall themes of interest can be seen in Figures \@ref(fig:Figure14),\@ref(fig:Figure15), and \@ref(fig:Figure16).
+As exploratory work into the dimensions of social vulnerability, environmental burden, and health vulnerability in relation to generation and emissions across power plants in North Carolina, tests for normality were conducted on the overall index value for each of the aggregated themes (SVI, EBM, HVM). The distribution of the variables corresponding to these three overall themes of interest can be seen in Figures \@ref(fig:Figure14), \@ref(fig:Figure15), and \@ref(fig:Figure16).
 
 
 ```{r Figure14,fig.cap="Test for normality in distribution of Social Vulnerability Module percentile ranks. Normal Q-Q Plot does not show a totally normal distribution. Distribution is skewed such that most observations fall in the second half.", echo=FALSE}
@@ -644,11 +644,11 @@ par(mfrow = c(2,2))
 
 ```
 
-As the last set of geographic explorations, three maps were created. The first was a map of NC power plants overlaid on tract boundaries to ensure that the matching of tracts to power plants for based on spatial features for Q3 analyses was successful (see Figure \@ref(fig:Figure17)). The second highlights tracts that contain power plants--one level deeper than county resolution, for comparison (see Figure \@ref(fig:Figure18)). The third maps asthma prevalence across NC tracts, as a visual grounding point in relation to Q3 analyses, given that the emissions considered in this project are known to have respiratory effects in humans (see Figure \@ref(fig:Figure19)).
+As the last set of geographic explorations, two maps were created. The first was a map of NC power plants overlaid on tract boundaries to ensure that the matching of tracts to power plants for based on spatial features for Q3 analyses was successful (see Figure \@ref(fig:Figure17)). The second maps asthma prevalence across NC tracts, as a visual grounding point in relation to Q3 analyses, given that the emissions considered in this project are known to have respiratory effects in humans (see Figure \@ref(fig:Figure18)).
 
-```{r Figure17,fig.cap="Power Plants Across North Carolina Tracts", echo=FALSE}
+```{r Figure17, fig.cap="Power Plants Across North Carolina Tracts", echo=FALSE}
 #Map of power plants across NC tracts, shown over NC tract boundaries 
-mapview(tracts_containing_plants, 
+Plants_Tracts_Map <-mapview(tracts_containing_plants, 
             col.regions='snow', 
             layer.name = 'NC Tracts Containing Power Plants') +
    mapview(plants_within_tracts,
@@ -656,10 +656,12 @@ mapview(tracts_containing_plants,
             col.regions='royalblue1',
             alpha=.5,
             cex=3)
+
+print(Plants_Tracts_Map)
 ```
 
 
-```{r Figure19,fig.cap="Mapping Asthma Prevalence Across Tracts", echo=FALSE}
+```{r Figure18,fig.cap="Mapping Asthma Prevalence Across Tracts", echo=FALSE}
 #Map asthma prevalence by tract
 Asthma_by_tract_map <- ggplot(data = tracts_EJI_sf_select) +
   geom_sf(data = tracts_EJI_sf_join)+
@@ -677,11 +679,11 @@ print(Asthma_by_tract_map)
 
 This analysis begins by examining the impact that income has on various power plant characteristics. This first analysis uses income as the highest-level socioeconomic indicator, as income often dictates an array of follow-on indicators. Several regressions are conducted including the impact of income on the fuel type (differentiating between clean and dirty sources), number of plants, and nameplate capacity. 
 
-Examining only the impact of income on coal plants, the estimated coefficient is approximately -134.6. This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. Furthermore, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income. Figure \@ref(fig:Figure20) below visualizes this relationship.
+Examining only the impact of income on coal plants, the estimated coefficient is approximately -134.6 (see Table \@ref(tab:Table1)). This suggests that for each one-unit increase in income, the predicted value of coal generation decreases by approximately 134.6 MWh. The coefficient's p-value (0.1049) is greater than 0.05, indicating that it is not statistically significant at the 0.05 significance level. Furthermore, the R^2 suggests that only about 13.24% of the variability in coal generation is explained by income. Figure \@ref(fig:Figure19) below visualizes this relationship.
 
 ---
 
-```{r IncomeAndFuel,echo=FALSE,warning=FALSE,error=FALSE}
+```{r Table1,echo=FALSE,warning=FALSE,error=FALSE}
 
 ########### DATA ANALYSIS - INCOME AND FUEL TYPE ###########
 
@@ -698,7 +700,7 @@ knitr::kable(summary_table, format = "html", caption = "Linear Regression Result
 
 ---
 
-```{r Figure20,fig.cap="Relationship of median household income ($) on coal generation (MWh) in 2021 by county.", warning=TRUE}
+```{r Figure19,fig.cap="Relationship of median household income ($) on coal generation (MWh) in 2021 by county.", warning=TRUE}
 #Visualize relationship
 scatter_coal <- ggplot(coal_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
   geom_point() +
@@ -709,11 +711,11 @@ scatter_coal <- ggplot(coal_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
 print(scatter_coal)
 ```
 
-The linear regression shown in Figure \@ref(fig:Figure21) below suggests that there might be a relationship between income and solar generation. The statistically significant p-value (0.04707) indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is quite low (about 0.56%), and so other factors not included in the model likely contribute to the variability in generation for solar.
+The linear regression shown in Figure \@ref(fig:Figure20) below suggests that there might be a relationship between income and solar generation. The statistically significant p-value (0.04707) found in Table \@ref(tab:Table2) indicates that there is evidence to suggest that an increase in median household income is associated with a decrease in the predicted value of solar generation However, it's important to note that the explained variance is quite low (about 0.56%), and so other factors not included in the model likely contribute to the variability in generation for solar.
 
 ---
 
-```{r Solar,echo=FALSE,error=FALSE,warning=FALSE}
+```{r Table2,echo=FALSE,error=FALSE,warning=FALSE}
 
 #Solar linear regression
 solar_data <- subset(processed_data, PLFUELCT == "SOLAR")
@@ -728,7 +730,7 @@ knitr::kable(summary_table_solar, format = "html", caption = "Linear Regression 
 ---
 
 
-```{r Figure21,fig.cap="Relationship of median household income ($) on solar generation (MWh) in 2021 by county.", echo = FALSE}
+```{r Figure20,fig.cap="Relationship of median household income ($) on solar generation (MWh) in 2021 by county.", echo = FALSE}
 #Visualize relationship
 scatter_solar <- ggplot(solar_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
   geom_point() +
@@ -739,11 +741,11 @@ scatter_solar <- ggplot(solar_data, aes(x = MEDHHINC_2021, y = PLNGENAN)) +
 print(scatter_solar)
 ```
 
-The next stage of analysis examined if there was a relationship between the quantity of generators and median household income. The linear regression results indicate that median household income does not show a statistically significant association with the number of plants. The coefficient is estimated to be -0.0000786, with a standard error of 0.0000922, a t-value of -0.85, and a p-value of 0.3962. This suggests that, based on the available data, changes in median household income do not appear to be statistically linked to variations in the number of plants. Figure \@ref(fig:Figure22) below illustrates this relationship.
+The next stage of analysis examined if there was a relationship between the quantity of generators and median household income. The linear regression results indicate that median household income does not show a statistically significant association with the number of plants. The coefficient is estimated to be -0.0000786, with a standard error of 0.0000922, a t-value of -0.85, and a p-value of 0.3962 (See Table \@ref(tab:Table3)). This suggests that, based on the available data, changes in median household income do not appear to be statistically linked to variations in the number of plants. Figure \@ref(fig:Figure22) below illustrates this relationship.
 
 ---
 
-```{r VisualizationforSolar,echo=FALSE,warning=FALSE,error=FALSE}
+```{r Table3,echo=FALSE,warning=FALSE,error=FALSE}
 
 ################ DATA ANALYSIS: INCOME AND POWER PLANTS ####################
 
@@ -805,7 +807,7 @@ ggplot(county_plants_df, aes(x = MEDHHINC_2021, y = Num_Plants)) +
 ```
 
 
-As a last step toward answering Question 1, an analysis was conducted on whether the average nameplate capacity of plants in a county is related to median household income across the data set in use, given that power plants differ in size. The linear regression on this relationship yields a coefficient of 0.0019239, accompanied by a standard error of 0.0023465. This implies that, theoretically, an increase in median household income is associated with a slight corresponding increase in Nameplate Capacity. However, the non-significant p-value of 0.4145 means we do not have sufficient evidence to reject the null hypothesis and the observed association between median household income and Nameplate Capacity may be coincidental. Figure \@ref(fig:Figure23) below demonstrates this relationship.
+As a last step toward answering Question 1, an analysis was conducted on whether the average nameplate capacity of plants in a county is related to median household income across the data set in use, given that power plants differ in size. The linear regression on this relationship yields a coefficient of 0.0019239, accompanied by a standard error of 0.0023465 (See Table \@ref(tab:npcap)). This implies that, theoretically, an increase in median household income is associated with a slight corresponding increase in Nameplate Capacity. However, the non-significant p-value of 0.4145 means we do not have sufficient evidence to reject the null hypothesis and the observed association between median household income and Nameplate Capacity may be coincidental. Figure \@ref(fig:Figure23) below demonstrates this relationship.
 
 ---
 
@@ -926,10 +928,9 @@ This study's initial inquiry sought to uncover how income, a significant socioec
 
 The primary motivation behind this analysis is to delve into the nuanced equilibrium inherent in a just energy transition. The imperative of shifting energy fuel sources from carbon-intensive to fossil fuel-free must be achieved without detriment to communities. In this examination, we initially pinpoint counties in North Carolina with the highest and lowest numbers of retirements, comparing them to their respective unemployment rates over time. To conduct a more pointed analysis, a statistical examination is performed on a specific county of interest.
 
-Power plant retirements were analyzed (using data contained in the 2020 eGRID dataset) to identify which counties had the most number of retired power plants. The full selection of power plants with historical retirements can be seen in Figure \@ref(fig:Figure24). Counties with no retirements were also subsequently selected to provide a comparison. 
+Power plant retirements were analyzed (using data contained in the 2020 eGRID dataset) to identify which counties had the most number of retired power plants. The full selection of power plants with historical retirements can be seen in Table \@ref(tab:Table9). Counties with no retirements were also subsequently selected to provide a comparison. 
 
-
-```{r Figure24,fig.cap="Number of historical power plant retirements per county based on 2020 eGRID dataset", echo=FALSE, warning=FALSE, error=FALSE}
+```{r Table9, caption="Number of historical power plant retirements per county based on 2020 eGRID dataset",echo=FALSE, warning=FALSE, error=FALSE}
 
 ################ DATA ANALYSIS: UNEMPLOYMENT AND GENERATOR RETIREMENTS ################ 
 
@@ -1081,7 +1082,7 @@ Having explored two major socioeconomic dimensions in relation to total annual g
 
 #### Sub-question: Does publicly available data show a relationship between power generation and social vulnerability?
 
-A set of analyses was conducted to briefly explore whether there is a significant relationship between power plants and the social vulnerability index (SVI), more broadly. A linear regression of SVI themes on total annual generation by county generated results summarized in Table 7.1. 
+A set of analyses was conducted to briefly explore whether there is a significant relationship between power plants and the social vulnerability index (SVI), more broadly. A linear regression of SVI themes on total annual generation by county generated results summarized in Table \@ref(tab:Table6). 
 
 ```{r County SVI and Total Power Generation lm}
 
@@ -1115,8 +1116,7 @@ Generation_County_lm <- lm(Total_Generation ~ RPL_THEMES, data=Generation_SVI)
 
 ---
 
-###### Table 7.1: Linear Regression Results - SVI and Total Generation
-```{r SummaryTableofSVITotalGenlm,echo=FALSE}
+```{r Table6,caption="Linear Regression Results - SVI and Total Generation", echo=FALSE}
 
 summary_table_SVI <- summary(Generation_County_lm)$coef
 
@@ -1149,7 +1149,7 @@ print(tract_generation_SVI_plot)
 
 #### Sub-question: Does publicly available data show a relationship between power generation and environmental burden?
 
-Given that power plants have historically made up a major stationary point source of air pollution including, for example, including SO2 and NO2, and given that both SO2 and NOx can contribute to the formation of atmospheric ozone and particulate matter, the relationship between power plant generation and emissions and the environmental burden module (EBM) was explored next. First, a single linear regression was run to examine whether the overall environmental burden module, RPL_EBM (percentile rank), could be at all explained by total generation per tract. Generation did not ultimately perform as a significant explanatory variable of RPL_EBM; the p-value of 0.93 was well above the 0.05 threshold for significance, and the R-squared value was very low (R-squared was 0.000025) as seen in Table 7.2. 
+Given that power plants have historically made up a major stationary point source of air pollution including, for example, including SO2 and NO2, and given that both SO2 and NOx can contribute to the formation of atmospheric ozone and particulate matter, the relationship between power plant generation and emissions and the environmental burden module (EBM) was explored next. First, a single linear regression was run to examine whether the overall environmental burden module, RPL_EBM (percentile rank), could be at all explained by total generation per tract. Generation did not ultimately perform as a significant explanatory variable of RPL_EBM; the p-value of 0.93 was well above the 0.05 threshold for significance, and the R-squared value was very low (R-squared was 0.000025) as seen in Table \@ref(tab:Table7).
 
 ```{r Tract Environmental Burden and Total Power Generation, include=FALSE}
 
@@ -1202,7 +1202,7 @@ summary(opt_multivarEB_totalgen_lm)
 
 ---
 
-```{r SummaryTableofEBTotalGenlm,echo=FALSE}
+```{r Table7,caption = "Linear Regression Results - Environmental Burden and Total Generation",echo=FALSE}
 
 summary_table_EB_totalgen_lm <- summary(EB_totalgen_lm)$coef
 
@@ -1346,7 +1346,7 @@ summary(BP_namep_lm)
 
 ---
 
-```{r SummaryTableofHVTotalGenlm,echo=FALSE}
+```{r Table8,echo=FALSE}
 
 summary_table_HV_totalgen_lm <- summary(HV_totalgen_lm)$coef
 
@@ -1356,7 +1356,7 @@ knitr::kable(summary(HV_totalgen_lm)$coef, format = "html", caption = "Linear Re
 
 ---
 
-Across regression tests run on the health vulnerability index value percentile rank (RPL_HVM) and total annual generation by tract, R-squared values were low and p-values were high. The regression results from this data and set of analyses are not sufficient to suggest that total generation can explain RPL_HVM with any significance. The analysis was insufficient to reject the null hypothesis that there is no relationship between health vulnerability and total generation by tract in our dataset. At the tract level across North Carolina in 2021, a relationship cannot be determined between percentile rank for Health Vulnerability and total power generation.
+Across regression tests run on the health vulnerability index value percentile rank (RPL_HVM) and total annual generation by tract, R-squared values were low and p-values were high. The regression results from this data and set of analyses are not sufficient to suggest that total generation can explain RPL_HVM with any significance. The analysis was insufficient to reject the null hypothesis that there is no relationship between health vulnerability and total generation by tract in our dataset. At the tract level across North Carolina in 2021, a relationship cannot be determined between percentile rank for Health Vulnerability and total power generation (See Table \@ref(tab:Table8))
 
 
 ## Summary
