@@ -4,7 +4,13 @@
 This repository contains the data and analysis conducted in R as part of the Czarniak, Michel, and Sedar EDE 872 Final group project. Analysis was conducted over the span of November and December 2023 to explore three key questions regarding the relationship between power plants in North Carolina and the impacts on the surrounding communities:
 1. How does income impact power plant characteristics at the county level?
 2. Do power plant retirements have a significant impact on unemployment?
-3. Is there a relationship between power plant distribution and impacts to human health?
+3. Does publicly available data show a relationship between power generation and social vulnerability, health vulnerability, or environmental burden?
+
+For Question 1, the investigation focused on the fuel type, the number, and the total nameplate capacity of power plants, and analyses did not produce definitive or statistically significant results regarding the influence of income on the number of power plants or nameplate capacity. 
+
+For Question 2, contrary to the initial hypothesis, the findings reveal a statistically significant relationship, wherein each megawatt increase in retired nameplate capacity is associated with a marginal decrease in the unemployment rate. However, the inherent data limitations within this relatively small sample size require cautious interpretation.
+
+For Question 3, no major findings arose; none of the relationships tested against total annual generation (social vulnerability, environmental burden, health vulnerability) were significant.
 
 ## Investigators
 Gaby Czarniak, Duke University - Nicholas School of the Environment, gabriella.czarniak@duke.edu  
@@ -57,4 +63,4 @@ https://www.atsdr.cdc.gov/placeandhealth/eji/docs/EJI-2022-Documentation-508.pdf
 To review the scripts and code associated with the preparation of this report, please refer to the 'Code' folder. Code is notated with comments to describe the purpose and desired outcome of each step.
 
 ## Quality assurance/quality control
-Our team did not conduct QA/QC on the accuracy of the raw data as our analysis assumes accuracy of our sources. However, the following QA/QC practices were implemented on our analyses. During the wrangling process, we checked for unintuitive values or results, such as NAs or negatives when all values should have been positive. Code was written to include descriptive comments of the purpose of each step. After each team member created their respective analysis code, the other team members would review for accuracy and reproducability. 
+Our team did not conduct QA/QC on the accuracy of the raw data as our analysis assumes accuracy of our sources. However, the following QA/QC practices were implemented on our analyses. During the wrangling process, we checked for unintuitive values or results, such as NAs or negatives when all values should have been positive. Spatial join results were cross-referenced manually using a small handful of examples to ensure, e.g. that tract geometry was correctly matched with power plant location. Code was written to include descriptive comments of the purpose of each step. After each team member created their respective analysis code, the other team members would review for accuracy and reproducibility. 

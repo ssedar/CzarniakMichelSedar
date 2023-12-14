@@ -138,7 +138,15 @@ SVI_2018_tract <-read.csv(here('Data/Raw/SVI2018_NorthCarolina.csv'),
 ```
 
 # Data Wrangling
-The initial step in our research, once loaded, was data wrangling on the eGRID, unemployment, and income datasets. Data wrangling, or the process of transforming raw data, was a crucial step in this research, particularly due to the diverse nature of the datasets. For the eGRID dataset, the code selects specific columns related to power plant information in North Carolina, converts certain columns to numeric format, and then combines the generator and plant data based on a common identifier. Duplicate columns are removed, resulting in the plant_gen_data dataframe. The code then proceeds to handle the unemployment dataset, selecting relevant columns covering the years 2002-2022 and merging it with the plant_gen_data dataframe using the FIPS code as a key. Similarly, the income dataset is processed by selecting specific columns, and the final step involves merging this income data with the previously created dataframe. The resulting dataset, named processed_data, contains information on power plants, unemployment rates, and income data, and the column names are displayed at the end of the code. The social vulnerability index and environmental justice datasets are wrangled within the context of Question 3.
+The initial step in our research, once loaded, was data wrangling on the eGRID, unemployment, and income datasets. Data wrangling, or the process of transforming raw data, was a crucial step in this research, particularly due to the diverse nature of the datasets. For the eGRID dataset, the code selects specific columns related to power plant information in North Carolina, converts certain columns to numeric format, and then combines the generator and plant data based on a common identifier. Duplicate columns are removed, resulting in the plant_gen_data dataframe. The code then proceeds to handle the unemployment dataset, selecting relevant columns covering the years 2002-2022 and merging it with the plant_gen_data dataframe using the FIPS code as a key. Similarly, the income dataset is processed by selecting specific columns, and the final step involves merging this income data with the previously created dataframe. The resulting dataset, named processed_data, contains information on power plants, unemployment rates, and income data, and the column names are displayed at the end of the code. 
+
+The SVI dataset was available at the county level, so it was simpler than the process for EJI, which follows. After import, SVI variables of interest were read into a data frame. Alongside this, plant generation data was grouped by county and summarized and later merged with the county-level SVI data.
+
+The data wrangling process for the EJI data was complex, so the major steps are described here. Key pieces of the data wrangling process for Q3 involved first establishing a shared GEOID format, then getting 2021 spatial census data to match tract-level GEOIDs with their respective coordinates by using tigris::tracts for North Carolina. Coordinate systems were checked throughout to ensure alignment. The EJI attributes were then joined to the county spatial features with geometry, by the GEOID field. Some tracts did not have EJI data. Variables of interest were then selected within the newly-created tracts_EJI_sf_select. The next step was to match power plant data to tracts, which was possible because LAT and LON were available for the plants. After checking coordinate systems (NAD1983, EPSG 4269), the coordinates of the power plants in North Carolina  were matched to tract geometry via st_intersection with the tracts_EJI_sf_select, into intersection_plants_EJI. 
+
+In order to get tract-level values for generation and emissions, which were at that point existing at the plant level, intersection_plants_EJI was grouped by GEOID and summarized such that variables of interest were summed from plant level to tract level. For example, the new column “Tract_Generation” was formed from the sum of the values of power plant generation for each plant in a tract, for each tract. With the addition of the tract-level EJI variables of interest, analyses on relationships between emissions, generation, and tract-level EJI data could finally be run. This was important because the EJI data documentation discourages adding up tract-level values to get to the county level. Information living at a common spatial resolution (being able to identify what tract a power plant was in) was a crucial foundation for running analyses.  Lastly, NAs were dropped for variables of interest.
+
+
 
 
 ```{r Data Wrangling, error=FALSE, warning=FALSE, include=FALSE}
@@ -638,22 +646,29 @@ par(mfrow = c(2,2))
 
 As the last set of geographic explorations, three maps were created. The first was a map of NC power plants overlaid on tract boundaries to ensure that the matching of tracts to power plants for based on spatial features for Q3 analyses was successful (see Figure \@ref(fig:Figure17)). The second highlights tracts that contain power plants--one level deeper than county resolution, for comparison (see Figure \@ref(fig:Figure18)). The third maps asthma prevalence across NC tracts, as a visual grounding point in relation to Q3 analyses, given that the emissions considered in this project are known to have respiratory effects in humans (see Figure \@ref(fig:Figure19)).
 
-```{r Figure17,fig.cap="Power Plants Within Tract Boundaries", echo=FALSE}
-#Map of plants across NC tracts, shown over NC tract boundaries 
-
-```
-
-
-```{r Figure18,fig.cap="Tracts that Contain Power Plants", echo=FALSE}
-#Map of just NC tracts that contain power plants
-
-
+```{r Figure17,fig.cap="Power Plants Across North Carolina Tracts", echo=FALSE}
+#Map of power plants across NC tracts, shown over NC tract boundaries 
+mapview(tracts_containing_plants, 
+            col.regions='snow', 
+            layer.name = 'NC Tracts Containing Power Plants') +
+   mapview(plants_within_tracts,
+            layer.name = 'Plants Within Each Tract',
+            col.regions='royalblue1',
+            alpha=.5,
+            cex=3)
 ```
 
 
 ```{r Figure19,fig.cap="Mapping Asthma Prevalence Across Tracts", echo=FALSE}
 #Map asthma prevalence by tract
-
+Asthma_by_tract_map <- ggplot(data = tracts_EJI_sf_select) +
+  geom_sf(data = tracts_EJI_sf_join)+
+  geom_sf(aes(fill = EP_ASTHMA)) +
+  labs(title = "Estimated Asthma Prevalence by NC Tract",
+       subtitle = "2021",
+       fill = "Percentage of Individuals with Asthma") +
+  theme(plot.margin = unit(c(0,0,-.40,0), "null"))
+print(Asthma_by_tract_map)
 ```
 
 #   Question 1: How does income impact power plant characteristics at the county level?
@@ -1071,7 +1086,7 @@ A set of analyses was conducted to briefly explore whether there is a significan
 ```{r County SVI and Total Power Generation lm}
 
 #Selecting columns of interest:
-SVI_county<-SVI_county_raw %>% select(ST_ABBR, STCNTY, COUNTY, FIPS, LOCATION, 
+SVI_county <- SVI_county_raw %>% select(ST_ABBR, STCNTY, COUNTY, FIPS, LOCATION, 
                                       RPL_THEMES, RPL_THEME1, RPL_THEME2, 
                                       RPL_THEME3, RPL_THEME4)
 
