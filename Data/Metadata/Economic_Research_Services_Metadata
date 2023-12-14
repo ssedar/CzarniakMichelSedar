@@ -1,0 +1,11 @@
+Metadata for Economic Research Service Unemployment and Median Household Income data
+
+In the absence of a data documentation PDF, the Unemployment and Median Household Income data obtained from the Economic Research Service of the United States Department of Agriculture’s live webpage notes (as of December 13, 2023), are included in this text file and, as mentioned in the README file, the most relevant information can be found at SAIPE's Methodology information: https://www.census.gov/programs-surveys/saipe/technical-documentation/methodology.html, and technical documentation for 2010-2021 County-Level Estimation Details can be found at the following U.S. Census Bureau page: https://www.census.gov/programs-surveys/saipe/technical-documentation/methodology/counties-states/county-level.html. Median household is from the U.S. Census Bureau's Small Area Income and Poverty Estimate (SAIPE) program. More information can be found on the Census Bureau's Small Area Income and Poverty Estimates web page.
+
+Additional helpful information can be found via the following:
+
+    - The county and State unemployment rates are from the Bureau of Labor Statistics (BLS) Local Area Unemployment Statistics (LAUS) program. More information about the methodology used to generate these estimates can be found on the BLS Local Area Unemployment Statistics web page.
+    
+    - More documentation related to Local Area Unemployment data, including methodology, can be found on the U.S. Bureau of Labor Statistics site: https://www.bls.gov/lau/publications.htm and https://www.bls.gov/lau/publications.htm.
+    
+    
